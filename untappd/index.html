@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍺 Bier Stats | mauricelol.fun</title>
     
-    <!-- Leaflet CSS für die Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     
     <style>
@@ -73,17 +72,13 @@
             transition: all 0.2s; border: 1px solid transparent;
             background: rgba(255,255,255,0.03);
         }
-        .nav-link:hover {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: var(--primary); color: var(--primary);
-        }
-        .nav-link.active {
+        .nav-link:hover, .nav-link.active {
             background: rgba(245, 158, 11, 0.15);
             border-color: var(--primary); color: var(--primary);
         }
 
         main {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: calc(var(--header-height) + 4rem) auto 2rem;
             padding: 0 2rem;
             position: relative; z-index: 1;
@@ -91,18 +86,13 @@
 
         /* === HERO === */
         .hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.8s ease-out; }
-
         h1 {
             font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800;
             margin-bottom: 0.75rem; line-height: 1.1;
             background: linear-gradient(135deg, #f59e0b, #ef4444);
             -webkit-background-clip: text; background-clip: text; color: transparent;
         }
-
-        .subtitle {
-            font-size: 1.05rem; color: var(--text-muted);
-            animation: slideUp 0.8s ease-out 0.1s backwards;
-        }
+        .subtitle { font-size: 1.05rem; color: var(--text-muted); animation: slideUp 0.8s ease-out 0.1s backwards; }
 
         /* === STATS BAR === */
         .stats-bar {
@@ -180,62 +170,78 @@
             margin-top: 0.6rem; font-size: 0.82rem; color: var(--text-muted);
         }
 
-        /* === SECTION TITLES === */
+        /* === SPLIT LAYOUT (MAP + TABLE) === */
+        .split-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            animation: slideUp 0.8s ease-out 0.3s backwards;
+        }
+        @media (max-width: 900px) {
+            .split-layout { grid-template-columns: 1fr; }
+        }
+
         .section-title {
             font-size: 1.1rem; font-weight: 700; color: var(--text);
             margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
-            animation: slideUp 0.8s ease-out 0.3s backwards;
         }
 
-        /* === MAP BOX === */
         .map-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 1rem;
-            margin-bottom: 2.5rem;
-            backdrop-filter: blur(10px);
-            animation: slideUp 0.8s ease-out 0.3s backwards;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 1rem; backdrop-filter: blur(10px);
         }
-        #map {
-            width: 100%;
-            height: 400px;
-            border-radius: 10px;
-            z-index: 10;
-        }
-        /* Leaflet Dark Mode Anpassung */
-        .leaflet-container {
-            background-color: #0f172a;
-        }
+        #map { width: 100%; height: 400px; border-radius: 10px; z-index: 10; }
+        
+        .leaflet-container { background-color: #0f172a; }
         .leaflet-popup-content-wrapper {
-            background-color: var(--bg);
-            color: var(--text);
-            border: 1px solid var(--primary);
-            border-radius: 8px;
+            background-color: var(--bg); color: var(--text);
+            border: 1px solid var(--primary); border-radius: 8px;
         }
         .leaflet-popup-tip {
-            background-color: var(--bg);
-            border-top: 1px solid var(--primary);
-            border-left: 1px solid var(--primary);
+            background-color: var(--bg); border-top: 1px solid var(--primary); border-left: 1px solid var(--primary);
         }
         .leaflet-popup-content b { color: var(--primary); }
+
+        /* === STYLES TABLE === */
+        .table-box {
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px);
+            max-height: 480px; overflow-y: auto;
+        }
+        /* Custom Scrollbar */
+        .table-box::-webkit-scrollbar { width: 6px; }
+        .table-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 8px; }
+        .table-box::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 8px; }
+
+        .styles-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .styles-table th {
+            position: sticky; top: -1.5rem; background: var(--bg);
+            padding: 0.75rem 0.5rem; font-size: 0.8rem; text-transform: uppercase;
+            color: var(--text-muted); border-bottom: 1px solid var(--card-border);
+            z-index: 5;
+        }
+        .styles-table td {
+            padding: 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.95rem;
+        }
+        .styles-table tr:last-child td { border-bottom: none; }
+        .styles-table tr:hover td { background: rgba(245, 158, 11, 0.05); }
+        .col-num { text-align: right; font-weight: 700; color: var(--primary); }
 
         /* === FOOTER === */
         footer {
             margin-top: 6rem; padding: 2rem;
             text-align: center; color: var(--text-muted);
             font-size: 0.9rem; border-top: 1px solid var(--card-border);
-            position: relative; z-index: 1;
         }
         .footer-links {
             display: flex; justify-content: center;
             gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap;
         }
-        .footer-link {
-            color: var(--text-muted); text-decoration: none; transition: color 0.2s;
-        }
+        .footer-link { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
         .footer-link:hover { color: var(--primary); }
 
-        /* === BACK TO TOP === */
         #back-to-top {
             position: fixed; bottom: 2rem; right: 2rem;
             width: 48px; height: 48px; border-radius: 50%;
@@ -248,11 +254,6 @@
         }
         #back-to-top.visible { opacity: 1; transform: translateY(0); }
         #back-to-top:hover { transform: scale(1.1) translateY(-2px); }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
 
         @media (max-width: 768px) {
             h1 { font-size: 2rem; }
@@ -278,97 +279,83 @@
     </header>
 
     <main>
-        <!-- Hero -->
         <div class="hero">
             <h1>🍺 Bier Stats</h1>
             <p class="subtitle">Meine persönlichen Bier-Statistiken &middot; Powered by Untappd &middot; Wird automatisch aktualisiert</p>
         </div>
 
-        <!-- Schnellübersicht -->
         <div class="stats-bar">
-            <div class="stat-item">
-                <div class="stat-number" id="stat-checkins">...</div>
-                <div class="stat-label">Check-ins</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="stat-unique">...</div>
-                <div class="stat-label">Einzigartige Biere</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="stat-breweries">...</div>
-                <div class="stat-label">Brauereien</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" id="stat-rating">–</div>
-                <div class="stat-label">Ø Bewertung</div>
-            </div>
+            <div class="stat-item"><div class="stat-number" id="stat-checkins">...</div><div class="stat-label">Check-ins</div></div>
+            <div class="stat-item"><div class="stat-number" id="stat-unique">...</div><div class="stat-label">Einzigartige Biere</div></div>
+            <div class="stat-item"><div class="stat-number" id="stat-breweries">...</div><div class="stat-label">Brauereien</div></div>
+            <div class="stat-item"><div class="stat-number" id="stat-rating">–</div><div class="stat-label">Ø Bewertung</div></div>
         </div>
 
-        <!-- Detail-Karten -->
         <div class="grid-4">
             <div class="stat-card">
-                <div class="card-header-row">
-                    <span class="card-emoji">🏆</span>
-                    <span class="card-label">Top Style</span>
-                </div>
+                <div class="card-header-row"><span class="card-emoji">🏆</span><span class="card-label">Top Style</span></div>
                 <div class="card-value" id="top-style">...</div>
                 <div class="card-sub">Meistgetrunkener Bierstil</div>
             </div>
             <div class="stat-card">
-                <div class="card-header-row">
-                    <span class="card-emoji">🏭</span>
-                    <span class="card-label">Top Brauerei</span>
-                </div>
+                <div class="card-header-row"><span class="card-emoji">🏭</span><span class="card-label">Top Brauerei</span></div>
                 <div class="card-value" id="top-brewery">...</div>
                 <div class="card-sub">Favoriten-Brauerei</div>
             </div>
             <div class="stat-card">
-                <div class="card-header-row">
-                    <span class="card-emoji">⭐</span>
-                    <span class="card-label">Meistgetrunken</span>
-                </div>
+                <div class="card-header-row"><span class="card-emoji">⭐</span><span class="card-label">Meistgetrunken</span></div>
                 <div class="card-value" id="best-beer">...</div>
                 <div class="card-sub" id="best-beer-sub">Top Bier Name</div>
             </div>
             <div class="stat-card">
-                <div class="card-header-row">
-                    <span class="card-emoji">📅</span>
-                    <span class="card-label">Letzter Check-in</span>
-                </div>
+                <div class="card-header-row"><span class="card-emoji">📅</span><span class="card-label">Letzter Check-in</span></div>
                 <div class="card-value" id="last-checkin">...</div>
                 <div class="card-sub">Zuletzt aktualisiert</div>
             </div>
         </div>
 
-        <!-- Meilenstein -->
         <div class="milestone-box">
             <h2>🎯 Nächster Meilenstein</h2>
             <p class="desc">Fortschritt zum <strong id="milestone-text">100-Bier-Meilenstein</strong> 🍻</p>
-            <div class="progress-track">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
             <div class="progress-meta">
                 <span id="progress-label">... / 100 Biere</span>
                 <span id="progress-target">Ziel: 100 🍺</span>
             </div>
         </div>
 
-        <!-- Map -->
-        <div class="section-title">
-            🌍 Check-in Heatmap
-        </div>
-        <div class="map-box">
-            <div id="map"></div>
-        </div>
+        <!-- SPLIT LAYOUT -->
+        <div class="split-layout">
+            <!-- Linke Spalte -->
+            <div class="left-col">
+                <div class="section-title">🌍 Check-in Heatmap</div>
+                <div class="map-box" style="margin-bottom: 2rem;">
+                    <div id="map"></div>
+                </div>
 
-        <!-- Letzte Check-ins -->
-        <div class="section-title">
-            📋 Top Venues & Orte
-        </div>
-        <div class="grid-4" id="venues-grid" style="margin-bottom: 2rem;">
-            <div class="stat-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">
-                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🍻</span>
-                Lade Locations...
+                <div class="section-title">📋 Top Venues & Orte</div>
+                <div class="grid-4" id="venues-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 0;">
+                    <div class="stat-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Lade Locations...</div>
+                </div>
+            </div>
+
+            <!-- Rechte Spalte -->
+            <div class="right-col">
+                <div class="section-title">📊 Bierstile (Getrunken)</div>
+                <div class="table-box">
+                    <table class="styles-table">
+                        <thead>
+                            <tr>
+                                <th>Stil</th>
+                                <th class="col-num">Check-ins</th>
+                                <th class="col-num">Unique</th>
+                            </tr>
+                        </thead>
+                        <tbody id="styles-tbody">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Stile...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -378,20 +365,17 @@
             <a href="/" class="footer-link">🏠 Home</a>
             <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
-            <a href="https://untappd.com/user/MauriceBa" target="_blank" rel="noopener" class="footer-link">🍺 Untappd</a>
-            <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
+            <a href="https://untappd.com/user/MauriceDE" target="_blank" rel="noopener" class="footer-link">🍺 Untappd</a>
         </div>
         <p>&copy; 2026 MauriceBa. Prost! 🍻</p>
     </footer>
 
     <button id="back-to-top" title="Nach oben scrollen">↑</button>
 
-    <!-- Leaflet JS & Heatmap Plugin -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script>
-        // === SCROLL PROGRESS ===
         const progressBar = document.getElementById('scroll-progress');
         window.addEventListener('scroll', () => {
             const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -399,115 +383,86 @@
             progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
         }, { passive: true });
 
-        // === BACK TO TOP ===
         const backToTop = document.getElementById('back-to-top');
-        window.addEventListener('scroll', () => {
-            backToTop.classList.toggle('visible', window.scrollY > 300);
-        }, { passive: true });
+        window.addEventListener('scroll', () => { backToTop.classList.toggle('visible', window.scrollY > 300); }, { passive: true });
         backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-        // === INITIALISIERE MAP ===
-        // Zentriert grob auf Europa/Deutschland
         const map = L.map('map').setView([50.5, 9.0], 5);
-        
-        // CartoDB Dark Matter Base Map (sieht super aus mit Dark Mode)
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
-            maxZoom: 19
+            attribution: '&copy; OpenStreetMap & CARTO', subdomains: 'abcd', maxZoom: 19
         }).addTo(map);
 
-        // Custom Icon für Top-Venues (Bier)
-        const beerIcon = L.divIcon({
-            html: '🍺',
-            className: 'custom-beer-icon',
-            iconSize: [24, 24],
-            iconAnchor: [12, 12]
-        });
+        const beerIcon = L.divIcon({ html: '🍺', className: 'custom-beer-icon', iconSize: [24, 24], iconAnchor: [12, 12] });
 
-
-        // =============================================
-        // LADE DATEN DYNAMISCH AUS DER GITHUB REPO JSON
-        // =============================================
         async function loadUntappdData() {
             try {
-                // Lade stats.json für die restlichen Daten UND die Map! (Deine stats.json hat "heatmap" Array)
                 const response = await fetch('./data/stats.json');
                 if (!response.ok) throw new Error('Stats JSON konnte nicht geladen werden');
-                
                 const data = await response.json();
                 
-                // 1. Übersicht
                 const total = data.overview.total_checkins;
                 document.getElementById('stat-checkins').textContent = total;
                 document.getElementById('stat-unique').textContent = data.overview.unique_beers;
                 document.getElementById('stat-breweries').textContent = data.overview.unique_breweries;
                 
-                // 2. Top Style
                 let topStyle = data.styles[0].style;
-                if(topStyle === 'Other' && data.styles.length > 1) {
-                    topStyle = data.styles[1].style;
-                }
+                if(topStyle === 'Other' && data.styles.length > 1) topStyle = data.styles[1].style;
                 document.getElementById('top-style').textContent = topStyle;
                 
-                // 3. Top Brewery
                 document.getElementById('top-brewery').textContent = data.top_breweries[0].brewery;
-                
-                // 4. Best / Most Drunk Beer
                 document.getElementById('best-beer').textContent = data.top_beers[0].beer;
                 document.getElementById('best-beer-sub').textContent = data.top_beers[0].brewery;
                 
-                // 5. Letzter Checkin (date_to)
                 const dateParts = data.overview.date_to.split('-');
                 document.getElementById('last-checkin').textContent = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
 
-                // 6. Meilenstein
                 const target = Math.ceil((total + 1) / 100) * 100;
                 document.getElementById('milestone-text').textContent = `${target}-Bier-Meilenstein`;
                 document.getElementById('progress-label').textContent = `${total} / ${target} Biere`;
                 document.getElementById('progress-target').textContent = `Ziel: ${target} 🍺`;
-                
-                const pct = Math.min((total / target) * 100, 100);
-                setTimeout(() => {
-                    document.getElementById('progress-fill').style.width = pct + '%';
-                }, 400);
+                setTimeout(() => { document.getElementById('progress-fill').style.width = Math.min((total/target)*100, 100) + '%'; }, 400);
 
-                // 7. Top Venues (Karten unten)
+                // --- STYLES TABLE ---
+                const tbody = document.getElementById('styles-tbody');
+                tbody.innerHTML = '';
+                data.styles.forEach(s => {
+                    const row = document.createElement('tr');
+                    let icon = '🍺';
+                    if(s.style === 'Tripel' || s.style === 'Quadrupel') icon = '🍷';
+                    if(s.style === 'IPA' || s.style.includes('IPA')) icon = '🌿';
+                    if(s.style === 'Lager/Pils') icon = '🍻';
+                    if(s.style === 'Wheat Beer') icon = '🌾';
+                    if(s.style === 'Stout/Porter') icon = '☕';
+                    if(s.style === 'Sour/Wild') icon = '🍋';
+                    if(s.style === 'Other') icon = '❓';
+
+                    row.innerHTML = `
+                        <td>${icon} ${s.style}</td>
+                        <td class="col-num">${s.checkins}</td>
+                        <td class="col-num" style="opacity: 0.7;">${s.unique_beers}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // --- VENUES ---
                 const venuesGrid = document.getElementById('venues-grid');
                 venuesGrid.innerHTML = ''; 
-                
-                const topVenues = data.top_venues.slice(0, 4);
-                topVenues.forEach(v => {
+                data.top_venues.slice(0, 4).forEach(v => {
                     venuesGrid.innerHTML += `
                         <div class="stat-card">
-                            <div class="card-header-row">
-                                <span class="card-emoji">📍</span>
-                                <span class="card-label">${v.city}, ${v.country}</span>
-                            </div>
-                            <div class="card-value" style="font-size: 1.3rem;">${v.venue}</div>
+                            <div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div>
+                            <div class="card-value" style="font-size: 1.1rem; line-height:1.2; margin-bottom:0.3rem;">${v.venue}</div>
                             <div class="card-sub">${v.visits} Besuche</div>
                         </div>
                     `;
                 });
 
-                // =====================================
-                // 8. HEATMAP DATEN FÜLLEN
-                // =====================================
-                // Deine stats.json hat praktischerweise schon ein "heatmap" (oder "top_venues") Array mit lat/lon
+                // --- HEATMAP ---
                 const heatPoints = [];
-                
-                // Wir nutzen heatmap aus der JSON
                 const mapData = data.heatmap || data.top_venues; 
-
                 mapData.forEach(loc => {
                     if(loc.lat && loc.lon) {
-                        // Intensity basierend auf visits
-                        const intensity = Math.min(loc.visits * 0.1, 1.0); // max. intensität cap
-                        
-                        // Für die Heatmap (vervielfachen des Punkts je nach Visits sieht oft besser aus, oder intensity nutzen)
-                        heatPoints.push([loc.lat, loc.lon, intensity]);
-                        
-                        // Setze auch normale Marker für die Top 15 Locations, damit man klicken kann
+                        heatPoints.push([loc.lat, loc.lon, Math.min(loc.visits * 0.1, 1.0)]);
                         if (loc.visits >= 4) {
                             L.marker([loc.lat, loc.lon], {icon: beerIcon})
                                 .bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`)
@@ -515,92 +470,37 @@
                         }
                     }
                 });
-
-                // Füge Heatmap Layer hinzu
-                const heat = L.heatLayer(heatPoints, {
-                    radius: 25,
-                    blur: 15,
-                    maxZoom: 10,
-                    gradient: {
-                        0.4: '#ef4444', // rot
-                        0.6: '#f59e0b', // amber
-                        0.8: '#fbbf24', // yellow
-                        1.0: '#fff'     // weiß heiß
-                    }
-                }).addTo(map);
-
-                // Zentriere Map auf Aachen (da dort laut Daten fast alles passiert)
+                L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10, gradient: { 0.4: '#ef4444', 0.6: '#f59e0b', 0.8: '#fbbf24', 1.0: '#fff' } }).addTo(map);
                 map.setView([50.7753, 6.0839], 6);
 
-            } catch (error) {
-                console.error(error);
-                document.getElementById('top-style').textContent = 'Fehler beim Laden';
-            }
+            } catch (error) { console.error(error); }
         }
 
         loadUntappdData();
 
-        // === AMBER PARTICLE BACKGROUND ===
+        // Canvas Particles (geklappt für Kürze)
         const canvas = document.getElementById('bg-canvas');
-        const ctx    = canvas.getContext('2d');
+        const ctx = canvas.getContext('2d');
         let width, height, particles = [];
-
-        function resize() {
-            width  = canvas.width  = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            initParticles();
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
+        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initParticles(); }
+        window.addEventListener('resize', resize); resize();
         class Particle {
             constructor() {
-                this.x       = Math.random() * width;
-                this.y       = Math.random() * height;
-                this.size    = Math.random() * 2 + 0.5;
-                this.speedX  = Math.random() * 0.8 - 0.4;
-                this.speedY  = Math.random() * 0.8 - 0.4;
-                this.opacity = Math.random() * 0.45 + 0.08;
-                this.color   = Math.random() > 0.5 ? '#f59e0b' : '#ef4444';
+                this.x = Math.random()*width; this.y = Math.random()*height; this.size = Math.random()*2+0.5;
+                this.speedX = Math.random()*0.8-0.4; this.speedY = Math.random()*0.8-0.4;
+                this.opacity = Math.random()*0.45+0.08; this.color = Math.random()>0.5?'#f59e0b':'#ef4444';
             }
-            update() {
-                this.x += this.speedX; this.y += this.speedY;
-                if (this.x < 0) this.x = width;  if (this.x > width)  this.x = 0;
-                if (this.y < 0) this.y = height; if (this.y > height) this.y = 0;
-            }
-            draw() {
-                ctx.globalAlpha = this.opacity;
-                ctx.fillStyle   = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+            update() { this.x += this.speedX; this.y += this.speedY; if(this.x<0)this.x=width; if(this.x>width)this.x=0; if(this.y<0)this.y=height; if(this.y>height)this.y=0; }
+            draw() { ctx.globalAlpha = this.opacity; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); }
         }
-
-        function initParticles() {
-            particles = [];
-            const count = Math.floor((width * height) / 15000);
-            for (let i = 0; i < count; i++) particles.push(new Particle());
-        }
-
+        function initParticles() { particles = []; const count = Math.floor((width*height)/15000); for(let i=0; i<count; i++) particles.push(new Particle()); }
         function animate() {
-            ctx.clearRect(0, 0, width, height);
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const d  = Math.sqrt(dx * dx + dy * dy);
-                    if (d < 100) {
-                        ctx.globalAlpha = (100 - d) / 1000;
-                        ctx.strokeStyle = particles[i].color;
-                        ctx.lineWidth   = 0.5;
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.stroke();
-                    }
+            ctx.clearRect(0,0,width,height);
+            for(let i=0; i<particles.length; i++) {
+                particles[i].update(); particles[i].draw();
+                for(let j=i+1; j<particles.length; j++) {
+                    const dx = particles[i].x-particles[j].x, dy = particles[i].y-particles[j].y, d = Math.sqrt(dx*dx+dy*dy);
+                    if(d<100) { ctx.globalAlpha=(100-d)/1000; ctx.strokeStyle=particles[i].color; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); }
                 }
             }
             requestAnimationFrame(animate);
