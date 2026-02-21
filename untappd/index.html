@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍺 Bier Stats | mauricelol.fun</title>
     
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --primary: #f59e0b;
@@ -35,233 +38,95 @@
             position: fixed; top: 0; left: 0; height: 3px;
             background: linear-gradient(to right, #f59e0b, #ef4444);
             z-index: 9999; width: 0%; transition: width 0.05s linear;
-            border-radius: 0 2px 2px 0;
         }
 
-        #bg-canvas {
-            position: fixed; top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: -1; pointer-events: none;
-        }
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
 
         header {
-            position: fixed; top: 0; left: 0; right: 0;
-            height: var(--header-height);
+            position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
             display: flex; align-items: center; justify-content: space-between;
-            padding: 0 2rem;
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--card-border);
-            z-index: 1000;
+            padding: 0 2rem; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border); z-index: 1000;
         }
 
         .logo {
-            font-size: 1.5rem; font-weight: 800;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text; background-clip: text;
-            color: transparent; text-decoration: none;
-            transition: transform 0.3s ease;
+            font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #ef4444);
+            -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none;
+            transition: transform 0.3s;
         }
         .logo:hover { transform: scale(1.05); }
 
         .nav-group { display: flex; align-items: center; gap: 0.75rem; }
-
         .nav-link {
             color: var(--text); text-decoration: none; font-weight: 500;
-            padding: 0.5rem 1rem; border-radius: 8px;
-            transition: all 0.2s; border: 1px solid transparent;
-            background: rgba(255,255,255,0.03);
+            padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;
+            border: 1px solid transparent; background: rgba(255,255,255,0.03);
         }
-        .nav-link:hover, .nav-link.active {
-            background: rgba(245, 158, 11, 0.15);
-            border-color: var(--primary); color: var(--primary);
-        }
+        .nav-link:hover, .nav-link.active { background: rgba(245, 158, 11, 0.15); border-color: var(--primary); color: var(--primary); }
 
-        main {
-            max-width: 1200px;
-            margin: calc(var(--header-height) + 4rem) auto 2rem;
-            padding: 0 2rem;
-            position: relative; z-index: 1;
-        }
+        main { max-width: 1200px; margin: calc(var(--header-height) + 4rem) auto 2rem; padding: 0 2rem; position: relative; z-index: 1; }
 
-        /* === HERO === */
         .hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.8s ease-out; }
-        h1 {
-            font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800;
-            margin-bottom: 0.75rem; line-height: 1.1;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text; background-clip: text; color: transparent;
-        }
-        .subtitle { font-size: 1.05rem; color: var(--text-muted); animation: slideUp 0.8s ease-out 0.1s backwards; }
+        h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.75rem; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .subtitle { font-size: 1.05rem; color: var(--text-muted); }
 
-        /* === STATS BAR === */
-        .stats-bar {
-            display: flex; justify-content: center; gap: 3rem;
-            margin: 0 auto 3rem; flex-wrap: wrap;
-            animation: slideUp 0.8s ease-out 0.15s backwards;
-        }
+        .stats-bar { display: flex; justify-content: center; gap: 3rem; margin: 0 auto 3rem; flex-wrap: wrap; animation: slideUp 0.8s ease-out 0.15s backwards; }
         .stat-item { text-align: center; }
-        .stat-number {
-            font-size: 2.2rem; font-weight: 800;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text; background-clip: text;
-            color: transparent; line-height: 1;
-        }
-        .stat-label {
-            font-size: 0.75rem; color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem;
-        }
+        .stat-number { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; }
 
-        /* === STAT CARDS GRID === */
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.25rem; margin-bottom: 2.5rem;
-            animation: slideUp 0.8s ease-out 0.2s backwards;
-        }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.2s backwards; }
 
         .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px; padding: 1.5rem;
-            backdrop-filter: blur(10px);
-            position: relative; overflow: hidden;
-            transition: all 0.3s ease;
+            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.5rem;
+            backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: all 0.3s ease;
         }
-        .stat-card::before {
-            content: ''; position: absolute;
-            top: 0; left: 0; width: 100%; height: 3px;
-            background: linear-gradient(to right, #f59e0b, #ef4444);
-            opacity: 0.7;
-        }
-        .stat-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(245, 158, 11, 0.4);
-            box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.2);
-        }
+        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(to right, #f59e0b, #ef4444); opacity: 0.7; }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.2); }
         .card-header-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
         .card-emoji { font-size: 1.4rem; }
         .card-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
         .card-value { font-size: 1.9rem; font-weight: 800; color: var(--text); line-height: 1.1; }
         .card-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.3rem; }
 
-        /* === MILESTONE === */
-        .milestone-box {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 2rem;
-            margin-bottom: 2.5rem;
-            backdrop-filter: blur(10px);
-            animation: slideUp 0.8s ease-out 0.25s backwards;
-        }
+        .milestone-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem; backdrop-filter: blur(10px); animation: slideUp 0.8s ease-out 0.25s backwards; }
         .milestone-box h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
         .milestone-box .desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem; }
-        .progress-track {
-            background: rgba(255,255,255,0.08);
-            border-radius: 50px; height: 14px; overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%; border-radius: 50px;
-            background: linear-gradient(to right, #f59e0b, #ef4444);
-            width: 0%; transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .progress-meta {
-            display: flex; justify-content: space-between;
-            margin-top: 0.6rem; font-size: 0.82rem; color: var(--text-muted);
-        }
+        .progress-track { background: rgba(255,255,255,0.08); border-radius: 50px; height: 14px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 50px; background: linear-gradient(to right, #f59e0b, #ef4444); width: 0%; transition: width 1.5s; }
+        .progress-meta { display: flex; justify-content: space-between; margin-top: 0.6rem; font-size: 0.82rem; color: var(--text-muted); }
 
-        /* === SPLIT LAYOUT (MAP + TABLE) === */
-        .split-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2.5rem;
-            animation: slideUp 0.8s ease-out 0.3s backwards;
-        }
-        @media (max-width: 900px) {
-            .split-layout { grid-template-columns: 1fr; }
-        }
+        .split-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.3s backwards; }
+        @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } }
 
-        .section-title {
-            font-size: 1.1rem; font-weight: 700; color: var(--text);
-            margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
-        }
+        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 
-        .map-box {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 1rem; backdrop-filter: blur(10px);
-        }
+        .map-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1rem; backdrop-filter: blur(10px); }
         #map { width: 100%; height: 400px; border-radius: 10px; z-index: 10; }
-        
         .leaflet-container { background-color: #0f172a; }
-        .leaflet-popup-content-wrapper {
-            background-color: var(--bg); color: var(--text);
-            border: 1px solid var(--primary); border-radius: 8px;
-        }
-        .leaflet-popup-tip {
-            background-color: var(--bg); border-top: 1px solid var(--primary); border-left: 1px solid var(--primary);
-        }
+        .leaflet-popup-content-wrapper { background-color: var(--bg); color: var(--text); border: 1px solid var(--primary); border-radius: 8px; }
+        .leaflet-popup-tip { background-color: var(--bg); border-top: 1px solid var(--primary); border-left: 1px solid var(--primary); }
         .leaflet-popup-content b { color: var(--primary); }
 
-        /* === STYLES TABLE === */
-        .table-box {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px);
-            max-height: 480px; overflow-y: auto;
-        }
-        /* Custom Scrollbar */
+        .table-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px); max-height: 480px; overflow-y: auto; }
         .table-box::-webkit-scrollbar { width: 6px; }
         .table-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 8px; }
         .table-box::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 8px; }
-
         .styles-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .styles-table th {
-            position: sticky; top: -1.5rem; background: var(--bg);
-            padding: 0.75rem 0.5rem; font-size: 0.8rem; text-transform: uppercase;
-            color: var(--text-muted); border-bottom: 1px solid var(--card-border);
-            z-index: 5;
-        }
-        .styles-table td {
-            padding: 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.95rem;
-        }
+        .styles-table th { position: sticky; top: -1.5rem; background: var(--bg); padding: 0.75rem 0.5rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); z-index: 5; }
+        .styles-table td { padding: 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
         .styles-table tr:last-child td { border-bottom: none; }
         .styles-table tr:hover td { background: rgba(245, 158, 11, 0.05); }
         .col-num { text-align: right; font-weight: 700; color: var(--primary); }
 
-        /* === FOOTER === */
-        footer {
-            margin-top: 6rem; padding: 2rem;
-            text-align: center; color: var(--text-muted);
-            font-size: 0.9rem; border-top: 1px solid var(--card-border);
-        }
-        .footer-links {
-            display: flex; justify-content: center;
-            gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap;
-        }
+        .badge { display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.55rem; border-radius: 50px; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.4rem; vertical-align: middle; }
+
+        footer { margin-top: 6rem; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--card-border); }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
         .footer-link { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
         .footer-link:hover { color: var(--primary); }
 
-        #back-to-top {
-            position: fixed; bottom: 2rem; right: 2rem;
-            width: 48px; height: 48px; border-radius: 50%;
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: white; border: none; font-size: 1.4rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
-            opacity: 0; transform: translateY(20px);
-            transition: all 0.3s ease; z-index: 999;
-        }
-        #back-to-top.visible { opacity: 1; transform: translateY(0); }
-        #back-to-top:hover { transform: scale(1.1) translateY(-2px); }
-
-        @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .stats-bar { gap: 1.5rem; }
-            .nav-group { gap: 0.4rem; }
-            .card-value { font-size: 1.5rem; }
-            #map { height: 300px; }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -274,6 +139,7 @@
             <a href="/" class="nav-link">🏠 Home</a>
             <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
+            <a href="/btd6/" class="nav-link">🎈 BTD6</a>
             <a href="/untappd/" class="nav-link active">🍺 Bier Stats</a>
         </div>
     </header>
@@ -324,33 +190,47 @@
             </div>
         </div>
 
-        <!-- SPLIT LAYOUT -->
+        <!-- NEW: CHART & ML RECOMMENDATION -->
+        <div class="split-layout" style="margin-bottom: 2.5rem;">
+            <!-- Chart.js Graph -->
+            <div class="left-col">
+                <div class="section-title">⭐ Bewertungs-Verteilung</div>
+                <div class="map-box" style="height: 350px; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                    <canvas id="ratingChart"></canvas>
+                </div>
+            </div>
+            <!-- ML Recommendation -->
+            <div class="right-col">
+                <div class="section-title">🤖 KI Bier-Empfehlung</div>
+                <div class="stat-card" style="border-color: var(--primary); height: 350px; display: flex; flex-direction: column;">
+                    <div class="card-header-row"><span class="card-emoji">💡</span><span class="card-label">Bier des Tages</span></div>
+                    <div class="card-value" id="rec-beer" style="font-size:1.4rem; color:var(--primary); line-height: 1.2;">Lade Analyse...</div>
+                    <div class="card-sub" id="rec-brewery" style="color:var(--text); font-weight:bold; margin-top: 0.5rem; font-size: 0.95rem;"></div>
+                    <div class="card-sub" id="rec-style" style="margin-top:0.2rem; font-style:italic;"></div>
+                    <p id="rec-desc" style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); line-height: 1.5; flex-grow: 1;"></p>
+                    <div><span class="badge" id="rec-reason" style="margin-left:0; background: linear-gradient(135deg, var(--primary), var(--secondary)); white-space: normal;">Profil wird berechnet...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SPLIT LAYOUT (MAP + TABLE) -->
         <div class="split-layout">
-            <!-- Linke Spalte -->
             <div class="left-col">
                 <div class="section-title">🌍 Check-in Heatmap</div>
                 <div class="map-box" style="margin-bottom: 2rem;">
                     <div id="map"></div>
                 </div>
-
                 <div class="section-title">📋 Top Venues & Orte</div>
                 <div class="grid-4" id="venues-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 0;">
                     <div class="stat-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Lade Locations...</div>
                 </div>
             </div>
 
-            <!-- Rechte Spalte -->
             <div class="right-col">
                 <div class="section-title">📊 Bierstile (Getrunken)</div>
                 <div class="table-box">
                     <table class="styles-table">
-                        <thead>
-                            <tr>
-                                <th>Stil</th>
-                                <th class="col-num">Check-ins</th>
-                                <th class="col-num">Unique</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Stil</th><th class="col-num">Check-ins</th><th class="col-num">Unique</th></tr></thead>
                         <tbody id="styles-tbody">
                             <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Stile...</td></tr>
                         </tbody>
@@ -363,16 +243,12 @@
     <footer>
         <div class="footer-links">
             <a href="/" class="footer-link">🏠 Home</a>
-            <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
-            <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
             <a href="https://untappd.com/user/MauriceDE" target="_blank" rel="noopener" class="footer-link">🍺 Untappd</a>
         </div>
         <p>&copy; 2026 MauriceBa. Prost! 🍻</p>
     </footer>
 
-    <button id="back-to-top" title="Nach oben scrollen">↑</button>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script>
@@ -381,23 +257,16 @@
             const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
             const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
-        }, { passive: true });
-
-        const backToTop = document.getElementById('back-to-top');
-        window.addEventListener('scroll', () => { backToTop.classList.toggle('visible', window.scrollY > 300); }, { passive: true });
-        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        });
 
         const map = L.map('map').setView([50.5, 9.0], 5);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap & CARTO', subdomains: 'abcd', maxZoom: 19
-        }).addTo(map);
-
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
         const beerIcon = L.divIcon({ html: '🍺', className: 'custom-beer-icon', iconSize: [24, 24], iconAnchor: [12, 12] });
 
         async function loadUntappdData() {
             try {
+                // 1. STATS JSON LOAD
                 const response = await fetch('./data/stats.json');
-                if (!response.ok) throw new Error('Stats JSON konnte nicht geladen werden');
                 const data = await response.json();
                 
                 const total = data.overview.total_checkins;
@@ -408,7 +277,6 @@
                 let topStyle = data.styles[0].style;
                 if(topStyle === 'Other' && data.styles.length > 1) topStyle = data.styles[1].style;
                 document.getElementById('top-style').textContent = topStyle;
-                
                 document.getElementById('top-brewery').textContent = data.top_breweries[0].brewery;
                 document.getElementById('best-beer').textContent = data.top_beers[0].beer;
                 document.getElementById('best-beer-sub').textContent = data.top_beers[0].brewery;
@@ -419,10 +287,9 @@
                 const target = Math.ceil((total + 1) / 100) * 100;
                 document.getElementById('milestone-text').textContent = `${target}-Bier-Meilenstein`;
                 document.getElementById('progress-label').textContent = `${total} / ${target} Biere`;
-                document.getElementById('progress-target').textContent = `Ziel: ${target} 🍺`;
                 setTimeout(() => { document.getElementById('progress-fill').style.width = Math.min((total/target)*100, 100) + '%'; }, 400);
 
-                // --- STYLES TABLE ---
+                // STYLES TABLE
                 const tbody = document.getElementById('styles-tbody');
                 tbody.innerHTML = '';
                 data.styles.forEach(s => {
@@ -435,50 +302,84 @@
                     if(s.style === 'Stout/Porter') icon = '☕';
                     if(s.style === 'Sour/Wild') icon = '🍋';
                     if(s.style === 'Other') icon = '❓';
-
-                    row.innerHTML = `
-                        <td>${icon} ${s.style}</td>
-                        <td class="col-num">${s.checkins}</td>
-                        <td class="col-num" style="opacity: 0.7;">${s.unique_beers}</td>
-                    `;
+                    row.innerHTML = `<td>${icon} ${s.style}</td><td class="col-num">${s.checkins}</td><td class="col-num" style="opacity: 0.7;">${s.unique_beers}</td>`;
                     tbody.appendChild(row);
                 });
 
-                // --- VENUES ---
+                // MAP & VENUES
                 const venuesGrid = document.getElementById('venues-grid');
                 venuesGrid.innerHTML = ''; 
                 data.top_venues.slice(0, 4).forEach(v => {
-                    venuesGrid.innerHTML += `
-                        <div class="stat-card">
-                            <div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div>
-                            <div class="card-value" style="font-size: 1.1rem; line-height:1.2; margin-bottom:0.3rem;">${v.venue}</div>
-                            <div class="card-sub">${v.visits} Besuche</div>
-                        </div>
-                    `;
+                    venuesGrid.innerHTML += `<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size: 1.1rem; line-height:1.2; margin-bottom:0.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
                 });
-
-                // --- HEATMAP ---
                 const heatPoints = [];
                 const mapData = data.heatmap || data.top_venues; 
                 mapData.forEach(loc => {
                     if(loc.lat && loc.lon) {
                         heatPoints.push([loc.lat, loc.lon, Math.min(loc.visits * 0.1, 1.0)]);
-                        if (loc.visits >= 4) {
-                            L.marker([loc.lat, loc.lon], {icon: beerIcon})
-                                .bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`)
-                                .addTo(map);
-                        }
+                        if (loc.visits >= 4) { L.marker([loc.lat, loc.lon], {icon: beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map); }
                     }
                 });
                 L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10, gradient: { 0.4: '#ef4444', 0.6: '#f59e0b', 0.8: '#fbbf24', 1.0: '#fff' } }).addTo(map);
                 map.setView([50.7753, 6.0839], 6);
 
-            } catch (error) { console.error(error); }
+            } catch (error) { console.error("Stats JSON error", error); }
+
+            // 2. ML DATA LOAD (NEU: Chart.js und Empfehlung)
+            try {
+                const mlRes = await fetch('./data/ml_data.json');
+                const mlData = await mlRes.json();
+                
+                // Rating Overview
+                document.getElementById('stat-rating').textContent = mlData.ratings.average.toFixed(2);
+                
+                // Recommendation Widget
+                document.getElementById('rec-beer').textContent = mlData.recommendation.beer;
+                document.getElementById('rec-brewery').textContent = mlData.recommendation.brewery;
+                document.getElementById('rec-style').textContent = mlData.recommendation.style;
+                document.getElementById('rec-desc').textContent = mlData.recommendation.description;
+                document.getElementById('rec-reason').textContent = mlData.recommendation.match_reason;
+                
+                // Rendering Chart.js
+                const ctxChart = document.getElementById('ratingChart').getContext('2d');
+                const labels = Object.keys(mlData.ratings.distribution).sort();
+                const dataPts = labels.map(l => mlData.ratings.distribution[l]);
+                
+                Chart.defaults.color = '#94a3b8';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+
+                new Chart(ctxChart, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Check-ins',
+                            data: dataPts,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: '#f59e0b',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#fff', bodyColor: '#f59e0b', padding: 10 }
+                        },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            } catch (error) { console.error("ML JSON error", error); }
         }
 
         loadUntappdData();
 
-        // Canvas Particles (geklappt für Kürze)
+        // Canvas Particles
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
@@ -498,10 +399,6 @@
             ctx.clearRect(0,0,width,height);
             for(let i=0; i<particles.length; i++) {
                 particles[i].update(); particles[i].draw();
-                for(let j=i+1; j<particles.length; j++) {
-                    const dx = particles[i].x-particles[j].x, dy = particles[i].y-particles[j].y, d = Math.sqrt(dx*dx+dy*dy);
-                    if(d<100) { ctx.globalAlpha=(100-d)/1000; ctx.strokeStyle=particles[i].color; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); }
-                }
             }
             requestAnimationFrame(animate);
         }
