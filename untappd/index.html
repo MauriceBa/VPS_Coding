@@ -239,6 +239,7 @@
             h1 { font-size: 2rem; }
             .stats-bar { gap: 1.5rem; }
             .nav-group { gap: 0.4rem; }
+            .card-value { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -260,21 +261,21 @@
         <!-- Hero -->
         <div class="hero">
             <h1>🍺 Bier Stats</h1>
-            <p class="subtitle">Meine persönlichen Bier-Statistiken &middot; Powered by Untappd &middot; Wird regelmäßig aktualisiert</p>
+            <p class="subtitle">Meine persönlichen Bier-Statistiken &middot; Powered by Untappd &middot; Wird automatisch aktualisiert</p>
         </div>
 
         <!-- Schnellübersicht -->
         <div class="stats-bar">
             <div class="stat-item">
-                <div class="stat-number" id="stat-checkins">–</div>
+                <div class="stat-number" id="stat-checkins">...</div>
                 <div class="stat-label">Check-ins</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="stat-unique">–</div>
+                <div class="stat-number" id="stat-unique">...</div>
                 <div class="stat-label">Einzigartige Biere</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="stat-breweries">–</div>
+                <div class="stat-number" id="stat-breweries">...</div>
                 <div class="stat-label">Brauereien</div>
             </div>
             <div class="stat-item">
@@ -290,7 +291,7 @@
                     <span class="card-emoji">🏆</span>
                     <span class="card-label">Top Style</span>
                 </div>
-                <div class="card-value" id="top-style">–</div>
+                <div class="card-value" id="top-style">...</div>
                 <div class="card-sub">Meistgetrunkener Bierstil</div>
             </div>
             <div class="stat-card">
@@ -298,48 +299,50 @@
                     <span class="card-emoji">🏭</span>
                     <span class="card-label">Top Brauerei</span>
                 </div>
-                <div class="card-value" id="top-brewery">–</div>
+                <div class="card-value" id="top-brewery">...</div>
                 <div class="card-sub">Favoriten-Brauerei</div>
             </div>
             <div class="stat-card">
                 <div class="card-header-row">
                     <span class="card-emoji">⭐</span>
-                    <span class="card-label">Bestes Bier</span>
+                    <span class="card-label">Meistgetrunken</span>
                 </div>
-                <div class="card-value" id="best-beer">–</div>
-                <div class="card-sub">Höchste persönliche Bewertung</div>
+                <div class="card-value" id="best-beer">...</div>
+                <div class="card-sub" id="best-beer-sub">Top Bier Name</div>
             </div>
             <div class="stat-card">
                 <div class="card-header-row">
                     <span class="card-emoji">📅</span>
                     <span class="card-label">Letzter Check-in</span>
                 </div>
-                <div class="card-value" id="last-checkin">–</div>
-                <div class="card-sub">Datum des letzten Check-ins</div>
+                <div class="card-value" id="last-checkin">...</div>
+                <div class="card-sub">Zuletzt aktualisiert</div>
             </div>
         </div>
 
         <!-- Meilenstein -->
         <div class="milestone-box">
             <h2>🎯 Nächster Meilenstein</h2>
-            <p class="desc">Fortschritt zum <strong>100-Bier-Meilenstein</strong> 🍻</p>
+            <p class="desc">Fortschritt zum <strong id="milestone-text">100-Bier-Meilenstein</strong> 🍻</p>
             <div class="progress-track">
                 <div class="progress-fill" id="progress-fill"></div>
             </div>
             <div class="progress-meta">
-                <span id="progress-label">0 / 100 Biere</span>
-                <span>Ziel: 100 🍺</span>
+                <span id="progress-label">... / 100 Biere</span>
+                <span id="progress-target">Ziel: 100 🍺</span>
             </div>
         </div>
 
         <!-- Letzte Check-ins -->
         <div class="section-title">
-            📋 Letzte Check-ins <span class="soon-badge">Demnächst</span>
+            📋 Top Venues & Orte
         </div>
-        <div class="empty-state">
-            <span class="big-icon">🍺</span>
-            <p>Hier erscheinen bald die letzten Check-ins von Untappd.</p>
-            <p class="hint">Maurice ist gerade am Recherchieren... oder am Trinken. 🤔</p>
+        <div class="grid-4" id="venues-grid" style="margin-bottom: 2rem;">
+            <!-- Wird per JS befüllt -->
+            <div class="stat-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">
+                <span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">🍻</span>
+                Lade Locations...
+            </div>
         </div>
     </main>
 
@@ -348,7 +351,7 @@
             <a href="/" class="footer-link">🏠 Home</a>
             <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
-            <a href="https://untappd.com" target="_blank" rel="noopener" class="footer-link">🍺 Untappd</a>
+            <a href="https://untappd.com/user/MauriceBa" target="_blank" rel="noopener" class="footer-link">🍺 Untappd</a>
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
         </div>
         <p>&copy; 2026 MauriceBa. Prost! 🍻</p>
@@ -373,44 +376,76 @@
         backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
         // =============================================
-        // STATS – hier kannst du echte Daten eintragen
-        // oder später per API-Fetch befüllen.
+        // LADE DATEN DYNAMISCH AUS DER GITHUB REPO JSON
         // =============================================
-        const beerData = {
-            totalCheckins:  null,   // z.B. 42
-            uniqueBeers:    null,   // z.B. 35
-            breweries:      null,   // z.B. 18
-            avgRating:      null,   // z.B. 3.75
-            topStyle:       null,   // z.B. 'IPA'
-            topBrewery:     null,   // z.B. 'Brauerei XY'
-            bestBeer:       null,   // z.B. 'Founder's KBS'
-            lastCheckin:    null,   // z.B. '20.02.2026'
-            milestoneTarget: 100,
-            milestoneProgress: 0,
-        };
+        async function loadUntappdData() {
+            try {
+                const response = await fetch('./data/stats.json');
+                if (!response.ok) throw new Error('Stats JSON konnte nicht geladen werden');
+                
+                const data = await response.json();
+                
+                // 1. Übersicht
+                const total = data.overview.total_checkins;
+                document.getElementById('stat-checkins').textContent = total;
+                document.getElementById('stat-unique').textContent = data.overview.unique_beers;
+                document.getElementById('stat-breweries').textContent = data.overview.unique_breweries;
+                // Rating fehlt leider im stats.json, daher "–"
+                
+                // 2. Top Style (Ignoriere "Other" wenn möglich)
+                let topStyle = data.styles[0].style;
+                if(topStyle === 'Other' && data.styles.length > 1) {
+                    topStyle = data.styles[1].style;
+                }
+                document.getElementById('top-style').textContent = topStyle;
+                
+                // 3. Top Brewery
+                document.getElementById('top-brewery').textContent = data.top_breweries[0].brewery;
+                
+                // 4. Best / Most Drunk Beer
+                document.getElementById('best-beer').textContent = data.top_beers[0].beer;
+                document.getElementById('best-beer-sub').textContent = data.top_beers[0].brewery;
+                
+                // 5. Letzter Checkin (date_to)
+                const dateParts = data.overview.date_to.split('-'); // YYYY-MM-DD
+                document.getElementById('last-checkin').textContent = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
 
-        function renderStats() {
-            const set = (id, val, fallback = '–') =>
-                document.getElementById(id).textContent = (val !== null && val !== undefined) ? val : fallback;
+                // 6. Meilenstein (Nächster Hunderter)
+                const target = Math.ceil((total + 1) / 100) * 100;
+                document.getElementById('milestone-text').textContent = `${target}-Bier-Meilenstein`;
+                document.getElementById('progress-label').textContent = `${total} / ${target} Biere`;
+                document.getElementById('progress-target').textContent = `Ziel: ${target} 🍺`;
+                
+                const pct = Math.min((total / target) * 100, 100);
+                setTimeout(() => {
+                    document.getElementById('progress-fill').style.width = pct + '%';
+                }, 400);
 
-            set('stat-checkins',  beerData.totalCheckins);
-            set('stat-unique',    beerData.uniqueBeers);
-            set('stat-breweries', beerData.breweries);
-            set('stat-rating',    beerData.avgRating ? beerData.avgRating.toFixed(2) + ' ⭐' : null);
-            set('top-style',      beerData.topStyle);
-            set('top-brewery',    beerData.topBrewery);
-            set('best-beer',      beerData.bestBeer);
-            set('last-checkin',   beerData.lastCheckin);
+                // 7. Top Venues (Top 4 einfügen)
+                const venuesGrid = document.getElementById('venues-grid');
+                venuesGrid.innerHTML = ''; // Clear loading
+                
+                const topVenues = data.top_venues.slice(0, 4);
+                topVenues.forEach(v => {
+                    venuesGrid.innerHTML += `
+                        <div class="stat-card">
+                            <div class="card-header-row">
+                                <span class="card-emoji">📍</span>
+                                <span class="card-label">${v.city}, ${v.country}</span>
+                            </div>
+                            <div class="card-value" style="font-size: 1.3rem;">${v.venue}</div>
+                            <div class="card-sub">${v.visits} Besuche</div>
+                        </div>
+                    `;
+                });
 
-            const pct = Math.min((beerData.milestoneProgress / beerData.milestoneTarget) * 100, 100);
-            document.getElementById('progress-label').textContent =
-                `${beerData.milestoneProgress} / ${beerData.milestoneTarget} Biere`;
-            setTimeout(() => {
-                document.getElementById('progress-fill').style.width = pct + '%';
-            }, 400);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('top-style').textContent = 'Fehler beim Laden';
+            }
         }
 
-        renderStats();
+        loadUntappdData();
 
         // === AMBER PARTICLE BACKGROUND ===
         const canvas = document.getElementById('bg-canvas');
