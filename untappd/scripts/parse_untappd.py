@@ -151,14 +151,19 @@ def parse_export(filepath):
                         if am:
                             current['abv'] = float(am.group(1))
                     
+                    total_count = 1
                     for nel in reversed(non_empty):
+                        tm = re.search(r'Total:\s*(\d+)', nel)
+                        if tm:
+                            total_count = int(tm.group(1))
+                            
                         dm = re.search(r'Recent:\s*(\d{2})/(\d{2})/(\d{2})', nel)
                         if dm:
                             m, d, y = dm.groups()
                             current['date'] = f"20{y}-{m}-{d}"
-                            break
                             
-                    checkins.append(current)
+                    for _ in range(total_count):
+                        checkins.append(current.copy())
                 i = j
             else:
                 i += 1
