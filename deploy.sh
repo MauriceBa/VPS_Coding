@@ -25,7 +25,12 @@ sudo rsync -av --exclude '.git' \
 
 sudo chown -R www-data:www-data /var/www/mauricefun.lol/html
 
-# 3. Games als Symlinks verlinken
+# 3. Games Ordner nach /var/www/games/ synchronisieren
+echo "🎮 Syncing games to /var/www/games/..."
+sudo mkdir -p /var/www/games
+sudo rsync -av --exclude '.git' --exclude '__pycache__' --exclude '*.pyc' games/ /var/www/games/
+
+# 4. Games als Symlinks im Webroot verlinken
 for game in games/*; do
     if [ -d "$game" ]; then
         name=$(basename "$game")
