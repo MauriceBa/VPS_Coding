@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍭 Lauras Lollipop Looper</title>
+    <style>
+        :root {
+            --primary: #ec4899; 
+            --secondary: #8b5cf6; 
+            --bg: #0f172a;
+            --text: #f8fafc; 
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.85); 
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            font-family: 'Inter', -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            overflow: hidden; 
+            user-select: none; 
+        }
+        
+        #gameCanvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh; 
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
+        }
+        
+        /* Home Button */
+        .btn-home { 
+            position: absolute; top: 1.5rem; left: 1.5rem; 
+            background: rgba(255,255,255,0.1); color: white; 
+            text-decoration: none; padding: 0.6rem 1.2rem; 
+            border-radius: 8px; font-weight: bold; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            pointer-events: auto; z-index: 1000;
+            backdrop-filter: blur(5px); transition: background 0.2s;
+        }
+        .btn-home:hover { background: rgba(255,255,255,0.25); }
+
+        /* HUD */
+        #hud { 
+            position: absolute; top: 1.5rem; right: 1.5rem; 
+            display: flex; gap: 1rem; pointer-events: none; z-index: 10; 
+        }
+        .hud-box { 
+            background: var(--card-bg); border: 1px solid var(--card-border); 
+            padding: 0.75rem 1.5rem; border-radius: 12px; 
+            backdrop-filter: blur(10px); text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .hud-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
+        .hud-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px;}
+
+        /* SHOP OVERLAY */
+        #shop { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15,23,42,0.85); backdrop-filter: blur(15px); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 100; transition: opacity 0.3s; pointer-events: auto; 
+        }
+        #shop.hidden { opacity: 0; pointer-events: none; }
+        
+        .shop-container { 
+            background: var(--card-bg); border: 1px solid var(--card-border); 
+            border-radius: 20px; width: 95%; max-width: 1000px; max-height: 85vh; 
+            padding: 2.5rem; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); 
+        }
+        
+        .shop-header { text-align: center; margin-bottom: 2.5rem; }
+        .shop-title { 
+            font-size: 3rem; font-weight: 900; 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            -webkit-background-clip: text; color: transparent; 
+            letter-spacing: -1px; margin-bottom: 0.5rem;
+        }
+        .shop-subtitle { color: var(--text-muted); font-size: 1.1rem; }
+        
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+        .upg-card { 
+            background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); 
+            border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; 
+            gap: 0.75rem; transition: transform 0.2s, border-color 0.2s; 
+        }
+        .upg-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 10px 20px rgba(236, 72, 153, 0.15); }
+        .upg-title { font-weight: 800; font-size: 1.2rem; display: flex; justify-content: space-between; align-items: center; }
+        .upg-lvl { color: var(--secondary); font-size: 0.95rem; background: rgba(139, 92, 246, 0.2); padding: 0.2rem 0.6rem; border-radius: 50px; }
+        .upg-desc { font-size: 0.9rem; color: var(--text-muted); flex-grow: 1; line-height: 1.5; }
+        .upg-cost { font-weight: bold; color: #fbbf24; margin: 0.5rem 0; font-size: 1.1rem; }
+        
+        .btn { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            color: white; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; 
+            font-weight: 800; cursor: pointer; transition: opacity 0.2s, transform 0.1s; width: 100%; 
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { background: #334155; color: #64748b; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        .start-btn { 
+            font-size: 1.4rem; padding: 1.2rem 4rem; margin-top: 3rem; 
+            border-radius: 50px; display: block; margin-left: auto; margin-right: auto; 
+            box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4); 
+            animation: pulseBtn 2s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(236, 72, 153, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); }
+        }
+
+        .prestige-box { 
+            margin-top: 3rem; padding: 2rem; border: 2px dashed #fbbf24; 
+            border-radius: 16px; text-align: center; background: rgba(251, 191, 36, 0.05); 
+        }
+        .prestige-btn { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #000; margin-top: 1.5rem; max-width: 400px; margin-left: auto; margin-right: auto;}
+
+        /* COMBAT TEXT */
+        .fct { 
+            position: absolute; color: white; font-weight: 900; pointer-events: none; 
+            animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); font-size: 1.2rem; z-index: 50; 
+        }
+        .fct.crit { color: #fcd34d; font-size: 1.8rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.8); }
+        @keyframes floatUp { 
+            0% { transform: translateY(0) scale(0.5); opacity: 1; } 
+            20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1); opacity: 0; } 
+        }
+        
+        .damage-overlay { 
+            position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: rgba(239, 68, 68, 0.4); pointer-events:none; 
+            opacity: 0; transition: opacity 0.15s; z-index: 20; 
+        }
+        .damage-overlay.flash { opacity: 1; }
+        
+        /* Scrollbar for shop */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+    <a href="/" class="btn-home">🏠 Home</a>
+    
+    <div id="hud">
+        <div class="hud-box"><div class="hud-val" id="hud-wave">1</div><div class="hud-lbl">Welle</div></div>
+        <div class="hud-box"><div class="hud-val" id="hud-money" style="color:#fbbf24;">0 🍬</div><div class="hud-lbl">Candies</div></div>
+    </div>
+
+    <div class="damage-overlay" id="dmg-overlay"></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- SHOP -->
+    <div id="shop">
+        <div class="shop-container">
+            <div class="shop-header">
+                <div class="shop-title">🍭 Lauras Lollipop Looper</div>
+                <div class="shop-subtitle">Überlebe die Gummibärchen-Zombies. Candies: <strong id="shop-money" style="color:#fbbf24; font-size: 1.3rem;">0 🍬</strong></div>
+            </div>
+            
+            <div class="shop-grid" id="shop-grid">
+                <!-- JS populated -->
+            </div>
+
+            <div class="prestige-box">
+                <h3 style="font-size: 1.8rem; margin-bottom: 0.5rem; color: #fbbf24;">🌟 Prestige</h3>
+                <p style="font-size:1rem; color:var(--text-muted); margin-bottom:0.5rem;">
+                    Setzt alle Upgrades zurück, aber gewährt dauerhaft <strong>+20% Basis-Schaden & +20% Candy-Drop</strong> pro Level!
+                </p>
+                <p style="font-size: 1.2rem; margin-top: 1rem;">Aktuelles Prestige Level: <strong id="prestige-lvl" style="color:#fbbf24; font-size: 1.5rem;">0</strong></p>
+                <button class="btn prestige-btn" id="btn-prestige" onclick="doPrestige()">Prestige aktivieren (Kosten: 5000 🍬)</button>
+            </div>
+
+            <button class="btn start-btn" onclick="startRun()">Spielen ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // === CANVAS SETUP ===
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let cw, ch;
+        function resize() { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize); resize();
+
+        // === STATE ===
+        let state = 'SHOP'; // SHOP, PLAYING
+        let money = parseInt(localStorage.getItem('ll_money') || '0');
+        let wave = 1;
+        let mouse = { x: cw/2, y: ch/2 };
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        
+        // Touch support for aiming
+        window.addEventListener('touchmove', e => { 
+            mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; 
+        }, {passive: false});
+
+        // === UPGRADES & PRESTIGE ===
+        let prestige = parseInt(localStorage.getItem('ll_prestige') || '0');
+        const defaultShop = {
+            damage: { lvl: 0, baseCost: 10, mult: 1.5, name: '🍭 Zucker-Schaden', desc: 'Erhöht den Basis-Schaden deiner Lollis.' },
+            fireRate: { lvl: 0, baseCost: 15, mult: 1.6, name: '⚡ Feuerrate', desc: 'Schießt schneller. Pew pew!' },
+            double: { lvl: 0, baseCost: 50, mult: 2.0, name: '👯 Doppelschuss', desc: '+10% Chance auf ein extra Projektil pro Schuss.' },
+            crit: { lvl: 0, baseCost: 40, mult: 1.8, name: '💥 Krit-Chance', desc: '+5% Chance auf verheerenden doppelten Schaden.' },
+            orbit: { lvl: 0, baseCost: 100, mult: 2.5, name: '🌀 Kreisende Lollis', desc: 'Fügt orbitierende Abwehr-Lollis hinzu (Max 5).' },
+            cannon: { lvl: 0, baseCost: 250, mult: 3.0, name: '💣 Kaugummi-Kanone', desc: 'Schießt alle 3s explosiv auf zufällige Gegner!' },
+            pulse: { lvl: 0, baseCost: 500, mult: 3.5, name: '🌊 Zucker-Pulswelle', desc: 'Löst alle 5s eine gewaltige Schockwelle aus.' }
+        };
+        let shop = JSON.parse(localStorage.getItem('ll_shop')) || JSON.parse(JSON.stringify(defaultShop));
+
+        function getCost(key) { return Math.floor(shop[key].baseCost * Math.pow(shop[key].mult, shop[key].lvl)); }
+        
+        function getStat(key) {
+            const l = shop[key].lvl;
+            const pMult = 1 + (prestige * 0.2);
+            if(key === 'damage') return (10 + l * 5) * pMult;
+            if(key === 'fireRate') return Math.max(100, 800 - l * 50);
+            if(key === 'double') return l * 0.1;
+            if(key === 'crit') return l * 0.05;
+            if(key === 'orbit') return Math.min(l, 5); // visual max 5
+            if(key === 'cannonDmg') return (30 + l * 15) * pMult;
+            if(key === 'pulseDmg') return (20 + l * 10) * pMult;
+        }
+
+        function save() {
+            localStorage.setItem('ll_money', money);
+            localStorage.setItem('ll_shop', JSON.stringify(shop));
+            localStorage.setItem('ll_prestige', prestige);
+        }
+
+        function renderShop() {
+            document.getElementById('shop-money').innerText = money + ' 🍬';
+            document.getElementById('prestige-lvl').innerText = prestige;
+            document.getElementById('btn-prestige').disabled = money < 5000;
+
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = '';
+            for(let key in shop) {
+                const u = shop[key];
+                const cost = getCost(key);
+                const canAfford = money >= cost;
+                const maxed = (key === 'crit' && u.lvl >= 10) || (key === 'double' && u.lvl >= 10) || (key === 'orbit' && u.lvl >= 5);
+                
+                grid.innerHTML += `
+                    <div class="upg-card">
+                        <div class="upg-title"><span>${u.name}</span> <span class="upg-lvl">Lvl ${u.lvl}</span></div>
+                        <div class="upg-desc">${u.desc}</div>
+                        <div class="upg-cost">${maxed ? 'MAX LEVEL' : cost + ' 🍬'}</div>
+                        <button class="btn" ${(!canAfford || maxed) ? 'disabled' : ''} onclick="buy('${key}')">Kaufen</button>
+                    </div>
+                `;
+            }
+        }
+
+        window.buy = function(key) {
+            const cost = getCost(key);
+            if(money >= cost) {
+                money -= cost;
+                shop[key].lvl++;
+                save();
+                renderShop();
+            }
+        }
+
+        window.doPrestige = function() {
+            if(money >= 5000) {
+                money -= 5000;
+                prestige++;
+                shop = JSON.parse(JSON.stringify(defaultShop));
+                save();
+                renderShop();
+            }
+        }
+
+        // === ENTITIES ===
+        let enemies = [];
+        let projectiles = [];
+        let particles = [];
+        
+        let lastShot = 0, lastCannon = 0, lastPulse = 0, lastSpawn = 0;
+        let enemiesToSpawn = 0, spawnInterval = 1000;
+        let bossActive = false;
+
+        class Zombie {
+            constructor(isMini, isBoss) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.max(cw, ch) / 2 + 50;
+                this.x = cw/2 + Math.cos(angle) * dist;
+                this.y = ch/2 + Math.sin(angle) * dist;
+                this.isMini = isMini;
+                this.isBoss = isBoss;
+                
+                // Difficulty scaling
+                let pMult = 1 + (prestige * 0.2);
+                let waveMult = Math.pow(1.15, wave - 1);
+                
+                let baseHp = isBoss ? 600 : (isMini ? 150 : 25);
+                this.hp = baseHp * waveMult * pMult;
+                this.maxHp = this.hp;
+                
+                this.speed = (isBoss ? 0.3 : isMini ? 0.7 : 1.2) + Math.random() * 0.4;
+                this.radius = isBoss ? 50 : isMini ? 30 : 18;
+                
+                // Colors: Boss=Red, Mini=Orange, Normal=Green
+                this.color = isBoss ? '#ef4444' : isMini ? '#f59e0b' : '#22c55e';
+                
+                // Wobble effect
+                this.wobble = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = Math.random() * 0.1 + 0.05;
+            }
+            update() {
+                const dx = cw/2 - this.x;
+                const dy = ch/2 - this.y;
+                const dist = Math.hypot(dx, dy);
+                
+                // Movement
+                this.x += (dx/dist) * this.speed;
+                this.y += (dy/dist) * this.speed;
+                this.wobble += this.wobbleSpeed;
+                
+                if(dist < this.radius + 25) { // Hit tower
+                    die();
+                }
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                
+                // Wobble scale
+                let scaleX = 1 + Math.sin(this.wobble) * 0.1;
+                let scaleY = 1 + Math.cos(this.wobble) * 0.1;
+                ctx.scale(scaleX, scaleY);
+                
+                // Body
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2); ctx.fill();
+                
+                // "Gummy" shine
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath(); ctx.arc(-this.radius*0.3, -this.radius*0.3, this.radius*0.3, 0, Math.PI*2); ctx.fill();
+                
+                ctx.restore();
+
+                // HP Bar
+                const hpWidth = this.radius * 2;
+                ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
+                ctx.fillRect(this.x - hpWidth/2, this.y - this.radius - 12, hpWidth, 5);
+                ctx.fillStyle = '#22c55e'; 
+                ctx.fillRect(this.x - hpWidth/2, this.y - this.radius - 12, hpWidth * Math.max(0, this.hp/this.maxHp), 5);
+            }
+        }
+
+        class Projectile {
+            constructor(x, y, targetX, targetY, dmg, isCrit, isExplosive) {
+                this.x = x; this.y = y; this.dmg = dmg; 
+                this.isCrit = isCrit; this.isExplosive = isExplosive;
+                
+                const dx = targetX - x; const dy = targetY - y;
+                const dist = Math.hypot(dx, dy);
+                
+                this.vx = (dx/dist) * (isExplosive ? 6 : 12);
+                this.vy = (dy/dist) * (isExplosive ? 6 : 12);
+                this.radius = isExplosive ? 10 : 6;
+                this.color = isExplosive ? '#fbbf24' : (isCrit ? '#fcd34d' : '#fbcfe8');
+                this.active = true;
+            }
+            update() {
+                this.x += this.vx; this.y += this.vy;
+                if(this.x < -100 || this.x > cw+100 || this.y < -100 || this.y > ch+100) this.active = false;
+                
+                // Add tiny trail particles
+                if(Math.random() < 0.3) {
+                    particles.push({x:this.x, y:this.y, vx:0, vy:0, life:0.5, color:this.color, size:2});
+                }
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2); ctx.fill();
+                if(this.isExplosive) {
+                    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2; ctx.stroke();
+                }
+            }
+        }
+
+        // === COMBAT FX ===
+        function spawnFCT(x, y, text, isCrit) {
+            const fct = document.createElement('div');
+            fct.className = 'fct' + (isCrit ? ' crit' : '');
+            fct.innerText = text;
+            fct.style.left = (x - 10) + 'px';
+            fct.style.top = (y - 20) + 'px';
+            document.body.appendChild(fct);
+            setTimeout(() => fct.remove(), 800);
+        }
+
+        function explode(x, y, radius, dmg) {
+            // Visual shockwave
+            let explRadius = 0;
+            const explInterval = setInterval(() => {
+                explRadius += 5;
+                if(explRadius > radius) { clearInterval(explInterval); return; }
+                if(state !== 'PLAYING') return;
+                ctx.beginPath(); ctx.arc(x, y, explRadius, 0, Math.PI*2);
+                ctx.fillStyle = `rgba(251, 191, 36, ${0.5 * (1 - explRadius/radius)})`; ctx.fill();
+            }, 16);
+
+            // Particles
+            for(let i=0; i<30; i++) {
+                particles.push({
+                    x, y, 
+                    vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, 
+                    life: 1, color: '#fbbf24', size: Math.random()*4+2
+                });
+            }
+
+            // Damage
+            enemies.forEach(e => {
+                if(Math.hypot(e.x - x, e.y - y) < radius + e.radius) {
+                    e.hp -= dmg;
+                    spawnFCT(e.x, e.y, Math.round(dmg), false);
+                }
+            });
+        }
+
+        function pulse() {
+            const dmg = getStat('pulseDmg');
+            let pRadius = 10;
+            const maxRadius = 400;
+            
+            // Visual wave
+            const interval = setInterval(() => {
+                pRadius += 15;
+                if(pRadius >= maxRadius) { clearInterval(interval); return; }
+                if(state !== 'PLAYING') return;
+                ctx.beginPath(); ctx.arc(cw/2, ch/2, pRadius, 0, Math.PI*2);
+                ctx.strokeStyle = `rgba(139, 92, 246, ${1 - pRadius/maxRadius})`; 
+                ctx.lineWidth = 15; ctx.stroke();
+            }, 16);
+            
+            // Damage
+            enemies.forEach(e => {
+                if(Math.hypot(e.x - cw/2, e.y - ch/2) < maxRadius) { 
+                    e.hp -= dmg; 
+                    spawnFCT(e.x, e.y, Math.round(dmg), false); 
+                }
+            });
+        }
+
+        // === RUN LOOP ===
+        window.startRun = function() {
+            state = 'PLAYING';
+            document.getElementById('shop').classList.add('hidden');
+            wave = 1; enemies = []; projectiles = []; particles = [];
+            startWave();
+            updateHUD();
+            lastShot = performance.now();
+            requestAnimationFrame(loop);
+        }
+
+        function startWave() {
+            bossActive = (wave % 10 === 0);
+            const miniBoss = (wave % 5 === 0 && !bossActive);
+            
+            if(bossActive) {
+                enemiesToSpawn = 1; // 1 Big Boss
+            } else if(miniBoss) {
+                enemiesToSpawn = 3 + Math.floor(wave/5); // Multiple Minibosses
+            } else {
+                enemiesToSpawn = wave * 5 + 5;
+            }
+            
+            spawnInterval = Math.max(300, 1500 - wave * 40);
+            updateHUD();
+        }
+
+        function die() {
+            state = 'SHOP';
+            document.getElementById('shop').classList.remove('hidden');
+            document.getElementById('dmg-overlay').classList.add('flash');
+            setTimeout(() => document.getElementById('dmg-overlay').classList.remove('flash'), 200);
+            renderShop();
+            save();
+        }
+
+        function updateHUD() {
+            document.getElementById('hud-wave').innerText = wave;
+            document.getElementById('hud-money').innerText = money + ' 🍬';
+        }
+
+        function loop(time) {
+            if(state !== 'PLAYING') return;
+
+            // Clear screen with trail
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.4)'; 
+            ctx.fillRect(0, 0, cw, ch);
+
+            // Spawning
+            if(time - lastSpawn > spawnInterval && enemiesToSpawn > 0) {
+                enemies.push(new Zombie(wave % 5 === 0 && !bossActive, bossActive));
+                enemiesToSpawn--;
+                lastSpawn = time;
+            } else if (enemiesToSpawn <= 0 && enemies.length === 0) {
+                wave++; 
+                startWave();
+            }
+
+            // Main Weapon Shooting
+            if(time - lastShot > getStat('fireRate')) {
+                const dmg = getStat('damage');
+                const isCrit = Math.random() < getStat('crit');
+                const finalDmg = isCrit ? dmg * 2 : dmg;
+                
+                // Normal shot
+                projectiles.push(new Projectile(cw/2, ch/2, mouse.x, mouse.y, finalDmg, isCrit, false));
+                
+                // Double shot chance
+                if(Math.random() < getStat('double')) {
+                    // Slight spread
+                    const angle = Math.atan2(mouse.y - ch/2, mouse.x - cw/2) + (Math.random()-0.5)*0.2;
+                    const tx = cw/2 + Math.cos(angle)*100;
+                    const ty = ch/2 + Math.sin(angle)*100;
+                    projectiles.push(new Projectile(cw/2, ch/2, tx, ty, finalDmg, isCrit, false));
+                }
+                lastShot = time;
+            }
+
+            // Cannon
+            if(shop.cannon.lvl > 0 && time - lastCannon > 3000 && enemies.length > 0) {
+                // target closest enemy
+                let closest = enemies[0];
+                let cDist = Infinity;
+                enemies.forEach(e => {
+                    let d = Math.hypot(e.x - cw/2, e.y - ch/2);
+                    if(d < cDist) { cDist = d; closest = e; }
+                });
+                projectiles.push(new Projectile(cw/2, ch/2, closest.x, closest.y, getStat('cannonDmg'), false, true));
+                lastCannon = time;
+            }
+
+            // Pulse
+            if(shop.pulse.lvl > 0 && time - lastPulse > 5000) {
+                pulse();
+                lastPulse = time;
+            }
+
+            // Orbiters
+            const orbCount = getStat('orbit');
+            const t = time / 1000;
+            for(let i=0; i<orbCount; i++) {
+                const angle = t * 4 + (i * Math.PI * 2 / orbCount);
+                const ox = cw/2 + Math.cos(angle) * 120;
+                const oy = ch/2 + Math.sin(angle) * 120;
+                
+                ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(ox-3, oy-3, 3, 0, Math.PI*2); ctx.fill();
+                
+                // Collision
+                enemies.forEach(e => {
+                    if(Math.hypot(e.x - ox, e.y - oy) < 10 + e.radius) {
+                        e.hp -= getStat('damage') * 0.05; // Constant small damage
+                    }
+                });
+            }
+
+            // Update Projectiles
+            projectiles.forEach(p => {
+                p.update(); p.draw();
+                if(p.active) {
+                    enemies.forEach(e => {
+                        if(p.active && Math.hypot(e.x - p.x, e.y - p.y) < p.radius + e.radius) {
+                            p.active = false;
+                            if(p.isExplosive) {
+                                explode(p.x, p.y, 100, p.dmg);
+                            } else {
+                                e.hp -= p.dmg;
+                                spawnFCT(e.x, e.y, Math.round(p.dmg), p.isCrit);
+                            }
+                        }
+                    });
+                }
+            });
+            projectiles = projectiles.filter(p => p.active);
+
+            // Update Enemies
+            for(let i = enemies.length - 1; i >= 0; i--) {
+                const e = enemies[i];
+                e.update(); e.draw();
+                if(e.hp <= 0) {
+                    // Death FX
+                    for(let j=0; j<15; j++) {
+                        particles.push({
+                            x:e.x, y:e.y, 
+                            vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, 
+                            life:1, color:e.color, size: Math.random()*5+2
+                        });
+                    }
+                    
+                    // Loot
+                    const drop = (e.isBoss ? 250 : e.isMini ? 40 : 5) * (1 + prestige * 0.2);
+                    money += Math.floor(drop);
+                    updateHUD();
+                    enemies.splice(i, 1);
+                }
+            }
+
+            // Draw Tower (Lollipop)
+            // Stick
+            ctx.fillStyle = '#fbcfe8'; ctx.fillRect(cw/2 - 8, ch/2, 16, 70); 
+            // Shadow under candy
+            ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(cw/2, ch/2+10, 30, 10, 0, 0, Math.PI*2); ctx.fill();
+            // Candy body
+            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 35, 0, Math.PI*2); 
+            const grad = ctx.createRadialGradient(cw/2-10, ch/2-25, 5, cw/2, ch/2-15, 35);
+            grad.addColorStop(0, '#f472b6'); grad.addColorStop(1, '#be185d');
+            ctx.fillStyle = grad; ctx.fill(); 
+            // Swirl pattern
+            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 20, 0, Math.PI*1.5, false); 
+            ctx.strokeStyle = '#fbcfe8'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 10, Math.PI, Math.PI*2.5, false); 
+            ctx.stroke();
+
+            // Particles
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.life -= 0.03;
+                ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+            });
+            ctx.globalAlpha = 1;
+            particles = particles.filter(p => p.life > 0);
+
+            requestAnimationFrame(loop);
+        }
+
+        renderShop();
+    </script>
+</body>
+</html>
