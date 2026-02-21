@@ -15,6 +15,8 @@
             --card-bg: rgba(30, 41, 59, 0.7);
             --card-border: rgba(255, 255, 255, 0.1);
             --header-height: 70px;
+            --terminal-bg: #020617;
+            --terminal-border: #1e293b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -273,6 +275,48 @@
             box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35);
         }
 
+        /* === SERVER STATS CARD === */
+        .card.server-card::before {
+            background: linear-gradient(to right, #22c55e, #16a34a);
+        }
+        .card.server-card:hover {
+            border-color: #22c55e;
+            box-shadow: 0 20px 40px -10px rgba(34, 197, 94, 0.35);
+        }
+        .terminal {
+            background: radial-gradient(circle at top left, #0b1120, #020617 60%);
+            border-radius: 12px;
+            border: 1px solid var(--terminal-border);
+            padding: 0.75rem 1rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+            font-size: 0.8rem;
+            color: #22c55e;
+            position: relative;
+            overflow: hidden;
+        }
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-bottom: 0.5rem;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+        }
+        .dot.red { background: #ef4444; }
+        .dot.yellow { background: #facc15; }
+        .dot.green { background: #22c55e; }
+        .terminal-title {
+            margin-left: 0.5rem;
+            color: #64748b;
+        }
+        .terminal-body { text-align: left; }
+        .terminal-line { white-space: pre; }
+        .terminal-cursor { display: inline-block; width: 7px; height: 1em; background: #22c55e; vertical-align: baseline; margin-left: 2px; animation: blink 1s step-end infinite; }
+        .terminal-meta { margin-top: 0.6rem; font-size: 0.7rem; color: #64748b; display: flex; justify-content: space-between; }
+
         .card-icon {
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -365,6 +409,11 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
 
         @media (max-width: 768px) {
@@ -460,6 +509,29 @@
                 <h3>GitHub Profil</h3>
                 <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
             </a>
+
+            <div class="card server-card">
+                <div class="card-icon">🖥️</div>
+                <h3>Server Status <span class="badge" style="background: linear-gradient(135deg, #22c55e, #16a34a);">Live</span></h3>
+                <p style="margin-bottom: 1rem; color: var(--text-muted);">Echtzeit-Stats deines VPS im Terminal-Look – direkt vom Server ausgelesen.</p>
+                <div class="terminal">
+                    <div class="terminal-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="terminal-title">maurice@vps:~</span>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line" id="server-line-1">$ top -b -n1 | head -3</div>
+                        <div class="terminal-line" id="server-line-2">loading live metrics...</div>
+                        <div class="terminal-line" id="server-line-3"><span class="terminal-cursor"></span></div>
+                    </div>
+                    <div class="terminal-meta">
+                        <span id="server-host">host: --</span>
+                        <span id="server-updated">updated: --:--:--</span>
+                    </div>
+                </div>
+            </div>
 
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="card friend-card">
                 <div class="card-icon">🍽️</div>
@@ -601,6 +673,41 @@
         }
         updateWeather();
         setInterval(updateWeather, 600000);
+
+        // === SERVER STATS FETCH ===
+        function formatTime(date){
+            const pad = n => String(n).padStart(2, '0');
+            return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+        }
+
+        async function fetchServerStats(){
+            try {
+                const res = await fetch('/data/server_stats.json?ts=' + Date.now());
+                if(!res.ok) return;
+                const s = await res.json();
+
+                const load1 = s.load?.['1m'] ?? 0;
+                const load5 = s.load?.['5m'] ?? 0;
+                const mem   = s.memory || {};
+                const disk  = s.disk_root || {};
+
+                const line2 = `CPU load: ${load1.toFixed(2)} (1m), ${load5.toFixed(2)} (5m)`;
+                const line3 = `RAM: ${mem.percent ?? 0}%  (${(mem.used_gb ?? 0).toFixed(2)}/${(mem.total_gb ?? 0).toFixed(2)} GB)  |  SSD: ${disk.percent ?? 0}%  (${(disk.used_gb ?? 0).toFixed(1)}/${(disk.total_gb ?? 0).toFixed(1)} GB)`;
+
+                document.getElementById('server-line-2').textContent = line2;
+                document.getElementById('server-line-3').textContent = line3;
+
+                document.getElementById('server-host').textContent = `host: ${s.hostname || 'vps'}`;
+                const ts = s.timestamp ? new Date(s.timestamp) : new Date();
+                document.getElementById('server-updated').textContent = `updated: ${formatTime(ts)}`;
+            } catch(e) {
+                document.getElementById('server-line-2').textContent = 'error: cannot read /data/server_stats.json';
+                document.getElementById('server-line-3').textContent = '';
+            }
+        }
+
+        fetchServerStats();
+        setInterval(fetchServerStats, 10000);
 
         // === PARTICLE BACKGROUND ===
         const canvas = document.getElementById('bg-canvas');

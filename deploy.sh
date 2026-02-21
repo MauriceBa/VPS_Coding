@@ -10,6 +10,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 
 # 2. Webroot vorbereiten
 sudo mkdir -p /var/www/mauricefun.lol/html
+sudo mkdir -p /var/www/mauricefun.lol/html/data
 sudo cp index.html /var/www/mauricefun.lol/html/
 sudo cp -r untappd /var/www/mauricefun.lol/html/
 sudo cp -r btd6 /var/www/mauricefun.lol/html/
