@@ -9,6 +9,7 @@ import time
 import re
 import urllib.request
 import urllib.parse
+from collections import defaultdict
 
 # Setup paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -135,6 +136,7 @@ def run():
     cache = load_cache()
     
     heatmap_data = []
+    checkin_countries_map = defaultdict(int)
     
     # Sort by checkins
     venues.sort(key=lambda x: x['checkins'], reverse=True)
@@ -169,7 +171,11 @@ def run():
             else:
                 # Store an empty object to avoid re-querying failures constantly
                 city_fallback = address.split(',')[0] if address else "Unknown"
-                cache[cache_key] = {"lat": None, "lon": None, "city": city_fallback, "country": "Unknown"}
+                country_fallback = "Deutschland" if "Nordrhein-Westfalen" in address or "Aachen" in address else "Unknown"
+                if "France" in address or "Frankreich" in address: country_fallback = "Frankreich"
+                if "España" in address: country_fallback = "Spanien"
+                
+                cache[cache_key] = {"lat": None, "lon": None, "city": city_fallback, "country": country_fallback}
                 
         geo = cache[cache_key]
         
@@ -183,11 +189,27 @@ def run():
         }
         heatmap_data.append(item)
         
+        # Aggregate check-in country visits
+        # Standardize country names slightly
+        c_name = item['country']
+        if c_name == 'Deutschland' or c_name == 'Germany': c_name = 'Deutschland'
+        elif c_name == 'France': c_name = 'Frankreich'
+        elif c_name == 'Nederland' or c_name == 'The Netherlands': c_name = 'Niederlande'
+        elif c_name == 'Österreich' or c_name == 'Austria': c_name = 'Österreich'
+        elif c_name == 'België / Belgique / Belgien' or c_name == 'Belgium': c_name = 'Belgien'
+        elif c_name == 'España' or c_name == 'Spain': c_name = 'Spanien'
+        
+        checkin_countries_map[c_name] += checkins
+        
     save_cache(cache)
     
     # Generate Top 4 Venues for the overview grid (prioritizing high visits, keeping names short)
     valid_venues = [h for h in heatmap_data if h['lat'] is not None]
     top_venues = valid_venues[:4] if len(valid_venues) >= 4 else valid_venues
+    
+    # Transform country map to sorted list
+    checkin_countries_list = [{"country": k, "count": v} for k, v in checkin_countries_map.items()]
+    checkin_countries_list.sort(key=lambda x: x["count"], reverse=True)
     
     if os.path.exists(STATS_PATH):
         with open(STATS_PATH, 'r', encoding='utf-8') as f:
@@ -195,6 +217,7 @@ def run():
             
         stats['heatmap'] = heatmap_data
         stats['top_venues'] = top_venues
+        stats['checkin_countries'] = checkin_countries_list
         
         tmp = STATS_PATH + '.tmp'
         with open(tmp, 'w', encoding='utf-8') as f:
