@@ -32,6 +32,7 @@
         .stat-number { font-size:2.2rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; }
         .stat-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:.3rem; }
         .grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.25rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .2s backwards; }
+        .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
         .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; backdrop-filter:blur(10px); position:relative; overflow:hidden; transition:all .3s ease; }
         .stat-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(to right,#f59e0b,#ef4444); opacity:.7; }
         .stat-card:hover { transform:translateY(-4px); border-color:rgba(245,158,11,.4); box-shadow:0 12px 30px -8px rgba(245,158,11,.2); }
@@ -50,7 +51,7 @@
         .split-half { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
         @media (max-width:900px) { .split-layout,.split-half { grid-template-columns:1fr; } }
         .section-title { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
-        .map-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1rem; backdrop-filter:blur(10px); }
+        .map-box, .chart-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1rem; backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; }
         #map { width:100%; height:400px; border-radius:10px; z-index:10; }
         .leaflet-container { background-color:#0f172a; }
         .leaflet-popup-content-wrapper { background-color:var(--bg); color:var(--text); border:1px solid var(--primary); border-radius:8px; }
@@ -116,7 +117,7 @@
         <div class="split-layout" style="margin-bottom:2.5rem;">
             <div class="left-col">
                 <div class="section-title">⭐ Bewertungs-Verteilung</div>
-                <div class="map-box" style="height:350px;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
+                <div class="chart-box" style="height:350px;padding:1.5rem;">
                     <canvas id="ratingChart"></canvas>
                 </div>
             </div>
@@ -129,6 +130,41 @@
                     <div class="card-sub" id="rec-style" style="font-style:italic;"></div>
                     <p id="rec-desc" style="margin-top:1rem;font-size:.9rem;color:var(--text-muted);line-height:1.5;flex-grow:1;"></p>
                     <div><span class="badge" id="rec-reason" style="margin-left:0;background:linear-gradient(135deg,var(--primary),var(--secondary));white-space:normal;">Berechne...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neu: ABV Verteilung & Brewery Countries -->
+        <div class="split-half">
+            <div>
+                <div class="section-title">🔥 ABV Verteilung (Alkoholgehalt)</div>
+                <div class="chart-box" style="height:350px;padding:1.5rem;">
+                    <canvas id="abvChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <div class="section-title">🌍 Brauerei-Herkunft (Länder)</div>
+                <div class="chart-box" style="height:350px;padding:1.5rem;">
+                    <canvas id="breweryCountryChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Neu: Top Styles Pie & Top Breweries List -->
+        <div class="split-half">
+            <div>
+                <div class="section-title">📊 Top Bierstile</div>
+                <div class="chart-box" style="height:480px;padding:1.5rem;">
+                    <canvas id="stylesChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <div class="section-title">🏭 Top Brauereien</div>
+                <div class="table-box">
+                    <table class="styles-table">
+                        <thead><tr><th>#</th><th>Brauerei</th><th class="col-num">Biere</th></tr></thead>
+                        <tbody id="breweries-tbody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Lade...</td></tr></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -155,7 +191,7 @@
             </div>
         </div>
 
-        <!-- Map + Styles -->
+        <!-- Map & Checkin Countries -->
         <div class="split-layout">
             <div class="left-col">
                 <div class="section-title">🌍 Check-in Heatmap</div>
@@ -166,12 +202,9 @@
                 </div>
             </div>
             <div class="right-col">
-                <div class="section-title">📊 Bierstile</div>
-                <div class="table-box">
-                    <table class="styles-table">
-                        <thead><tr><th>Stil</th><th class="col-num">Check-ins</th><th class="col-num">Unique</th></tr></thead>
-                        <tbody id="styles-tbody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Lade...</td></tr></tbody>
-                    </table>
+                <div class="section-title">📍 Check-in Länder</div>
+                <div class="chart-box" style="height:400px;padding:1.5rem;margin-bottom:2rem;">
+                    <canvas id="checkinCountryChart"></canvas>
                 </div>
             </div>
         </div>
@@ -201,14 +234,19 @@
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
         const beerIcon = L.divIcon({ html: '🍺', className: 'custom-beer-icon', iconSize: [24,24], iconAnchor: [12,12] });
 
+        /* Chart Config Defaults */
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter',sans-serif";
+        const CHART_COLORS = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#a855f7', '#ec4899', '#f97316', '#14b8a6', '#6366f1'];
+
         /* --- Stern-Darstellung (0.25er Schritte) --- */
         function starsHtml(rating) {
             const full    = Math.floor(rating);
             const quarter = Math.round((rating - full) * 4); // 0,1,2,3
             let s = '★'.repeat(full);
-            if (quarter === 1) s += '\u00bc';
+            if (quarter === 1) s += '\\u00bc';
             else if (quarter === 2) s += '½';
-            else if (quarter === 3) s += '\u00be';
+            else if (quarter === 3) s += '\\u00be';
             s += '☆'.repeat(5 - full - (quarter > 0 ? 1 : 0));
             return `<span class="stars">${s}</span>`;
         }
@@ -225,7 +263,7 @@
                     <td style="color:var(--text-muted);font-size:.8rem;width:1.5rem;">${i+1}</td>
                     <td>
                         <strong style="color:var(--text);">${b.beer}</strong>
-                        <div style="font-size:.75rem;color:var(--text-muted);">${b.brewery} &middot; ${b.style}${b.count > 1 ? ` &middot; ${b.count}× bewertet` : ''}</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">${b.brewery} &middot; ${b.style}${b.count > 1 ? ` &middot; ${b.count}×` : ''}</div>
                     </td>
                     <td class="col-num" style="white-space:nowrap;">
                         ${starsHtml(b.rating)}<br>
@@ -235,58 +273,125 @@
             `).join('');
         }
 
+        function createPieChart(ctxId, labels, data) {
+            new Chart(document.getElementById(ctxId).getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{ data: data, backgroundColor: CHART_COLORS, borderWidth: 1, borderColor: '#0f172a' }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: { backgroundColor: 'rgba(15,23,42,.9)', titleColor: '#fff', bodyColor: '#fff', padding: 10 } 
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
         async function loadUntappdData() {
             /* 1. Stats JSON */
             try {
                 const res  = await fetch('./data/stats.json');
                 const data = await res.json();
-                const total = data.overview.total_checkins;
+                const total = data.overview.total_checkins || 0;
 
                 document.getElementById('stat-checkins').textContent  = total;
-                document.getElementById('stat-unique').textContent    = data.overview.unique_beers;
-                document.getElementById('stat-breweries').textContent = data.overview.unique_breweries;
+                document.getElementById('stat-unique').textContent    = data.overview.unique_beers || 0;
+                document.getElementById('stat-breweries').textContent = data.overview.unique_breweries || 0;
 
-                let topStyle = data.styles[0].style;
+                let topStyle = data.styles && data.styles.length > 0 ? data.styles[0].style : 'N/A';
                 if (topStyle === 'Other' && data.styles.length > 1) topStyle = data.styles[1].style;
                 document.getElementById('top-style').textContent   = topStyle;
-                document.getElementById('top-brewery').textContent = data.top_breweries[0].brewery;
-                document.getElementById('best-beer').textContent   = data.top_beers[0].beer;
-                document.getElementById('best-beer-sub').textContent = data.top_beers[0].brewery;
+                document.getElementById('top-brewery').textContent = data.top_breweries && data.top_breweries.length > 0 ? data.top_breweries[0].brewery : 'N/A';
+                document.getElementById('best-beer').textContent   = data.top_beers && data.top_beers.length > 0 ? data.top_beers[0].beer : 'N/A';
+                document.getElementById('best-beer-sub').textContent = data.top_beers && data.top_beers.length > 0 ? data.top_beers[0].brewery : 'N/A';
 
-                const dp = data.overview.date_to.split('-');
-                document.getElementById('last-checkin').textContent = `${dp[2]}.${dp[1]}.${dp[0]}`;
+                if (data.overview.date_to) {
+                    const dp = data.overview.date_to.split('-');
+                    document.getElementById('last-checkin').textContent = `${dp[2]}.${dp[1]}.${dp[0]}`;
+                }
 
                 const target = Math.ceil((total + 1) / 100) * 100;
                 document.getElementById('milestone-text').textContent  = `${target}-Bier-Meilenstein`;
                 document.getElementById('progress-label').textContent  = `${total} / ${target} Biere`;
                 setTimeout(() => { document.getElementById('progress-fill').style.width = Math.min((total/target)*100, 100) + '%'; }, 400);
 
-                /* Styles Tabelle */
-                const sTbody = document.getElementById('styles-tbody');
-                sTbody.innerHTML = '';
-                const styleIcons = { 'Tripel':'\ud83c\udf77','Quadrupel':'\ud83c\udf77','IPA':'\ud83c\udf3f','NEIPA/Hazy IPA':'\ud83c\udf3f',
-                    'DIPA':'\ud83c\udf3f','TIPA':'\ud83c\udf3f','Lager/Pils':'\ud83c\udf7b','Wheat Beer':'\ud83c\udf3e',
-                    'Stout/Porter':'\u2615','Sour/Wild':'\ud83c\udf4b','Other':'\u2753' };
-                data.styles.forEach(s => {
-                    const icon = styleIcons[s.style] || '\ud83c\udf7a';
-                    sTbody.innerHTML += `<tr><td>${icon} ${s.style}</td><td class="col-num">${s.checkins}</td><td class="col-num" style="opacity:.7;">${s.unique_beers}</td></tr>`;
-                });
+                /* Top Breweries Table */
+                const bTbody = document.getElementById('breweries-tbody');
+                bTbody.innerHTML = '';
+                if (data.top_breweries) {
+                    bTbody.innerHTML = data.top_breweries.slice(0, 15).map((b, i) => `
+                        <tr>
+                            <td style="color:var(--text-muted);font-size:.8rem;">${i+1}</td>
+                            <td style="color:var(--text);font-weight:500;">${b.brewery}</td>
+                            <td class="col-num">${b.count}</td>
+                        </tr>
+                    `).join('');
+                }
+
+                /* Styles Pie Chart */
+                if (data.styles) {
+                    const sLabels = data.styles.slice(0,8).map(s => s.style);
+                    const sData = data.styles.slice(0,8).map(s => s.checkins);
+                    const sOther = data.styles.slice(8).reduce((acc, s) => acc + s.checkins, 0);
+                    if (sOther > 0) { sLabels.push('Sonstige'); sData.push(sOther); }
+                    createPieChart('stylesChart', sLabels, sData);
+                }
+
+                /* ABV Bar Chart */
+                if (data.abv_distribution) {
+                    new Chart(document.getElementById('abvChart').getContext('2d'), {
+                        type: 'bar',
+                        data: {
+                            labels: data.abv_distribution.map(d => d.label),
+                            datasets: [{ label: 'Biere', data: data.abv_distribution.map(d => d.count), backgroundColor: 'rgba(239, 68, 68, 0.7)', borderColor: '#ef4444', borderWidth: 1, borderRadius: 4 }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend:{display:false} },
+                            scales: { y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'}}, x:{grid:{display:false}} }
+                        }
+                    });
+                }
+
+                /* Brewery Countries Pie Chart */
+                if (data.brewery_countries) {
+                    const bLabels = data.brewery_countries.slice(0,7).map(c => c.country);
+                    const bData = data.brewery_countries.slice(0,7).map(c => c.count);
+                    const bOther = data.brewery_countries.slice(7).reduce((acc, c) => acc + c.count, 0);
+                    if (bOther > 0) { bLabels.push('Sonstige'); bData.push(bOther); }
+                    createPieChart('breweryCountryChart', bLabels, bData);
+                }
+
+                /* Check-in Countries Pie Chart */
+                if (data.checkin_countries) {
+                    const cLabels = data.checkin_countries.slice(0,7).map(c => c.country);
+                    const cData = data.checkin_countries.slice(0,7).map(c => c.count);
+                    const cOther = data.checkin_countries.slice(7).reduce((acc, c) => acc + c.count, 0);
+                    if (cOther > 0) { cLabels.push('Sonstige'); cData.push(cOther); }
+                    createPieChart('checkinCountryChart', cLabels, cData);
+                }
 
                 /* Map & Venues */
-                const vg = document.getElementById('venues-grid');
-                vg.innerHTML = '';
-                data.top_venues.slice(0, 4).forEach(v => {
-                    vg.innerHTML += `<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size:1.1rem;line-height:1.2;margin-bottom:.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
-                });
-                const heatPoints = [];
-                (data.heatmap || data.top_venues).forEach(loc => {
-                    if (loc.lat && loc.lon) {
-                        heatPoints.push([loc.lat, loc.lon, Math.min(loc.visits * 0.1, 1.0)]);
-                        if (loc.visits >= 4) L.marker([loc.lat,loc.lon],{icon:beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map);
-                    }
-                });
-                L.heatLayer(heatPoints,{radius:25,blur:15,maxZoom:10,gradient:{'0.4':'#ef4444','0.6':'#f59e0b','0.8':'#fbbf24','1.0':'#fff'}}).addTo(map);
-                map.setView([50.7753,6.0839],6);
+                if (data.top_venues) {
+                    const vg = document.getElementById('venues-grid');
+                    vg.innerHTML = '';
+                    data.top_venues.slice(0, 4).forEach(v => {
+                        vg.innerHTML += `<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size:1.1rem;line-height:1.2;margin-bottom:.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
+                    });
+                    const heatPoints = [];
+                    (data.heatmap || data.top_venues).forEach(loc => {
+                        if (loc.lat && loc.lon) {
+                            heatPoints.push([loc.lat, loc.lon, Math.min(loc.visits * 0.1, 1.0)]);
+                            if (loc.visits >= 4) L.marker([loc.lat,loc.lon],{icon:beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map);
+                        }
+                    });
+                    L.heatLayer(heatPoints,{radius:25,blur:15,maxZoom:10,gradient:{'0.4':'#ef4444','0.6':'#f59e0b','0.8':'#fbbf24','1.0':'#fff'}}).addTo(map);
+                    map.setView([50.7753,6.0839],6);
+                }
             } catch(e) { console.error('Stats JSON error', e); }
 
             /* 2. ML JSON */
@@ -304,15 +409,11 @@
                 document.getElementById('rec-reason').textContent  = mlData.recommendation.match_reason;
 
                 /* Top / Flop */
-                const noRealData = `🔍 Echte Ratings fehlen noch.<br>
-                    Bitte <code>parse_untappd.py</code> mit dem Untappd-Export erneut ausführen,<br>
-                    damit deine echten Bewertungen hier erscheinen.`;
+                const noRealData = `🔍 Echte Ratings fehlen noch.<br>Bitte Skripte ausführen.`;
                 renderRankTable('top-beers-tbody',  mlData.top_rated,    noRealData);
                 renderRankTable('flop-beers-tbody', mlData.lowest_rated, noRealData);
 
-                /* Chart.js */
-                Chart.defaults.color = '#94a3b8';
-                Chart.defaults.font.family = "'Inter',sans-serif";
+                /* Chart.js - Rating Distribution */
                 const ctxChart = document.getElementById('ratingChart').getContext('2d');
                 const labels  = Object.keys(mlData.ratings.distribution).sort();
                 const dataPts  = labels.map(l => mlData.ratings.distribution[l]);
