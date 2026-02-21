@@ -189,6 +189,7 @@
             justify-content: center;
             gap: 3rem;
             margin: 0 auto 3rem;
+            flex-wrap: wrap;
             animation: slideUp 0.8s ease-out 0.15s backwards;
         }
         .stat-item { text-align: center; }
@@ -406,12 +407,16 @@
                 <div class="stat-label">Deine Besuche</div>
             </div>
             <div class="stat-item">
+                <div class="stat-number" id="global-visit-count">–</div>
+                <div class="stat-label">Total Besucher</div>
+            </div>
+            <div class="stat-item">
                 <div class="stat-number">2</div>
                 <div class="stat-label">Games</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">∞</div>
-                <div class="stat-label">Kaffee ☕</div>
+                <div class="stat-label">Bier 🍺</div>
             </div>
         </div>
 
@@ -456,7 +461,7 @@
             <a href="/untappd/" class="footer-link">🍺 Bier Stats</a>
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
         </div>
-        <p>&copy; 2026 MauriceBa. Built with passion &amp; coffee. ☕</p>
+        <p>&copy; 2026 MauriceBa. Built with passion &amp; beer. 🍺</p>
     </footer>
 
     <!-- Back to Top Button -->
@@ -488,7 +493,7 @@
         updateClock();
         setInterval(updateClock, 1000);
 
-        // === VISITOR COUNTER (localStorage) ===
+        // === VISITOR COUNTER (LOCAL) ===
         (() => {
             const KEY_COUNT = 'mauricelol_visits';
             const KEY_LAST  = 'mauricelol_last_visit';
@@ -503,10 +508,32 @@
                 localStorage.getItem(KEY_COUNT) || '1';
         })();
 
+        // === GLOBAL UNIQUE VISITOR COUNTER (API) ===
+        async function fetchGlobalVisitors() {
+            const counterKey = 'mauricelol_global_counted';
+            const hasVisitedGlobal = localStorage.getItem(counterKey);
+            
+            // Verwende eine kostenlose API, die nur hochzählt, wenn der Nutzer neu ist
+            let url = 'https://api.counterapi.dev/v1/mauricefun_lol/visitors';
+            if (!hasVisitedGlobal) {
+                url += '/up';
+                localStorage.setItem(counterKey, 'true');
+            }
+            
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                document.getElementById('global-visit-count').textContent = data.count || '100+';
+            } catch (e) {
+                document.getElementById('global-visit-count').textContent = '100+';
+            }
+        }
+        fetchGlobalVisitors();
+
         // === TYPEWRITER EFFECT ===
         const texts = [
             'Coding-Projekte, Web-Experimente und coole Spiele. 🚀',
-            'Built with ❤️ and too much caffeine.',
+            'Built with ❤️ and too much beer.',
             'Viel Spaß beim Ausprobieren!'
         ];
         let tIdx = 0, cIdx = 0, deleting = false;
