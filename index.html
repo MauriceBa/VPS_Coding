@@ -212,11 +212,26 @@
             margin-top: 0.25rem;
         }
 
+        /* === SECTION HEADINGS === */
+        .section-heading {
+            text-align: left;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 3rem 0 1.5rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+            animation: slideUp 0.8s ease-out backwards;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 2rem;
-            padding: 1rem;
+            margin-bottom: 2rem;
         }
 
         .card {
@@ -248,74 +263,18 @@
         }
         .card:hover::before { opacity: 1; }
 
-        /* === FRIEND CARD === */
-        .card.friend-card::before {
-            background: linear-gradient(to right, #f97316, #eab308);
-        }
-        .card.friend-card:hover {
-            border-color: #f97316;
-            box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.35);
-        }
+        /* === SPECIFIC CARDS === */
+        .card.friend-card::before { background: linear-gradient(to right, #f97316, #eab308); }
+        .card.friend-card:hover { border-color: #f97316; box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.35); }
 
-        /* === BEER CARD === */
-        .card.beer-card::before {
-            background: linear-gradient(to right, #f59e0b, #ef4444);
-        }
-        .card.beer-card:hover {
-            border-color: #f59e0b;
-            box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.35);
-        }
+        .card.beer-card::before { background: linear-gradient(to right, #f59e0b, #ef4444); }
+        .card.beer-card:hover { border-color: #f59e0b; box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.35); }
 
-        /* === BTD6 CARD === */
-        .card.btd-card::before {
-            background: linear-gradient(to right, #3b82f6, #ef4444);
-        }
-        .card.btd-card:hover {
-            border-color: #3b82f6;
-            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35);
-        }
+        .card.btd-card::before { background: linear-gradient(to right, #3b82f6, #ef4444); }
+        .card.btd-card:hover { border-color: #3b82f6; box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35); }
 
-        /* === SERVER STATS CARD === */
-        .card.server-card::before {
-            background: linear-gradient(to right, #22c55e, #16a34a);
-        }
-        .card.server-card:hover {
-            border-color: #22c55e;
-            box-shadow: 0 20px 40px -10px rgba(34, 197, 94, 0.35);
-        }
-        .terminal {
-            background: radial-gradient(circle at top left, #0b1120, #020617 60%);
-            border-radius: 12px;
-            border: 1px solid var(--terminal-border);
-            padding: 0.75rem 1rem;
-            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
-            font-size: 0.8rem;
-            color: #22c55e;
-            position: relative;
-            overflow: hidden;
-        }
-        .terminal-header {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-            margin-bottom: 0.5rem;
-        }
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-        }
-        .dot.red { background: #ef4444; }
-        .dot.yellow { background: #facc15; }
-        .dot.green { background: #22c55e; }
-        .terminal-title {
-            margin-left: 0.5rem;
-            color: #64748b;
-        }
-        .terminal-body { text-align: left; }
-        .terminal-line { white-space: pre; }
-        .terminal-cursor { display: inline-block; width: 7px; height: 1em; background: #22c55e; vertical-align: baseline; margin-left: 2px; animation: blink 1s step-end infinite; }
-        .terminal-meta { margin-top: 0.6rem; font-size: 0.7rem; color: #64748b; display: flex; justify-content: space-between; }
+        .card.github-card::before { background: linear-gradient(to right, #6b7280, #cbd5e1); }
+        .card.github-card:hover { border-color: #94a3b8; box-shadow: 0 20px 40px -10px rgba(148, 163, 184, 0.35); }
 
         .card-icon {
             font-size: 3.5rem;
@@ -346,6 +305,49 @@
             vertical-align: middle;
         }
 
+        /* === BOTTOM SERVER STATS TERMINAL === */
+        .server-status-bar {
+            background: radial-gradient(circle at top left, #0b1120, #020617 60%);
+            border: 1px solid var(--terminal-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+            font-size: 0.9rem;
+            color: #22c55e;
+            text-align: left;
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+            animation: slideUp 0.8s ease-out backwards;
+        }
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 999px; }
+        .dot.red { background: #ef4444; }
+        .dot.yellow { background: #facc15; }
+        .dot.green { background: #22c55e; }
+        .terminal-title {
+            margin-left: 0.8rem;
+            color: #64748b;
+            font-size: 0.8rem;
+        }
+        .terminal-line { white-space: pre-wrap; line-height: 1.8; }
+        .terminal-cursor { display: inline-block; width: 8px; height: 1em; background: #22c55e; vertical-align: baseline; margin-left: 4px; animation: blink 1s step-end infinite; }
+        .terminal-meta { 
+            margin-top: 1rem; 
+            padding-top: 0.75rem; 
+            border-top: 1px solid rgba(255,255,255,0.05); 
+            font-size: 0.75rem; 
+            color: #475569; 
+            display: flex; 
+            justify-content: space-between; 
+        }
+
         /* === BACK TO TOP === */
         #back-to-top {
             position: fixed;
@@ -368,17 +370,11 @@
             transition: all 0.3s ease;
             z-index: 999;
         }
-        #back-to-top.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        #back-to-top:hover {
-            transform: scale(1.1) translateY(-2px);
-            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6);
-        }
+        #back-to-top.visible { opacity: 1; transform: translateY(0); }
+        #back-to-top:hover { transform: scale(1.1) translateY(-2px); box-shadow: 0 8px 30px rgba(99, 102, 241, 0.6); }
 
         footer {
-            margin-top: 6rem;
+            margin-top: 3rem;
             padding: 2rem;
             text-align: center;
             color: var(--text-muted);
@@ -402,19 +398,9 @@
         }
         .footer-link:hover { color: var(--primary); }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         @media (max-width: 768px) {
             h1 { font-size: 2.5rem; }
@@ -426,14 +412,11 @@
     </style>
 </head>
 <body>
-    <!-- Scroll Progress Bar -->
     <div id="scroll-progress"></div>
-
     <canvas id="bg-canvas"></canvas>
 
     <header>
         <a href="/" class="logo">mauricelol.fun</a>
-
         <div class="nav-group">
             <div class="clock-widget">
                 <span>🕐</span>
@@ -479,6 +462,8 @@
             </div>
         </div>
 
+        <!-- CATEGORY: DASHBOARDS -->
+        <h2 class="section-heading">📊 Dashboards & Projekte</h2>
         <section class="grid">
             <a href="/btd6/" class="card btd-card">
                 <div class="card-icon">🎈</div>
@@ -492,6 +477,16 @@
                 <p>Meine persönlichen Bier-Statistiken. Check-ins, Favoriten und mehr – powered by Untappd.</p>
             </a>
 
+            <a href="https://github.com/MauriceBa" target="_blank" class="card github-card">
+                <div class="card-icon">💻</div>
+                <h3>GitHub Profil</h3>
+                <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
+            </a>
+        </section>
+
+        <!-- CATEGORY: GAMES -->
+        <h2 class="section-heading">🎮 Web Games</h2>
+        <section class="grid">
             <a href="/ski-resort-idle/" class="card">
                 <div class="card-icon">🏔️</div>
                 <h3>Ski Resort Idle</h3>
@@ -503,42 +498,35 @@
                 <h3>Bridle (Brick Breaker)</h3>
                 <p>Ein actionreiches Idle-Brick-Breaker Spiel. Kaufe Bälle, upgrade deinen Schaden und aktiviere Prestige!</p>
             </a>
+        </section>
 
-            <a href="https://github.com/MauriceBa" target="_blank" class="card">
-                <div class="card-icon">💻</div>
-                <h3>GitHub Profil</h3>
-                <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
-            </a>
-
-            <div class="card server-card">
-                <div class="card-icon">🖥️</div>
-                <h3>Server Status <span class="badge" style="background: linear-gradient(135deg, #22c55e, #16a34a);">Live</span></h3>
-                <p style="margin-bottom: 1rem; color: var(--text-muted);">Echtzeit-Stats deines VPS im Terminal-Look – direkt vom Server ausgelesen.</p>
-                <div class="terminal">
-                    <div class="terminal-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="terminal-title">maurice@vps:~</span>
-                    </div>
-                    <div class="terminal-body">
-                        <div class="terminal-line" id="server-line-1">$ top -b -n1 | head -3</div>
-                        <div class="terminal-line" id="server-line-2">loading live metrics...</div>
-                        <div class="terminal-line" id="server-line-3"><span class="terminal-cursor"></span></div>
-                    </div>
-                    <div class="terminal-meta">
-                        <span id="server-host">host: --</span>
-                        <span id="server-updated">updated: --:--:--</span>
-                    </div>
-                </div>
-            </div>
-
+        <!-- CATEGORY: FRIENDS -->
+        <h2 class="section-heading">🤝 Friends & Links</h2>
+        <section class="grid">
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="card friend-card">
                 <div class="card-icon">🍽️</div>
                 <h3>uncreped.eu <span class="badge">Freund</span></h3>
                 <p>Die Website meines Freundes – unbedingt vorbeischauen und genießen!</p>
             </a>
         </section>
+
+        <!-- SERVER STATUS WIDE TERMINAL -->
+        <div class="server-status-bar">
+            <div class="terminal-header">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+                <span class="terminal-title">maurice@vps:~ $ ./live-metrics.sh</span>
+            </div>
+            <div class="terminal-body">
+                <div class="terminal-line" id="server-line-2">fetching live server metrics...</div>
+                <div class="terminal-line"><span id="server-line-3"></span><span class="terminal-cursor"></span></div>
+            </div>
+            <div class="terminal-meta">
+                <span id="server-host">host: offline</span>
+                <span id="server-updated">updated: --:--:--</span>
+            </div>
+        </div>
     </main>
 
     <footer>
@@ -553,7 +541,6 @@
         <p>&copy; 2026 MauriceBa. Built with passion &amp; beer. 🍺</p>
     </footer>
 
-    <!-- Back to Top Button -->
     <button id="back-to-top" title="Nach oben scrollen">↑</button>
 
     <script>
@@ -702,7 +689,7 @@
                 document.getElementById('server-updated').textContent = `updated: ${formatTime(ts)}`;
             } catch(e) {
                 document.getElementById('server-line-2').textContent = 'error: cannot read /data/server_stats.json';
-                document.getElementById('server-line-3').textContent = '';
+                document.getElementById('server-line-3').textContent = 'waiting for cronjob...';
             }
         }
 
