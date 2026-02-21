@@ -72,9 +72,26 @@
 
         /* Version Label */
         #version-lbl {
-            position: absolute; bottom: 1rem; right: 1rem;
+            position: absolute; bottom: 1rem; left: 1rem;
             color: rgba(255,255,255,0.3); font-size: 0.8rem;
             font-weight: bold; pointer-events: none; z-index: 1000;
+        }
+
+        /* Speed Adjuster */
+        #speed-controls {
+            position: absolute; bottom: 1.5rem; right: 1.5rem;
+            display: flex; gap: 0.5rem; z-index: 1000;
+        }
+        .speed-btn {
+            background: rgba(30, 41, 59, 0.85); color: var(--text-muted);
+            border: 1px solid var(--card-border); border-radius: 8px;
+            padding: 0.5rem 0.8rem; font-weight: bold; cursor: pointer;
+            backdrop-filter: blur(5px); transition: 0.2s;
+        }
+        .speed-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+        .speed-btn.active {
+            background: var(--primary); color: white;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); border-color: var(--primary);
         }
 
         /* MODAL (Settings) */
@@ -216,8 +233,16 @@
         </div>
     </div>
 
-    <div id="version-lbl">v1.3.1</div>
+    <div id="version-lbl">v1.4.0</div>
     <div class="damage-overlay" id="dmg-overlay"></div>
+    
+    <div id="speed-controls">
+        <button class="speed-btn active" id="speed-1" onclick="setSpeed(1)">1x</button>
+        <button class="speed-btn" id="speed-2" onclick="setSpeed(2)">2x</button>
+        <button class="speed-btn" id="speed-5" onclick="setSpeed(5)">5x</button>
+        <button class="speed-btn" id="speed-10" onclick="setSpeed(10)">10x</button>
+    </div>
+
     <canvas id="gameCanvas"></canvas>
 
     <!-- SHOP -->
@@ -252,17 +277,24 @@
         function resize() { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
 
-        // === SETTINGS & AUDIO ===
+        // === SETTINGS, SPEED & AUDIO ===
         let appSettings = JSON.parse(localStorage.getItem('ll_settings')) || { lazyMode: false, sound: true };
         
+        let gameSpeed = 1;
+        function setSpeed(s) {
+            gameSpeed = s;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('speed-' + s).classList.add('active');
+        }
+
         let audioCtx;
         function initAudio() {
             if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if(audioCtx.state === 'suspended') audioCtx.resume();
         }
-        window.addEventListener('click', initAudio, {once: true}); // Init on first click
+        window.addEventListener('click', initAudio, {once: true});
         
-        // Procedural Retro Sound Effects
+        // Procedural Retro Sound Effects (Rate-limited for high speeds)
         const sfx = {
             play: (freq, type, dur, vol=0.1) => {
                 if(!appSettings.sound || !audioCtx) return;
@@ -274,12 +306,12 @@
                 osc.connect(gain); gain.connect(audioCtx.destination);
                 osc.start(); osc.stop(audioCtx.currentTime + dur);
             },
-            shoot: () => sfx.play(600, 'square', 0.1, 0.02),
-            hit: () => sfx.play(300, 'sawtooth', 0.1, 0.03),
-            kill: () => { sfx.play(800, 'sine', 0.1, 0.04); setTimeout(()=>sfx.play(1200, 'sine', 0.15, 0.04), 80); },
+            shoot: () => { if(gameSpeed <= 2 || Math.random() < 0.2) sfx.play(600, 'square', 0.1, 0.02); },
+            hit: () => { if(gameSpeed <= 2 || Math.random() < 0.2) sfx.play(300, 'sawtooth', 0.1, 0.03); },
+            kill: () => { if(gameSpeed <= 5 || Math.random() < 0.3) { sfx.play(800, 'sine', 0.1, 0.04); setTimeout(()=>sfx.play(1200, 'sine', 0.15, 0.04), 80/Math.min(gameSpeed, 2)); } },
             hurt: () => sfx.play(150, 'sawtooth', 0.3, 0.1),
             buy: () => { sfx.play(400, 'sine', 0.1, 0.05); setTimeout(()=>sfx.play(600, 'sine', 0.2, 0.05), 100); },
-            explosion: () => sfx.play(100, 'square', 0.4, 0.1)
+            explosion: () => { if(gameSpeed <= 5 || Math.random() < 0.5) sfx.play(100, 'square', 0.4, 0.1); }
         };
 
         function toggleSettings() {
@@ -551,20 +583,27 @@
 
         // === COMBAT FX ===
         function spawnFCT(x, y, text, isCrit, isDmg = false) {
+            // Prevent DOM lag on extremely high speeds by culling non-important numbers
+            if (gameSpeed >= 5 && !isDmg && !isCrit && Math.random() > 0.2) return; 
+
             const fct = document.createElement('div');
             fct.className = 'fct' + (isCrit ? ' crit' : '') + (isDmg ? ' dmg' : '');
             fct.innerText = text;
             fct.style.left = (x - 10) + 'px';
             fct.style.top = (y - 20) + 'px';
+            
+            let dur = 0.8 / Math.min(gameSpeed, 3);
+            fct.style.animation = `floatUp ${dur}s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards`;
+
             document.body.appendChild(fct);
-            setTimeout(() => fct.remove(), 800);
+            setTimeout(() => fct.remove(), dur * 1000);
         }
 
         function explode(x, y, radius, dmg) {
             sfx.explosion();
             let explRadius = 0;
             const explInterval = setInterval(() => {
-                explRadius += 7;
+                explRadius += 7 * Math.min(gameSpeed, 3);
                 if(explRadius > radius) { clearInterval(explInterval); return; }
                 if(state !== 'PLAYING') return;
                 ctx.beginPath(); ctx.arc(x, y, explRadius, 0, Math.PI*2);
@@ -593,7 +632,7 @@
             const maxRadius = Math.max(cw, ch) * 0.8;
             
             const interval = setInterval(() => {
-                pRadius += 25;
+                pRadius += 25 * Math.min(gameSpeed, 3);
                 if(pRadius >= maxRadius) { clearInterval(interval); return; }
                 if(state !== 'PLAYING') return;
                 ctx.beginPath(); ctx.arc(cw/2, ch/2, pRadius, 0, Math.PI*2);
@@ -610,6 +649,10 @@
         }
 
         // === RUN LOOP ===
+        let simTime = performance.now();
+        let lastRealTime = performance.now();
+        let accumulator = 0;
+        
         window.startRun = function() {
             initAudio();
             state = 'PLAYING';
@@ -621,7 +664,11 @@
             wave = 1; enemies = []; projectiles = []; particles = []; candies = [];
             startWave(); updateHUD();
             
-            lastShot = performance.now(); lastRegen = performance.now();
+            simTime = performance.now();
+            lastRealTime = simTime;
+            accumulator = 0;
+            lastShot = simTime; lastRegen = simTime; lastCannon = simTime; lastPulse = simTime; lastSpawn = simTime;
+            
             requestAnimationFrame(loop);
         }
 
@@ -669,193 +716,222 @@
             document.getElementById('hud-money').innerText = Math.floor(money) + ' 🍬';
         }
 
-        function loop(time) {
+        function loop(realTime) {
             if(state !== 'PLAYING') return;
+            requestAnimationFrame(loop);
 
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.4)'; 
-            ctx.fillRect(0, 0, cw, ch);
+            let delta = realTime - lastRealTime;
+            if(delta > 250) delta = 250; 
+            lastRealTime = realTime;
 
-            if(time - lastSpawn > spawnInterval && enemiesToSpawn > 0) {
-                enemies.push(new Zombie(wave % 5 === 0 && !bossActive, bossActive));
-                enemiesToSpawn--; lastSpawn = time;
-            } else if (enemiesToSpawn <= 0 && enemies.length === 0 && candies.length === 0) {
-                wave++; startWave();
+            accumulator += delta * gameSpeed;
+            
+            const TIME_STEP = 16.666;
+            if (accumulator > TIME_STEP * 60) {
+                accumulator = TIME_STEP * 60; // Max 60 ticks per frame to prevent freezing
             }
 
-            if(time - lastRegen > 1000) {
-                let regenAmt = getStat('regen');
-                if(regenAmt > 0 && hp < maxHp) {
-                    hp = Math.min(maxHp, hp + regenAmt); updateHUD();
+            while(accumulator >= TIME_STEP) {
+                accumulator -= TIME_STEP;
+                simTime += TIME_STEP;
+                let time = simTime;
+                
+                let isLastStep = (accumulator < TIME_STEP);
+
+                if (isLastStep) {
+                    ctx.fillStyle = 'rgba(15, 23, 42, 0.4)'; 
+                    ctx.fillRect(0, 0, cw, ch);
                 }
-                lastRegen = time;
-            }
 
-            // Shooting
-            if(time - lastShot > getStat('fireRate')) {
-                const dmg = getStat('damage');
-                const isCrit = Math.random() < getStat('crit');
-                const finalDmg = isCrit ? dmg * 2 : dmg;
-                
-                let targetX = mouse.x;
-                let targetY = mouse.y;
-                
-                // Lazy Mode: Auto-Aim
-                if (appSettings.lazyMode && enemies.length > 0) {
+                if(time - lastSpawn > spawnInterval && enemiesToSpawn > 0) {
+                    enemies.push(new Zombie(wave % 5 === 0 && !bossActive, bossActive));
+                    enemiesToSpawn--; lastSpawn = time;
+                } else if (enemiesToSpawn <= 0 && enemies.length === 0 && candies.length === 0) {
+                    wave++; startWave();
+                }
+
+                if(time - lastRegen > 1000) {
+                    let regenAmt = getStat('regen');
+                    if(regenAmt > 0 && hp < maxHp) {
+                        hp = Math.min(maxHp, hp + regenAmt); updateHUD();
+                    }
+                    lastRegen = time;
+                }
+
+                // Shooting
+                if(time - lastShot > getStat('fireRate')) {
+                    const dmg = getStat('damage');
+                    const isCrit = Math.random() < getStat('crit');
+                    const finalDmg = isCrit ? dmg * 2 : dmg;
+                    
+                    let targetX = mouse.x;
+                    let targetY = mouse.y;
+                    
+                    // Lazy Mode: Auto-Aim
+                    if (appSettings.lazyMode && enemies.length > 0) {
+                        let closest = enemies[0];
+                        let cDist = Infinity;
+                        enemies.forEach(e => {
+                            let d = Math.hypot(e.x - cw/2, e.y - ch/2);
+                            if (d < cDist) { cDist = d; closest = e; }
+                        });
+                        targetX = closest.x;
+                        targetY = closest.y;
+                    }
+                    
+                    sfx.shoot();
+                    projectiles.push(new Projectile(cw/2, ch/2, targetX, targetY, finalDmg, isCrit, false));
+                    
+                    if(Math.random() < getStat('double')) {
+                        const angle = Math.atan2(targetY - ch/2, targetX - cw/2) + (Math.random()-0.5)*0.2;
+                        const tx = cw/2 + Math.cos(angle)*100;
+                        const ty = ch/2 + Math.sin(angle)*100;
+                        projectiles.push(new Projectile(cw/2, ch/2, tx, ty, finalDmg, isCrit, false));
+                    }
+                    lastShot = time;
+                }
+
+                if(shop.cannon.lvl > 0 && time - lastCannon > 3000 && enemies.length > 0) {
                     let closest = enemies[0];
                     let cDist = Infinity;
                     enemies.forEach(e => {
                         let d = Math.hypot(e.x - cw/2, e.y - ch/2);
-                        if (d < cDist) { cDist = d; closest = e; }
+                        if(d < cDist) { cDist = d; closest = e; }
                     });
-                    targetX = closest.x;
-                    targetY = closest.y;
+                    sfx.shoot();
+                    projectiles.push(new Projectile(cw/2, ch/2, closest.x, closest.y, getStat('cannonDmg'), false, true));
+                    lastCannon = time;
                 }
-                
-                sfx.shoot();
-                projectiles.push(new Projectile(cw/2, ch/2, targetX, targetY, finalDmg, isCrit, false));
-                
-                if(Math.random() < getStat('double')) {
-                    const angle = Math.atan2(targetY - ch/2, targetX - cw/2) + (Math.random()-0.5)*0.2;
-                    const tx = cw/2 + Math.cos(angle)*100;
-                    const ty = ch/2 + Math.sin(angle)*100;
-                    projectiles.push(new Projectile(cw/2, ch/2, tx, ty, finalDmg, isCrit, false));
+
+                if(shop.pulse.lvl > 0 && time - lastPulse > 5000) {
+                    pulse(); lastPulse = time;
                 }
-                lastShot = time;
-            }
 
-            if(shop.cannon.lvl > 0 && time - lastCannon > 3000 && enemies.length > 0) {
-                let closest = enemies[0];
-                let cDist = Infinity;
-                enemies.forEach(e => {
-                    let d = Math.hypot(e.x - cw/2, e.y - ch/2);
-                    if(d < cDist) { cDist = d; closest = e; }
-                });
-                sfx.shoot();
-                projectiles.push(new Projectile(cw/2, ch/2, closest.x, closest.y, getStat('cannonDmg'), false, true));
-                lastCannon = time;
-            }
-
-            if(shop.pulse.lvl > 0 && time - lastPulse > 5000) {
-                pulse(); lastPulse = time;
-            }
-
-            // Orbiters
-            const orbCount = getStat('orbit');
-            const t = time / 1000;
-            for(let i=0; i<orbCount; i++) {
-                const angle = t * 4 + (i * Math.PI * 2 / orbCount);
-                const ox = cw/2 + Math.cos(angle) * 120;
-                const oy = ch/2 + Math.sin(angle) * 120;
-                
-                ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(ox-3, oy-3, 3, 0, Math.PI*2); ctx.fill();
-                
-                enemies.forEach(e => {
-                    if(Math.hypot(e.x - ox, e.y - oy) < 10 + e.radius) {
-                        // Cooldown logic to prevent 60fps micro-ticks, does bigger damage
-                        if(e.orbHitTimer <= 0) {
-                            let dmg = getStat('damage') * 0.4;
-                            e.hp -= dmg; 
-                            e.hitTimer = 3;
-                            e.orbHitTimer = 15; // Hit ~4 times per second max per orb
-                            sfx.hit();
-                            spawnFCT(e.x, e.y, Math.round(dmg), false);
-                        }
+                // Orbiters
+                const orbCount = getStat('orbit');
+                const t = time / 1000;
+                for(let i=0; i<orbCount; i++) {
+                    const angle = t * 4 + (i * Math.PI * 2 / orbCount);
+                    const ox = cw/2 + Math.cos(angle) * 120;
+                    const oy = ch/2 + Math.sin(angle) * 120;
+                    
+                    if(isLastStep) {
+                        ctx.fillStyle = '#8b5cf6'; ctx.beginPath(); ctx.arc(ox, oy, 10, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.beginPath(); ctx.arc(ox-3, oy-3, 3, 0, Math.PI*2); ctx.fill();
                     }
-                });
-            }
-
-            // Projectiles
-            projectiles.forEach(p => {
-                p.update(); p.draw();
-                if(p.active) {
+                    
                     enemies.forEach(e => {
-                        if(p.active && !p.hitEnemies.has(e) && Math.hypot(e.x - p.x, e.y - p.y) < p.radius + e.radius) {
-                            p.hitEnemies.add(e);
-                            if(p.isExplosive) {
-                                p.active = false;
-                                explode(p.x, p.y, 100, p.dmg);
-                            } else {
-                                e.hp -= p.dmg;
+                        if(Math.hypot(e.x - ox, e.y - oy) < 10 + e.radius) {
+                            if(e.orbHitTimer <= 0) {
+                                let dmg = getStat('damage') * 0.4;
+                                e.hp -= dmg; 
                                 e.hitTimer = 3;
+                                e.orbHitTimer = 15; 
                                 sfx.hit();
-                                
-                                if (shop.slow.lvl > 0) e.slowTimer = 90; 
-                                spawnFCT(e.x, e.y, Math.round(p.dmg), p.isCrit);
-                                
-                                p.pierceLeft--;
-                                if(p.pierceLeft < 0) p.active = false;
+                                spawnFCT(e.x, e.y, Math.round(dmg), false);
                             }
                         }
                     });
                 }
-            });
-            projectiles = projectiles.filter(p => p.active);
 
-            // Enemies
-            for(let i = enemies.length - 1; i >= 0; i--) {
-                const e = enemies[i];
-                e.update(); e.draw();
-                if(e.hp <= 0) {
-                    sfx.kill();
-                    for(let j=0; j<15; j++) {
-                        particles.push({
-                            x:e.x, y:e.y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, 
-                            life:1, color:e.color, size: Math.random()*5+2
+                // Projectiles
+                projectiles.forEach(p => {
+                    p.update(); 
+                    if(isLastStep) p.draw();
+                    if(p.active) {
+                        enemies.forEach(e => {
+                            if(p.active && !p.hitEnemies.has(e) && Math.hypot(e.x - p.x, e.y - p.y) < p.radius + e.radius) {
+                                p.hitEnemies.add(e);
+                                if(p.isExplosive) {
+                                    p.active = false;
+                                    explode(p.x, p.y, 100, p.dmg);
+                                } else {
+                                    e.hp -= p.dmg;
+                                    e.hitTimer = 3;
+                                    sfx.hit();
+                                    
+                                    if (shop.slow.lvl > 0) e.slowTimer = 90; 
+                                    spawnFCT(e.x, e.y, Math.round(p.dmg), p.isCrit);
+                                    
+                                    p.pierceLeft--;
+                                    if(p.pierceLeft < 0) p.active = false;
+                                }
+                            }
                         });
                     }
-                    
-                    const drop = (e.isBoss ? 250 : e.isMini ? 40 : 5) * (1 + prestige * 0.2);
-                    candies.push({x: e.x, y: e.y, val: Math.floor(drop)});
-                    enemies.splice(i, 1);
+                });
+                projectiles = projectiles.filter(p => p.active);
+
+                // Enemies
+                for(let i = enemies.length - 1; i >= 0; i--) {
+                    const e = enemies[i];
+                    e.update(); 
+                    if(isLastStep) e.draw();
+                    if(e.hp <= 0) {
+                        sfx.kill();
+                        for(let j=0; j<15; j++) {
+                            particles.push({
+                                x:e.x, y:e.y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, 
+                                life:1, color:e.color, size: Math.random()*5+2
+                            });
+                        }
+                        
+                        const drop = (e.isBoss ? 250 : e.isMini ? 40 : 5) * (1 + prestige * 0.2);
+                        candies.push({x: e.x, y: e.y, val: Math.floor(drop)});
+                        enemies.splice(i, 1);
+                    }
                 }
+
+                // Candies
+                for(let i = candies.length - 1; i >= 0; i--) {
+                    const c = candies[i];
+                    const dx = cw/2 - c.x; const dy = ch/2 - c.y;
+                    const dist = Math.hypot(dx, dy);
+                    
+                    c.x += (dx/dist) * 15; c.y += (dy/dist) * 15;
+                    
+                    if(isLastStep) {
+                        ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(c.x, c.y, 6, 0, Math.PI*2); ctx.fill();
+                        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(c.x-2, c.y-2, 2, 0, Math.PI*2); ctx.fill();
+                    }
+                    
+                    if(dist < 30) { money += c.val; updateHUD(); candies.splice(i, 1); }
+                }
+
+                if(isLastStep) {
+                    // Tower
+                    ctx.fillStyle = '#fbcfe8'; ctx.fillRect(cw/2 - 8, ch/2, 16, 70); 
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(cw/2, ch/2+10, 30, 10, 0, 0, Math.PI*2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 35, 0, Math.PI*2); 
+                    const grad = ctx.createRadialGradient(cw/2-10, ch/2-25, 5, cw/2, ch/2-15, 35);
+                    grad.addColorStop(0, '#f472b6'); grad.addColorStop(1, '#be185d');
+                    ctx.fillStyle = grad; ctx.fill(); 
+                    ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 20, 0, Math.PI*1.5, false); 
+                    ctx.strokeStyle = '#fbcfe8'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 10, Math.PI, Math.PI*2.5, false); 
+                    ctx.stroke();
+
+                    // Tower HP Bar
+                    const towerHpWidth = 80;
+                    ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
+                    ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
+                    ctx.fillStyle = '#ef4444'; 
+                    ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth * Math.max(0, hp/maxHp), 10);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+                    ctx.strokeRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
+                }
+
+                // Particles
+                particles.forEach(p => {
+                    p.x += p.vx; p.y += p.vy; p.life -= 0.03;
+                    if(isLastStep) {
+                        ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
+                        ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+                    }
+                });
+                if(isLastStep) ctx.globalAlpha = 1;
+                particles = particles.filter(p => p.life > 0);
             }
-
-            // Candies
-            for(let i = candies.length - 1; i >= 0; i--) {
-                const c = candies[i];
-                const dx = cw/2 - c.x; const dy = ch/2 - c.y;
-                const dist = Math.hypot(dx, dy);
-                
-                c.x += (dx/dist) * 15; c.y += (dy/dist) * 15;
-                
-                ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(c.x, c.y, 6, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(c.x-2, c.y-2, 2, 0, Math.PI*2); ctx.fill();
-                
-                if(dist < 30) { money += c.val; updateHUD(); candies.splice(i, 1); }
-            }
-
-            // Tower
-            ctx.fillStyle = '#fbcfe8'; ctx.fillRect(cw/2 - 8, ch/2, 16, 70); 
-            ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(cw/2, ch/2+10, 30, 10, 0, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 35, 0, Math.PI*2); 
-            const grad = ctx.createRadialGradient(cw/2-10, ch/2-25, 5, cw/2, ch/2-15, 35);
-            grad.addColorStop(0, '#f472b6'); grad.addColorStop(1, '#be185d');
-            ctx.fillStyle = grad; ctx.fill(); 
-            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 20, 0, Math.PI*1.5, false); 
-            ctx.strokeStyle = '#fbcfe8'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
-            ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 10, Math.PI, Math.PI*2.5, false); 
-            ctx.stroke();
-
-            // Tower HP Bar
-            const towerHpWidth = 80;
-            ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
-            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
-            ctx.fillStyle = '#ef4444'; 
-            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth * Math.max(0, hp/maxHp), 10);
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
-            ctx.strokeRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
-
-            // Particles
-            particles.forEach(p => {
-                p.x += p.vx; p.y += p.vy; p.life -= 0.03;
-                ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.color;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-            particles = particles.filter(p => p.life > 0);
-
-            requestAnimationFrame(loop);
         }
 
         updateSettingsUI(); // Init buttons state
