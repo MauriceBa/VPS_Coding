@@ -42,9 +42,8 @@ def run_ml_pipeline():
     # ====================================================
     # 1. Rating Distribution Approximation
     # ====================================================
-    # Da die aktuellen Rohdaten keine Bewertungen beinhalten, modellieren 
-    # wir mithilfe der Check-in-Anzahl eine realistische Normalverteilung
-    ratings_count = { "0.5": 0, "1.0": 0, "1.5": 0, "2.0": 0, "2.5": 0, "3.0": 0, "3.5": 0, "4.0": 0, "4.5": 0, "5.0": 0 }
+    # Da Untappd Sterne in 0.25 Schritten vergibt, passen wir die Verteilung an:
+    ratings_count = {f"{x/4:.2f}": 0 for x in range(1, 21)} # Erzeugt 0.25 bis 5.00
     sum_ratings = 0
     
     # Fixierter temporärer Seed, damit die Verteilungskurve (das Diagramm) konsistent 
@@ -54,9 +53,9 @@ def run_ml_pipeline():
     for _ in range(total_checkins):
         # Gaussverteilung: Mittelwert 3.8, Standardabweichung 0.55
         val = random.gauss(3.8, 0.55)
-        val = max(0.5, min(5.0, val))
-        rounded = round(val * 2) / 2
-        ratings_count[f"{rounded:.1f}"] += 1
+        val = max(0.25, min(5.0, val))
+        rounded = round(val * 4) / 4 # Rundung auf 0.25 Schritte
+        ratings_count[f"{rounded:.2f}"] += 1
         sum_ratings += rounded
     random.setstate(temp_state)
         
@@ -68,7 +67,7 @@ def run_ml_pipeline():
     # Tagesspezifischer Seed für "Bier des Tages" Feature
     random.seed(datetime.now().strftime("%Y-%m-%d"))
     
-    top_styles = [s["style"] for s in stats["styles"][:5]]
+    top_styles = [s["style"] for s in stats.get("styles", [])[:5]]
     drunk_beers = [b["beer"] for b in stats.get("top_beers", [])]
     
     recommendations = []
@@ -83,7 +82,8 @@ def run_ml_pipeline():
             score += random.uniform(0, 5) 
             recommendations.append((score, b))
             
-    recommendations.sort(key=lambda x: x[0], reverse=True)
+        recommendations.sort(key=lambda x: x[0], reverse=True)
+    
     best_match = recommendations[0][1] if recommendations else GLOBAL_BEERS[0]
     
     ml_data = {
