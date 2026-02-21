@@ -1,0 +1,12 @@
+# Generierte/automatische Dateien
+untappd/data/
+*.db
+*.csv
+__pycache__/
+*.pyc
+
+# IDE/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

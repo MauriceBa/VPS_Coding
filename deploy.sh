@@ -12,8 +12,7 @@ sudo rm -f /etc/nginx/sites-enabled/default
 sudo mkdir -p /var/www/mauricefun.lol/html
 sudo mkdir -p /var/www/mauricefun.lol/html/data
 
-# Sync alle Dateien und Ordner, AUßER config, scripts, games und Git-bezogene Dateien
-# rsync eignet sich hierfür am besten
+# Sync alle Dateien und Ordner, AUßER config, scripts, games, data-Ordner und Git-bezogene Dateien
 sudo rsync -av --exclude '.git' \
              --exclude '.gitignore' \
              --exclude 'README.md' \
@@ -21,6 +20,7 @@ sudo rsync -av --exclude '.git' \
              --exclude 'scripts' \
              --exclude 'games' \
              --exclude 'deploy.sh' \
+             --exclude 'untappd/data' \
              ./ /var/www/mauricefun.lol/html/
 
 sudo chown -R www-data:www-data /var/www/mauricefun.lol/html
