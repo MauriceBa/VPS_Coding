@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beer Easter Egg</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            overflow: hidden;
+        }
+        iframe {
+            width: 100vw;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const videos = [
+            "OU_M2nNErMA",
+            "dQw4w9WgXcQ",
+            "ZZ5LpwO-An4",
+            "ZD71JeX4Vk0",
+            "pCOb6Fykxz0",
+            "q6EoRBvdVPQ",
+            "J---aiyznGQ",
+            "Z3ZAGBL6UBA"
+        ];
+        
+        // Zufälliges Video auswählen
+        const randomVid = videos[Math.floor(Math.random() * videos.length)];
+        
+        // Iframe im Fullscreen Modus mit Autoplay injecten
+        // ?autoplay=1 sorgt für direkten Start (Browser erlauben oft Audio-Autoplay, da die Seite via Link-Klick von der Domain geöffnet wurde)
+        document.body.innerHTML = `
+            <iframe 
+                src="https://www.youtube.com/embed/${randomVid}?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1" 
+                allow="autoplay; fullscreen; encrypted-media" 
+                allowfullscreen>
+            </iframe>
+        `;
+    </script>
+</body>
+</html>
