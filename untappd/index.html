@@ -4,142 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🍺 Bier Stats | mauricelol.fun</title>
-    
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
         :root {
-            --primary: #f59e0b;
-            --secondary: #ef4444;
-            --accent: #fbbf24;
-            --bg: #0f172a;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #f59e0b; --secondary: #ef4444; --bg: #0f172a;
+            --text: #f8fafc; --text-muted: #94a3b8;
+            --card-bg: rgba(30,41,59,0.7); --card-border: rgba(255,255,255,0.1);
             --header-height: 70px;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        #scroll-progress {
-            position: fixed; top: 0; left: 0; height: 3px;
-            background: linear-gradient(to right, #f59e0b, #ef4444);
-            z-index: 9999; width: 0%; transition: width 0.05s linear;
-        }
-
-        #bg-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; }
-
-        header {
-            position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 2rem; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--card-border); z-index: 1000;
-        }
-
-        .logo {
-            font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #ef4444);
-            -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none;
-            transition: transform 0.3s;
-        }
-        .logo:hover { transform: scale(1.05); }
-
-        .nav-group { display: flex; align-items: center; gap: 0.75rem; }
-        .nav-link {
-            color: var(--text); text-decoration: none; font-weight: 500;
-            padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;
-            border: 1px solid transparent; background: rgba(255,255,255,0.03);
-        }
-        .nav-link:hover, .nav-link.active { background: rgba(245, 158, 11, 0.15); border-color: var(--primary); color: var(--primary); }
-
-        main { max-width: 1200px; margin: calc(var(--header-height) + 4rem) auto 2rem; padding: 0 2rem; position: relative; z-index: 1; }
-
-        .hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.8s ease-out; }
-        h1 { font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.75rem; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .subtitle { font-size: 1.05rem; color: var(--text-muted); }
-
-        .stats-bar { display: flex; justify-content: center; gap: 3rem; margin: 0 auto 3rem; flex-wrap: wrap; animation: slideUp 0.8s ease-out 0.15s backwards; }
-        .stat-item { text-align: center; }
-        .stat-number { font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #ef4444); -webkit-background-clip: text; background-clip: text; color: transparent; line-height: 1; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.3rem; }
-
-        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.2s backwards; }
-
-        .stat-card {
-            background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 1.5rem;
-            backdrop-filter: blur(10px); position: relative; overflow: hidden; transition: all 0.3s ease;
-        }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(to right, #f59e0b, #ef4444); opacity: 0.7; }
-        .stat-card:hover { transform: translateY(-4px); border-color: rgba(245, 158, 11, 0.4); box-shadow: 0 12px 30px -8px rgba(245, 158, 11, 0.2); }
-        .card-header-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
-        .card-emoji { font-size: 1.4rem; }
-        .card-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-        .card-value { font-size: 1.9rem; font-weight: 800; color: var(--text); line-height: 1.1; }
-        .card-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.3rem; }
-
-        .milestone-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem; backdrop-filter: blur(10px); animation: slideUp 0.8s ease-out 0.25s backwards; }
-        .milestone-box h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
-        .milestone-box .desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem; }
-        .progress-track { background: rgba(255,255,255,0.08); border-radius: 50px; height: 14px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 50px; background: linear-gradient(to right, #f59e0b, #ef4444); width: 0%; transition: width 1.5s; }
-        .progress-meta { display: flex; justify-content: space-between; margin-top: 0.6rem; font-size: 0.82rem; color: var(--text-muted); }
-
-        .split-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.3s backwards; }
-        @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } }
-        
-        .split-half { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.3s backwards; }
-        @media (max-width: 900px) { .split-half { grid-template-columns: 1fr; } }
-
-        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-
-        .map-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1rem; backdrop-filter: blur(10px); }
-        #map { width: 100%; height: 400px; border-radius: 10px; z-index: 10; }
-        .leaflet-container { background-color: #0f172a; }
-        .leaflet-popup-content-wrapper { background-color: var(--bg); color: var(--text); border: 1px solid var(--primary); border-radius: 8px; }
-        .leaflet-popup-tip { background-color: var(--bg); border-top: 1px solid var(--primary); border-left: 1px solid var(--primary); }
-        .leaflet-popup-content b { color: var(--primary); }
-
-        .table-box { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; backdrop-filter: blur(10px); max-height: 480px; overflow-y: auto; }
-        .table-box::-webkit-scrollbar { width: 6px; }
-        .table-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 8px; }
-        .table-box::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 8px; }
-        
-        .styles-table { width: 100%; border-collapse: collapse; text-align: left; }
-        .styles-table th { position: sticky; top: -1.5rem; background: var(--bg); padding: 0.75rem 0.5rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); z-index: 5; }
-        .styles-table td { padding: 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
-        .styles-table tr:last-child td { border-bottom: none; }
-        .styles-table tr:hover td { background: rgba(245, 158, 11, 0.05); }
-        .col-num { text-align: right; font-weight: 700; color: var(--primary); }
-        
-        /* Neu: Sterne in Table */
-        .stars { color: #fbbf24; letter-spacing: 2px; font-size: 0.9rem;}
-
-        .badge { display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.55rem; border-radius: 50px; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.4rem; vertical-align: middle; }
-
-        footer { margin-top: 6rem; padding: 2rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--card-border); }
-        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
-        .footer-link { color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
-        .footer-link:hover { color: var(--primary); }
-
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; line-height:1.6; overflow-x:hidden; }
+        #scroll-progress { position:fixed; top:0; left:0; height:3px; background:linear-gradient(to right,#f59e0b,#ef4444); z-index:9999; width:0%; transition:width .05s linear; }
+        #bg-canvas { position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:-1; pointer-events:none; }
+        header { position:fixed; top:0; left:0; right:0; height:var(--header-height); display:flex; align-items:center; justify-content:space-between; padding:0 2rem; background:rgba(15,23,42,.85); backdrop-filter:blur(12px); border-bottom:1px solid var(--card-border); z-index:1000; }
+        .logo { font-size:1.5rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none; transition:transform .3s; }
+        .logo:hover { transform:scale(1.05); }
+        .nav-group { display:flex; align-items:center; gap:.75rem; }
+        .nav-link { color:var(--text); text-decoration:none; font-weight:500; padding:.5rem 1rem; border-radius:8px; transition:all .2s; border:1px solid transparent; background:rgba(255,255,255,.03); }
+        .nav-link:hover,.nav-link.active { background:rgba(245,158,11,.15); border-color:var(--primary); color:var(--primary); }
+        main { max-width:1200px; margin:calc(var(--header-height) + 4rem) auto 2rem; padding:0 2rem; position:relative; z-index:1; }
+        .hero { text-align:center; margin-bottom:3rem; animation:slideUp .8s ease-out; }
+        h1 { font-size:clamp(2.5rem,5vw,4rem); font-weight:800; margin-bottom:.75rem; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .subtitle { font-size:1.05rem; color:var(--text-muted); }
+        .stats-bar { display:flex; justify-content:center; gap:3rem; margin:0 auto 3rem; flex-wrap:wrap; animation:slideUp .8s ease-out .15s backwards; }
+        .stat-item { text-align:center; }
+        .stat-number { font-size:2.2rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; }
+        .stat-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:.3rem; }
+        .grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.25rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .2s backwards; }
+        .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; backdrop-filter:blur(10px); position:relative; overflow:hidden; transition:all .3s ease; }
+        .stat-card::before { content:''; position:absolute; top:0; left:0; width:100%; height:3px; background:linear-gradient(to right,#f59e0b,#ef4444); opacity:.7; }
+        .stat-card:hover { transform:translateY(-4px); border-color:rgba(245,158,11,.4); box-shadow:0 12px 30px -8px rgba(245,158,11,.2); }
+        .card-header-row { display:flex; align-items:center; gap:.6rem; margin-bottom:.75rem; }
+        .card-emoji { font-size:1.4rem; }
+        .card-label { font-size:.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+        .card-value { font-size:1.9rem; font-weight:800; color:var(--text); line-height:1.1; }
+        .card-sub { font-size:.82rem; color:var(--text-muted); margin-top:.3rem; }
+        .milestone-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:2rem; margin-bottom:2.5rem; backdrop-filter:blur(10px); animation:slideUp .8s ease-out .25s backwards; }
+        .milestone-box h2 { font-size:1.15rem; font-weight:700; margin-bottom:.4rem; }
+        .milestone-box .desc { font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; }
+        .progress-track { background:rgba(255,255,255,.08); border-radius:50px; height:14px; overflow:hidden; }
+        .progress-fill { height:100%; border-radius:50px; background:linear-gradient(to right,#f59e0b,#ef4444); width:0%; transition:width 1.5s; }
+        .progress-meta { display:flex; justify-content:space-between; margin-top:.6rem; font-size:.82rem; color:var(--text-muted); }
+        .split-layout { display:grid; grid-template-columns:2fr 1fr; gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
+        .split-half { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
+        @media (max-width:900px) { .split-layout,.split-half { grid-template-columns:1fr; } }
+        .section-title { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
+        .map-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1rem; backdrop-filter:blur(10px); }
+        #map { width:100%; height:400px; border-radius:10px; z-index:10; }
+        .leaflet-container { background-color:#0f172a; }
+        .leaflet-popup-content-wrapper { background-color:var(--bg); color:var(--text); border:1px solid var(--primary); border-radius:8px; }
+        .leaflet-popup-tip { background-color:var(--bg); }
+        .leaflet-popup-content b { color:var(--primary); }
+        .table-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.5rem; backdrop-filter:blur(10px); max-height:480px; overflow-y:auto; }
+        .table-box::-webkit-scrollbar { width:6px; }
+        .table-box::-webkit-scrollbar-thumb { background:var(--primary); border-radius:8px; }
+        .styles-table { width:100%; border-collapse:collapse; text-align:left; }
+        .styles-table th { position:sticky; top:-1.5rem; background:var(--bg); padding:.75rem .5rem; font-size:.8rem; text-transform:uppercase; color:var(--text-muted); border-bottom:1px solid var(--card-border); z-index:5; }
+        .styles-table td { padding:.65rem .5rem; border-bottom:1px solid rgba(255,255,255,.05); font-size:.9rem; }
+        .styles-table tr:last-child td { border-bottom:none; }
+        .styles-table tr:hover td { background:rgba(245,158,11,.05); }
+        .col-num { text-align:right; font-weight:700; color:var(--primary); }
+        .stars { color:#fbbf24; }
+        .badge { display:inline-block; font-size:.65rem; padding:.15rem .55rem; border-radius:50px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-left:.4rem; vertical-align:middle; }
+        .no-data-hint { text-align:center; color:var(--text-muted); padding:2rem 1rem; font-size:.9rem; line-height:1.7; }
+        footer { margin-top:6rem; padding:2rem; text-align:center; color:var(--text-muted); font-size:.9rem; border-top:1px solid var(--card-border); }
+        .footer-links { display:flex; justify-content:center; gap:2rem; margin-bottom:1rem; flex-wrap:wrap; }
+        .footer-link { color:var(--text-muted); text-decoration:none; transition:color .2s; }
+        .footer-link:hover { color:var(--primary); }
+        @keyframes slideUp { from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)} }
     </style>
 </head>
 <body>
     <div id="scroll-progress"></div>
     <canvas id="bg-canvas"></canvas>
-
     <header>
         <a href="/" class="logo">mauricelol.fun</a>
         <div class="nav-group">
@@ -150,124 +88,89 @@
             <a href="/untappd/" class="nav-link active">🍺 Bier Stats</a>
         </div>
     </header>
-
     <main>
         <div class="hero">
             <h1>🍺 Bier Stats</h1>
             <p class="subtitle">Meine persönlichen Bier-Statistiken &middot; Powered by Untappd &middot; Wird automatisch aktualisiert</p>
         </div>
-
         <div class="stats-bar">
             <div class="stat-item"><div class="stat-number" id="stat-checkins">...</div><div class="stat-label">Check-ins</div></div>
             <div class="stat-item"><div class="stat-number" id="stat-unique">...</div><div class="stat-label">Einzigartige Biere</div></div>
             <div class="stat-item"><div class="stat-number" id="stat-breweries">...</div><div class="stat-label">Brauereien</div></div>
             <div class="stat-item"><div class="stat-number" id="stat-rating">–</div><div class="stat-label">Ø Bewertung</div></div>
         </div>
-
         <div class="grid-4">
-            <div class="stat-card">
-                <div class="card-header-row"><span class="card-emoji">🏆</span><span class="card-label">Top Style</span></div>
-                <div class="card-value" id="top-style">...</div>
-                <div class="card-sub">Meistgetrunkener Bierstil</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-header-row"><span class="card-emoji">🏭</span><span class="card-label">Top Brauerei</span></div>
-                <div class="card-value" id="top-brewery">...</div>
-                <div class="card-sub">Favoriten-Brauerei</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-header-row"><span class="card-emoji">⭐</span><span class="card-label">Meistgetrunken</span></div>
-                <div class="card-value" id="best-beer">...</div>
-                <div class="card-sub" id="best-beer-sub">Top Bier Name</div>
-            </div>
-            <div class="stat-card">
-                <div class="card-header-row"><span class="card-emoji">📅</span><span class="card-label">Letzter Check-in</span></div>
-                <div class="card-value" id="last-checkin">...</div>
-                <div class="card-sub">Zuletzt aktualisiert</div>
-            </div>
+            <div class="stat-card"><div class="card-header-row"><span class="card-emoji">🏆</span><span class="card-label">Top Style</span></div><div class="card-value" id="top-style">...</div><div class="card-sub">Meistgetrunkener Bierstil</div></div>
+            <div class="stat-card"><div class="card-header-row"><span class="card-emoji">🏭</span><span class="card-label">Top Brauerei</span></div><div class="card-value" id="top-brewery">...</div><div class="card-sub">Favoriten-Brauerei</div></div>
+            <div class="stat-card"><div class="card-header-row"><span class="card-emoji">⭐</span><span class="card-label">Meistgetrunken</span></div><div class="card-value" id="best-beer">...</div><div class="card-sub" id="best-beer-sub">Top Bier</div></div>
+            <div class="stat-card"><div class="card-header-row"><span class="card-emoji">📅</span><span class="card-label">Letzter Check-in</span></div><div class="card-value" id="last-checkin">...</div><div class="card-sub">Zuletzt aktualisiert</div></div>
         </div>
-
         <div class="milestone-box">
             <h2>🎯 Nächster Meilenstein</h2>
             <p class="desc">Fortschritt zum <strong id="milestone-text">100-Bier-Meilenstein</strong> 🍻</p>
             <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-            <div class="progress-meta">
-                <span id="progress-label">... / 100 Biere</span>
-                <span id="progress-target">Ziel: 100 🍺</span>
-            </div>
+            <div class="progress-meta"><span id="progress-label">... / 100 Biere</span><span id="progress-target">Ziel: 100 🍺</span></div>
         </div>
 
-        <!-- NEW: CHART & ML RECOMMENDATION -->
-        <div class="split-layout" style="margin-bottom: 2.5rem;">
-            <!-- Chart.js Graph -->
+        <!-- Chart + ML Recommendation -->
+        <div class="split-layout" style="margin-bottom:2.5rem;">
             <div class="left-col">
                 <div class="section-title">⭐ Bewertungs-Verteilung</div>
-                <div class="map-box" style="height: 350px; display: flex; align-items: center; justify-content: center; padding: 1.5rem;">
+                <div class="map-box" style="height:350px;display:flex;align-items:center;justify-content:center;padding:1.5rem;">
                     <canvas id="ratingChart"></canvas>
                 </div>
             </div>
-            <!-- ML Recommendation -->
             <div class="right-col">
                 <div class="section-title">🤖 KI Bier-Empfehlung</div>
-                <div class="stat-card" style="border-color: var(--primary); height: 350px; display: flex; flex-direction: column;">
+                <div class="stat-card" style="border-color:var(--primary);height:350px;display:flex;flex-direction:column;">
                     <div class="card-header-row"><span class="card-emoji">💡</span><span class="card-label">Bier des Tages</span></div>
-                    <div class="card-value" id="rec-beer" style="font-size:1.4rem; color:var(--primary); line-height: 1.2;">Lade Analyse...</div>
-                    <div class="card-sub" id="rec-brewery" style="color:var(--text); font-weight:bold; margin-top: 0.5rem; font-size: 0.95rem;"></div>
-                    <div class="card-sub" id="rec-style" style="margin-top:0.2rem; font-style:italic;"></div>
-                    <p id="rec-desc" style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); line-height: 1.5; flex-grow: 1;"></p>
-                    <div><span class="badge" id="rec-reason" style="margin-left:0; background: linear-gradient(135deg, var(--primary), var(--secondary)); white-space: normal;">Profil wird berechnet...</span></div>
+                    <div class="card-value" id="rec-beer" style="font-size:1.4rem;color:var(--primary);line-height:1.2;">Lade...</div>
+                    <div class="card-sub" id="rec-brewery" style="color:var(--text);font-weight:bold;margin-top:.5rem;font-size:.95rem;"></div>
+                    <div class="card-sub" id="rec-style" style="font-style:italic;"></div>
+                    <p id="rec-desc" style="margin-top:1rem;font-size:.9rem;color:var(--text-muted);line-height:1.5;flex-grow:1;"></p>
+                    <div><span class="badge" id="rec-reason" style="margin-left:0;background:linear-gradient(135deg,var(--primary),var(--secondary));white-space:normal;">Berechne...</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- NEW: TOP & FLOP BEERS TABLES -->
-        <div class="split-half" style="margin-bottom: 2.5rem;">
-            <div class="left-col">
-                <div class="section-title">🥇 Top 10 Beste Biere</div>
+        <!-- Top 10 Beste & Schlechteste -->
+        <div class="split-half" style="margin-bottom:2.5rem;">
+            <div>
+                <div class="section-title">🥇 Top 10 &ndash; Beste Biere</div>
                 <div class="table-box">
                     <table class="styles-table">
-                        <thead><tr><th>Bier</th><th>Brauerei</th><th class="col-num">Rating</th></tr></thead>
-                        <tbody id="top-beers-tbody">
-                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Top Biere...</td></tr>
-                        </tbody>
+                        <thead><tr><th>#</th><th>Bier &amp; Brauerei</th><th class="col-num">Rating</th></tr></thead>
+                        <tbody id="top-beers-tbody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Lade...</td></tr></tbody>
                     </table>
                 </div>
             </div>
-            
-            <div class="right-col">
-                <div class="section-title">📉 Top 10 Schlechteste Biere</div>
+            <div>
+                <div class="section-title">📉 Top 10 &ndash; Schlechteste Biere</div>
                 <div class="table-box">
                     <table class="styles-table">
-                        <thead><tr><th>Bier</th><th>Brauerei</th><th class="col-num">Rating</th></tr></thead>
-                        <tbody id="flop-beers-tbody">
-                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Flop Biere...</td></tr>
-                        </tbody>
+                        <thead><tr><th>#</th><th>Bier &amp; Brauerei</th><th class="col-num">Rating</th></tr></thead>
+                        <tbody id="flop-beers-tbody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Lade...</td></tr></tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- SPLIT LAYOUT (MAP + TABLE) -->
+        <!-- Map + Styles -->
         <div class="split-layout">
             <div class="left-col">
                 <div class="section-title">🌍 Check-in Heatmap</div>
-                <div class="map-box" style="margin-bottom: 2rem;">
-                    <div id="map"></div>
-                </div>
-                <div class="section-title">📋 Top Venues & Orte</div>
-                <div class="grid-4" id="venues-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 0;">
-                    <div class="stat-card" style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Lade Locations...</div>
+                <div class="map-box" style="margin-bottom:2rem;"><div id="map"></div></div>
+                <div class="section-title">📋 Top Venues</div>
+                <div class="grid-4" id="venues-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:0;">
+                    <div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Lade...</div>
                 </div>
             </div>
-
             <div class="right-col">
-                <div class="section-title">📊 Bierstile (Getrunken)</div>
+                <div class="section-title">📊 Bierstile</div>
                 <div class="table-box">
                     <table class="styles-table">
                         <thead><tr><th>Stil</th><th class="col-num">Check-ins</th><th class="col-num">Unique</th></tr></thead>
-                        <tbody id="styles-tbody">
-                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Stile...</td></tr>
-                        </tbody>
+                        <tbody id="styles-tbody"><tr><td colspan="3" style="text-align:center;color:var(--text-muted);">Lade...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -284,182 +187,165 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-
     <script>
+        /* Scroll progress */
         const progressBar = document.getElementById('scroll-progress');
         window.addEventListener('scroll', () => {
-            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
+            const scrollTop = document.documentElement.scrollTop;
+            const docH = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            progressBar.style.width = (docH > 0 ? (scrollTop / docH) * 100 : 0) + '%';
         });
 
+        /* Map */
         const map = L.map('map').setView([50.5, 9.0], 5);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
-        const beerIcon = L.divIcon({ html: '🍺', className: 'custom-beer-icon', iconSize: [24, 24], iconAnchor: [12, 12] });
+        const beerIcon = L.divIcon({ html: '🍺', className: 'custom-beer-icon', iconSize: [24,24], iconAnchor: [12,12] });
+
+        /* --- Stern-Darstellung (0.25er Schritte) --- */
+        function starsHtml(rating) {
+            const full    = Math.floor(rating);
+            const quarter = Math.round((rating - full) * 4); // 0,1,2,3
+            let s = '★'.repeat(full);
+            if (quarter === 1) s += '\u00bc';
+            else if (quarter === 2) s += '½';
+            else if (quarter === 3) s += '\u00be';
+            s += '☆'.repeat(5 - full - (quarter > 0 ? 1 : 0));
+            return `<span class="stars">${s}</span>`;
+        }
+
+        /* --- Tabellen rendern --- */
+        function renderRankTable(tbodyId, beers, noDataMsg) {
+            const tbody = document.getElementById(tbodyId);
+            if (!beers || beers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="no-data-hint">${noDataMsg}</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = beers.map((b, i) => `
+                <tr>
+                    <td style="color:var(--text-muted);font-size:.8rem;width:1.5rem;">${i+1}</td>
+                    <td>
+                        <strong style="color:var(--text);">${b.beer}</strong>
+                        <div style="font-size:.75rem;color:var(--text-muted);">${b.brewery} &middot; ${b.style}${b.count > 1 ? ` &middot; ${b.count}× bewertet` : ''}</div>
+                    </td>
+                    <td class="col-num" style="white-space:nowrap;">
+                        ${starsHtml(b.rating)}<br>
+                        <span style="font-size:.8rem;color:var(--text-muted);">${b.rating.toFixed(2)}</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
         async function loadUntappdData() {
+            /* 1. Stats JSON */
             try {
-                // 1. STATS JSON LOAD
-                const response = await fetch('./data/stats.json');
-                const data = await response.json();
-                
+                const res  = await fetch('./data/stats.json');
+                const data = await res.json();
                 const total = data.overview.total_checkins;
-                document.getElementById('stat-checkins').textContent = total;
-                document.getElementById('stat-unique').textContent = data.overview.unique_beers;
+
+                document.getElementById('stat-checkins').textContent  = total;
+                document.getElementById('stat-unique').textContent    = data.overview.unique_beers;
                 document.getElementById('stat-breweries').textContent = data.overview.unique_breweries;
-                
+
                 let topStyle = data.styles[0].style;
-                if(topStyle === 'Other' && data.styles.length > 1) topStyle = data.styles[1].style;
-                document.getElementById('top-style').textContent = topStyle;
+                if (topStyle === 'Other' && data.styles.length > 1) topStyle = data.styles[1].style;
+                document.getElementById('top-style').textContent   = topStyle;
                 document.getElementById('top-brewery').textContent = data.top_breweries[0].brewery;
-                document.getElementById('best-beer').textContent = data.top_beers[0].beer;
+                document.getElementById('best-beer').textContent   = data.top_beers[0].beer;
                 document.getElementById('best-beer-sub').textContent = data.top_beers[0].brewery;
-                
-                const dateParts = data.overview.date_to.split('-');
-                document.getElementById('last-checkin').textContent = `${dateParts[2]}.${dateParts[1]}.${dateParts[0]}`;
+
+                const dp = data.overview.date_to.split('-');
+                document.getElementById('last-checkin').textContent = `${dp[2]}.${dp[1]}.${dp[0]}`;
 
                 const target = Math.ceil((total + 1) / 100) * 100;
-                document.getElementById('milestone-text').textContent = `${target}-Bier-Meilenstein`;
-                document.getElementById('progress-label').textContent = `${total} / ${target} Biere`;
+                document.getElementById('milestone-text').textContent  = `${target}-Bier-Meilenstein`;
+                document.getElementById('progress-label').textContent  = `${total} / ${target} Biere`;
                 setTimeout(() => { document.getElementById('progress-fill').style.width = Math.min((total/target)*100, 100) + '%'; }, 400);
 
-                // STYLES TABLE
-                const tbody = document.getElementById('styles-tbody');
-                tbody.innerHTML = '';
+                /* Styles Tabelle */
+                const sTbody = document.getElementById('styles-tbody');
+                sTbody.innerHTML = '';
+                const styleIcons = { 'Tripel':'\ud83c\udf77','Quadrupel':'\ud83c\udf77','IPA':'\ud83c\udf3f','NEIPA/Hazy IPA':'\ud83c\udf3f',
+                    'DIPA':'\ud83c\udf3f','TIPA':'\ud83c\udf3f','Lager/Pils':'\ud83c\udf7b','Wheat Beer':'\ud83c\udf3e',
+                    'Stout/Porter':'\u2615','Sour/Wild':'\ud83c\udf4b','Other':'\u2753' };
                 data.styles.forEach(s => {
-                    const row = document.createElement('tr');
-                    let icon = '🍺';
-                    if(s.style === 'Tripel' || s.style === 'Quadrupel') icon = '🍷';
-                    if(s.style === 'IPA' || s.style.includes('IPA')) icon = '🌿';
-                    if(s.style === 'Lager/Pils') icon = '🍻';
-                    if(s.style === 'Wheat Beer') icon = '🌾';
-                    if(s.style === 'Stout/Porter') icon = '☕';
-                    if(s.style === 'Sour/Wild') icon = '🍋';
-                    if(s.style === 'Other') icon = '❓';
-                    row.innerHTML = `<td>${icon} ${s.style}</td><td class="col-num">${s.checkins}</td><td class="col-num" style="opacity: 0.7;">${s.unique_beers}</td>`;
-                    tbody.appendChild(row);
+                    const icon = styleIcons[s.style] || '\ud83c\udf7a';
+                    sTbody.innerHTML += `<tr><td>${icon} ${s.style}</td><td class="col-num">${s.checkins}</td><td class="col-num" style="opacity:.7;">${s.unique_beers}</td></tr>`;
                 });
 
-                // MAP & VENUES
-                const venuesGrid = document.getElementById('venues-grid');
-                venuesGrid.innerHTML = ''; 
+                /* Map & Venues */
+                const vg = document.getElementById('venues-grid');
+                vg.innerHTML = '';
                 data.top_venues.slice(0, 4).forEach(v => {
-                    venuesGrid.innerHTML += `<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size: 1.1rem; line-height:1.2; margin-bottom:0.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
+                    vg.innerHTML += `<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size:1.1rem;line-height:1.2;margin-bottom:.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
                 });
                 const heatPoints = [];
-                const mapData = data.heatmap || data.top_venues; 
-                mapData.forEach(loc => {
-                    if(loc.lat && loc.lon) {
+                (data.heatmap || data.top_venues).forEach(loc => {
+                    if (loc.lat && loc.lon) {
                         heatPoints.push([loc.lat, loc.lon, Math.min(loc.visits * 0.1, 1.0)]);
-                        if (loc.visits >= 4) { L.marker([loc.lat, loc.lon], {icon: beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map); }
+                        if (loc.visits >= 4) L.marker([loc.lat,loc.lon],{icon:beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map);
                     }
                 });
-                L.heatLayer(heatPoints, { radius: 25, blur: 15, maxZoom: 10, gradient: { 0.4: '#ef4444', 0.6: '#f59e0b', 0.8: '#fbbf24', 1.0: '#fff' } }).addTo(map);
-                map.setView([50.7753, 6.0839], 6);
+                L.heatLayer(heatPoints,{radius:25,blur:15,maxZoom:10,gradient:{'0.4':'#ef4444','0.6':'#f59e0b','0.8':'#fbbf24','1.0':'#fff'}}).addTo(map);
+                map.setView([50.7753,6.0839],6);
+            } catch(e) { console.error('Stats JSON error', e); }
 
-            } catch (error) { console.error("Stats JSON error", error); }
-
-            // 2. ML DATA LOAD (NEU: Chart.js, Empfehlung, Top/Flop)
+            /* 2. ML JSON */
             try {
-                const mlRes = await fetch('./data/ml_data.json');
+                const mlRes  = await fetch('./data/ml_data.json');
                 const mlData = await mlRes.json();
-                
-                // Rating Overview
-                document.getElementById('stat-rating').textContent = mlData.ratings.average.toFixed(2);
-                
-                // Recommendation Widget
-                document.getElementById('rec-beer').textContent = mlData.recommendation.beer;
-                document.getElementById('rec-brewery').textContent = mlData.recommendation.brewery;
-                document.getElementById('rec-style').textContent = mlData.recommendation.style;
-                document.getElementById('rec-desc').textContent = mlData.recommendation.description;
-                document.getElementById('rec-reason').textContent = mlData.recommendation.match_reason;
-                
-                // Top / Flop Beers Tables
-                const renderBeerTable = (tbodyId, beers) => {
-                    const tbody = document.getElementById(tbodyId);
-                    tbody.innerHTML = '';
-                    beers.forEach(b => {
-                        const tr = document.createElement('tr');
-                        // Helper to generate star text based on 0.25 steps
-                        const fullStars = Math.floor(b.rating);
-                        const quarter = b.rating - fullStars;
-                        let starStr = '★'.repeat(fullStars);
-                        if(quarter > 0) starStr += '½'; // simple representation
-                        
-                        tr.innerHTML = `
-                            <td><strong style="color:var(--text);">${b.beer}</strong><div style="font-size:0.75rem;color:var(--text-muted);">${b.style}</div></td>
-                            <td style="font-size:0.85rem;">${b.brewery}</td>
-                            <td class="col-num"><span class="stars">${starStr}</span><br><span style="font-size:0.8rem; color:var(--text-muted);">${b.rating.toFixed(2)}</span></td>
-                        `;
-                        tbody.appendChild(tr);
-                    });
-                };
-                
-                if(mlData.top_rated) renderBeerTable('top-beers-tbody', mlData.top_rated);
-                if(mlData.lowest_rated) renderBeerTable('flop-beers-tbody', mlData.lowest_rated);
-                
-                // Rendering Chart.js
-                const ctxChart = document.getElementById('ratingChart').getContext('2d');
-                const labels = Object.keys(mlData.ratings.distribution).sort();
-                const dataPts = labels.map(l => mlData.ratings.distribution[l]);
-                
-                Chart.defaults.color = '#94a3b8';
-                Chart.defaults.font.family = "'Inter', sans-serif";
 
+                document.getElementById('stat-rating').textContent = mlData.ratings.average.toFixed(2);
+
+                /* Empfehlung */
+                document.getElementById('rec-beer').textContent    = mlData.recommendation.beer;
+                document.getElementById('rec-brewery').textContent = mlData.recommendation.brewery;
+                document.getElementById('rec-style').textContent   = mlData.recommendation.style;
+                document.getElementById('rec-desc').textContent    = mlData.recommendation.description;
+                document.getElementById('rec-reason').textContent  = mlData.recommendation.match_reason;
+
+                /* Top / Flop */
+                const noRealData = `🔍 Echte Ratings fehlen noch.<br>
+                    Bitte <code>parse_untappd.py</code> mit dem Untappd-Export erneut ausführen,<br>
+                    damit deine echten Bewertungen hier erscheinen.`;
+                renderRankTable('top-beers-tbody',  mlData.top_rated,    noRealData);
+                renderRankTable('flop-beers-tbody', mlData.lowest_rated, noRealData);
+
+                /* Chart.js */
+                Chart.defaults.color = '#94a3b8';
+                Chart.defaults.font.family = "'Inter',sans-serif";
+                const ctxChart = document.getElementById('ratingChart').getContext('2d');
+                const labels  = Object.keys(mlData.ratings.distribution).sort();
+                const dataPts  = labels.map(l => mlData.ratings.distribution[l]);
                 new Chart(ctxChart, {
                     type: 'bar',
                     data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Check-ins',
-                            data: dataPts,
-                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
-                            borderColor: '#f59e0b',
-                            borderWidth: 1,
-                            borderRadius: 4
-                        }]
+                        labels,
+                        datasets: [{ label:'Check-ins', data:dataPts, backgroundColor:'rgba(245,158,11,.7)', borderColor:'#f59e0b', borderWidth:1, borderRadius:4 }]
                     },
                     options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', titleColor: '#fff', bodyColor: '#f59e0b', padding: 10 }
-                        },
-                        scales: {
-                            y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                            x: { grid: { display: false } }
-                        }
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend:{display:false}, tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#fff',bodyColor:'#f59e0b',padding:10} },
+                        scales: { y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'}}, x:{grid:{display:false}} }
                     }
                 });
-            } catch (error) { console.error("ML JSON error", error); }
+            } catch(e) { console.error('ML JSON error', e); }
         }
 
         loadUntappdData();
 
-        // Canvas Particles
+        /* Particles */
         const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
+        const ctx    = canvas.getContext('2d');
         let width, height, particles = [];
-        function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; initParticles(); }
+        function resize() { width=canvas.width=window.innerWidth; height=canvas.height=window.innerHeight; initParticles(); }
         window.addEventListener('resize', resize); resize();
         class Particle {
-            constructor() {
-                this.x = Math.random()*width; this.y = Math.random()*height; this.size = Math.random()*2+0.5;
-                this.speedX = Math.random()*0.8-0.4; this.speedY = Math.random()*0.8-0.4;
-                this.opacity = Math.random()*0.45+0.08; this.color = Math.random()>0.5?'#f59e0b':'#ef4444';
-            }
-            update() { this.x += this.speedX; this.y += this.speedY; if(this.x<0)this.x=width; if(this.x>width)this.x=0; if(this.y<0)this.y=height; if(this.y>height)this.y=0; }
-            draw() { ctx.globalAlpha = this.opacity; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill(); }
+            constructor() { this.x=Math.random()*width; this.y=Math.random()*height; this.size=Math.random()*2+.5; this.speedX=Math.random()*.8-.4; this.speedY=Math.random()*.8-.4; this.opacity=Math.random()*.45+.08; this.color=Math.random()>.5?'#f59e0b':'#ef4444'; }
+            update() { this.x+=this.speedX; this.y+=this.speedY; if(this.x<0)this.x=width; if(this.x>width)this.x=0; if(this.y<0)this.y=height; if(this.y>height)this.y=0; }
+            draw() { ctx.globalAlpha=this.opacity; ctx.fillStyle=this.color; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
         }
-        function initParticles() { particles = []; const count = Math.floor((width*height)/15000); for(let i=0; i<count; i++) particles.push(new Particle()); }
-        function animate() {
-            ctx.clearRect(0,0,width,height);
-            for(let i=0; i<particles.length; i++) {
-                particles[i].update(); particles[i].draw();
-            }
-            requestAnimationFrame(animate);
-        }
+        function initParticles() { particles=[]; const n=Math.floor((width*height)/15000); for(let i=0;i<n;i++) particles.push(new Particle()); }
+        function animate() { ctx.clearRect(0,0,width,height); for(const p of particles){p.update();p.draw();} requestAnimationFrame(animate); }
         animate();
     </script>
 </body>
