@@ -35,10 +35,10 @@ def parse_date(s):
 
 def infer_style(name, badges):
     n = name
-    if re.search(r'0[,.]0|Alkoholfrei|Alcohol Free', n, re.I): return 'Non-Alcoholic'
-    if re.search(r'Radler|Fassbrause', n, re.I): return 'Radler/Malt'
+    if re.search(r'0[,.]0|Alkoholfrei|Alcohol Free|Non-Alcoholic', n, re.I): return 'Non-Alcoholic'
+    if re.search(r'Radler|Fassbrause|Shandy', n, re.I): return 'Radler/Malt'
     if re.search(r'Cider', n, re.I): return 'Cider'
-    if re.search(r'TIPA|Triple.*IPA', n, re.I): return 'TIPA'
+    if re.search(r'TIPA|Triple.*IPA|Quadruple.*IPA', n, re.I): return 'TIPA/QIPA'
     if re.search(r'DIPA|Double.*IPA|Imperial.*IPA|DDH DIPA', n, re.I): return 'DIPA'
     if re.search(r'NEIPA|New England|Hazy', n, re.I): return 'NEIPA/Hazy IPA'
     if re.search(r'I\.?P\.?A\.?|India Pale Ale', n, re.I): return 'IPA'
@@ -51,14 +51,52 @@ def infer_style(name, badges):
     if re.search(r'Kölsch|Kolsch', n, re.I): return 'Kölsch'
     if re.search(r'Alt\b|Altbier', n, re.I): return 'Altbier'
     if re.search(r'Bock\b|Märzen|Oktoberfest', n, re.I): return 'Bock/Märzen'
-    if re.search(r'Lager|Pils|Pilsner|Hell\b|Helles', n, re.I): return 'Lager/Pils'
+    if re.search(r'Lager|Pils|Pilsner|Hell\b|Helles|Export', n, re.I): return 'Lager/Pils'
     if re.search(r'Pale Ale|\bPA\b', n, re.I): return 'Pale Ale'
     if re.search(r'Blonde|Blond\b|Blanche|Golden', n, re.I): return 'Blonde/Golden'
     if re.search(r'Amber|Ambrée|Red\b|Rouge\b', n, re.I): return 'Amber/Red'
     return 'Other'
 
+def guess_brewery_country(brewery):
+    br = brewery.lower()
+    
+    # Keyword based matching for European / global breweries
+    if any(x in br for x in ["brauerei", "bräu", "krombacher", "paulaner", "bitburger", "diebels", "schlenkerla", "radeberger", "veltins", "meckatzer", "schanzenbräu", "eremita", "störtebeker", "insel-brauerei", "hopfen+malz", "yankee & kraut", "totenhopfen", "blech.brut", "atelier vrai", "gmbh", "karlsberg", "riegele", "kundmüller", "bayreuther", "simon", "lammsbräu", "hohenthanner"]):
+        return "Deutschland"
+    if any(x in br for x in ["brouwerij", "vrouwen", "swinkels", "uiltje", "frontaal", "vande", "jopen", "kees", "stadshaven", "moersleutel", "hoop", "t ij", "lindeboom", "two chefs", "heineken", "bavaria"]):
+        return "Niederlande"
+    if any(x in br for x in ["mont blanc", "licorne", "galibier", "pélican", "champigneulles", "sainte cru", "sapaudia", "gallia", "popihn", "fauve", "gwape", "la cahute", "brasserie du"]):
+        return "Frankreich"
+    if any(x in br for x in ["brasserie", "stella", "leroy", "delirium", "rochehaut", "bertinchamps", "haacht", "dubbel", "dupont", "palm", "achouffe", "caulier", "rodenbach", "alken-maes", "belgium", "huyghe", "grain d'orge"]):
+        return "Belgien"
+    if any(x in br for x in ["brewdog", "northern monk", "vocation", "hawkes", "lhg", "beak", "beavertown"]):
+        return "UK"
+    if any(x in br for x in ["sierra nevada", "other half", "rogue", "two brothers", "mackinac"]):
+        return "USA"
+    if "pivovar" in br or "staropramen" in br or "kozel" in br:
+        return "Tschechien"
+    if "guinness" in br or "rye river" in br:
+        return "Irland"
+    if "lervig" in br:
+        return "Norwegen"
+    if "põhjala" in br:
+        return "Estland"
+    if "ārpus" in br:
+        return "Lettland"
+    if "bevog" in br or "stiegl" in br or "ottakringer" in br:
+        return "Österreich"
+    if "maryensztadt" in br or "browar" in br:
+        return "Polen"
+    if "mikkeller" in br or "carlsberg" in br:
+        return "Dänemark"
+    if "garage" in br:
+        return "Spanien"
+    
+    return "Unknown"
+
 # Extrahiere JEDE Dezimalzahl in der Export-Datei (auch mit Komma statt Punkt oder "Rating:" Präfix)
 RATING_RE_ANY = re.compile(r'(?:Rating:)?\s*([0-5][\.,](?:0|25|5|75|\d{1,2}))\b', re.IGNORECASE)
+ABV_RE = re.compile(r'([0-9.]+)\s*%\s*ABV', re.IGNORECASE)
 
 def parse_export(filepath):
     if not os.path.exists(filepath):
@@ -85,6 +123,7 @@ def parse_export(filepath):
                     'serving_type': None,
                     'date': None,
                     'rating': None,
+                    'abv': None,
                     'badges': [],
                     'tagged_friends': []
                 }
@@ -106,7 +145,11 @@ def parse_export(filepath):
                         rm = re.search(r'You?(?:r)?\s+Rating\s*\(([0-9.]+)\)', nel, re.IGNORECASE)
                         if rm:
                             current['rating'] = float(rm.group(1))
-                            break
+                            
+                        # Extract ABV
+                        am = ABV_RE.search(nel)
+                        if am:
+                            current['abv'] = float(am.group(1))
                     
                     for nel in reversed(non_empty):
                         dm = re.search(r'Recent:\s*(\d{2})/(\d{2})/(\d{2})', nel)
@@ -125,7 +168,7 @@ def parse_export(filepath):
             
         return checkins
 
-    # --- ALT FORMAT PARSING ---
+    # --- ALT FORMAT PARSING (Falls man mal wieder einen echten Export lädt) ---
     checkins, current, tagged = [], {}, False
 
     for raw in lines:
@@ -144,6 +187,7 @@ def parse_export(filepath):
                 'serving_type': None,
                 'date':      None,
                 'rating':    None,
+                'abv':       None,
                 'badges':    [],
                 'tagged_friends': []
             }
@@ -181,6 +225,12 @@ def parse_export(filepath):
                     pass
             elif line in ["1", "2", "3", "4", "5"]:
                 current['rating'] = float(line)
+                
+        # Versuche ABV in der exportdatei zu finden
+        if current['abv'] is None:
+            am = ABV_RE.search(line)
+            if am:
+                current['abv'] = float(am.group(1))
 
         elif 'View Detailed Check-in Delete Check-In' in line:
             ds = line.replace('View Detailed Check-in Delete Check-In', '').strip()
@@ -199,11 +249,38 @@ def parse_export(filepath):
 
 def build_rated_beers(checkins):
     beer_data = defaultdict(lambda: {'brewery': '', 'style': '', 'ratings': []})
+    brewery_counts = defaultdict(int)
+    style_counts = defaultdict(lambda: {'count': 0, 'unique': set()})
+    
+    # ABV dist, 1% steps: "0-1", "1-2", "2-3", ... "12+"
+    abv_dist = defaultdict(int)
+    brewery_countries = defaultdict(int)
 
     found_any_ratings = any(c.get('rating') is not None for c in checkins)
 
     for c in checkins:
         beer_name = c['beer_name']
+        brewery = c['brewery']
+        style = c['style']
+        
+        # Style Aggregation
+        style_counts[style]['count'] += 1
+        style_counts[style]['unique'].add(beer_name)
+        
+        # Brewery / Country Aggregation
+        brewery_counts[brewery] += 1
+        b_country = guess_brewery_country(brewery)
+        brewery_countries[b_country] += 1
+        
+        # ABV
+        if c.get('abv') is not None:
+            abv_val = c['abv']
+            if abv_val >= 12:
+                abv_dist["12+%"] += 1
+            else:
+                step = int(abv_val)
+                label = f"{step}-{step+1}%"
+                abv_dist[label] += 1
         
         if not found_any_ratings:
             random.seed(beer_name)
@@ -212,8 +289,8 @@ def build_rated_beers(checkins):
             c['rating'] = round(base * 4) / 4
         
         if c.get('rating') is not None:
-            beer_data[beer_name]['brewery'] = c['brewery']
-            beer_data[beer_name]['style']   = c['style']
+            beer_data[beer_name]['brewery'] = brewery
+            beer_data[beer_name]['style']   = style
             beer_data[beer_name]['ratings'].append(c['rating'])
 
     random.seed()
@@ -232,7 +309,24 @@ def build_rated_beers(checkins):
         })
 
     rated.sort(key=lambda x: (x['avg_rating'], x['rated_count']), reverse=True)
-    return rated, not found_any_ratings
+    
+    # Top Breweries List
+    top_breweries = [{"brewery": b, "count": c} for b, c in brewery_counts.items()]
+    top_breweries.sort(key=lambda x: x["count"], reverse=True)
+    
+    # Styles
+    styles_list = [{"style": s, "checkins": d['count'], "unique_beers": len(d['unique'])} for s, d in style_counts.items()]
+    styles_list.sort(key=lambda x: x["checkins"], reverse=True)
+    
+    # ABV List for Chart (Sorted 0-1, 1-2... 12+)
+    abv_keys = [f"{i}-{i+1}%" for i in range(12)] + ["12+%"]
+    abv_chart = [{"label": k, "count": abv_dist.get(k, 0)} for k in abv_keys]
+    
+    # Brewery Countries List
+    b_countries_list = [{"country": k, "count": v} for k, v in brewery_countries.items() if v > 0]
+    b_countries_list.sort(key=lambda x: x["count"], reverse=True)
+
+    return rated, not found_any_ratings, top_breweries, styles_list, abv_chart, b_countries_list
 
 if __name__ == '__main__':
     print(f'Parsing {INPUT_FILE}...')
@@ -241,7 +335,7 @@ if __name__ == '__main__':
         print("Keine Checkins gefunden oder Datei leer.")
         sys.exit(0)
         
-    rated_beers, used_fallback = build_rated_beers(checkins)
+    rated_beers, used_fallback, top_breweries, styles_list, abv_chart, b_countries = build_rated_beers(checkins)
 
     if used_fallback:
         print(f"WARNUNG: Die Datei '{INPUT_FILE}' enthielt KEINE Stern-Bewertungen!")
@@ -255,12 +349,19 @@ if __name__ == '__main__':
             stats = json.load(f)
 
         stats['rated_beers'] = rated_beers
+        stats['top_breweries'] = top_breweries
+        stats['styles'] = styles_list
+        stats['abv_distribution'] = abv_chart
+        stats['brewery_countries'] = b_countries
 
         if checkins:
             dates = [c['date'] for c in checkins if c.get('date')]
             if dates:
                 stats['overview']['date_from'] = min(dates)
                 stats['overview']['date_to']   = max(dates)
+                stats['overview']['unique_beers'] = len(set(c['beer_name'] for c in checkins))
+                stats['overview']['total_checkins'] = len(checkins)
+                stats['overview']['unique_breweries'] = len(set(c['brewery'] for c in checkins))
 
         tmp = STATS_PATH + '.tmp'
         with open(tmp, 'w', encoding='utf-8') as f:
