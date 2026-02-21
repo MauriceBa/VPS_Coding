@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎿 Plan des Pistes | mauricelol.fun</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --secondary: #38bdf8;
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --header-height: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: var(--header-height);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 2rem; background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            text-decoration: none; transition: transform 0.3s;
+        }
+        .logo:hover { transform: scale(1.05); }
+
+        .nav-group { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-link {
+            color: var(--text); text-decoration: none; font-weight: 500;
+            padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;
+            border: 1px solid transparent; background: rgba(255,255,255,0.03);
+        }
+        .nav-link:hover, .nav-link.active {
+            background: rgba(2, 132, 199, 0.15);
+            border-color: var(--primary); color: var(--secondary);
+        }
+
+        main {
+            max-width: 1400px; margin: calc(var(--header-height) + 3rem) auto 2rem;
+            padding: 0 1rem; position: relative; z-index: 1;
+        }
+
+        .hero { text-align: center; margin-bottom: 3rem; animation: slideUp 0.8s ease-out; }
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 800; margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #e0f2fe, #7dd3fc);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .subtitle { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+
+        .map-container {
+            margin-bottom: 4rem;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.8s ease-out backwards;
+        }
+
+        .map-container:nth-child(2) { animation-delay: 0.1s; }
+        .map-container:nth-child(3) { animation-delay: 0.2s; }
+        .map-container:nth-child(4) { animation-delay: 0.3s; }
+        .map-container:nth-child(5) { animation-delay: 0.4s; }
+
+        .map-header {
+            padding: 1.2rem 1.5rem;
+            background: rgba(2, 132, 199, 0.1);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .map-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .map-title::before {
+            content: '🏔️';
+            font-size: 1.6rem;
+        }
+
+        .open-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.2s;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .open-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            width: 100%;
+            height: 75vh;
+            min-height: 600px;
+            background: #1e293b;
+        }
+
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Loading indicator for iframes */
+        .iframe-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        footer { padding: 2rem; text-align: center; color: var(--text-muted); border-top: 1px solid var(--card-border); margin-top: 2rem; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* SNOW ANIMATION */
+        #snow-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <canvas id="snow-canvas"></canvas>
+
+    <header>
+        <a href="/" class="logo">mauricelol.fun</a>
+        <div class="nav-group">
+            <a href="/" class="nav-link">🏠 Home</a>
+            <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
+            <a href="/plan-des-pistes/" class="nav-link active">🎿 Pistenpläne</a>
+            <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
+            <a href="/untappd/" class="nav-link">🍺 Bier</a>
+            <a href="/btd6/" class="nav-link">🎈 BTD6</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="hero">
+            <h1>Plan des Pistes</h1>
+            <p class="subtitle">Interaktive Pistenpläne deiner Lieblings-Skigebiete in Frankreich. Aktuelle Lift- und Pistenstatus in Echtzeit.</p>
+        </div>
+
+        <!-- VAL MEINIER -->
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-title">Valmeinier & Galibier Thabor</div>
+                <a href="https://live.skiplan.com/moduleweb/2.0/live.php?resort=valmeinier&module=ouvertures#" target="_blank" class="open-btn">In neuem Tab öffnen</a>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-loading"><div class="spinner"></div><span>Lade Pistenplan...</span></div>
+                <iframe src="https://live.skiplan.com/moduleweb/2.0/live.php?resort=valmeinier&module=ouvertures#" onload="this.previousElementSibling.style.display='none'"></iframe>
+            </div>
+        </div>
+
+        <!-- PARADISKI -->
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-title">Paradiski (Les Arcs / La Plagne)</div>
+                <a href="https://lumiplay.link/interactive-map/Paradiski/fr" target="_blank" class="open-btn">In neuem Tab öffnen</a>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-loading"><div class="spinner"></div><span>Lade Pistenplan...</span></div>
+                <iframe src="https://lumiplay.link/interactive-map/Paradiski/fr" onload="this.previousElementSibling.style.display='none'"></iframe>
+            </div>
+        </div>
+
+        <!-- LES 3 VALLEES -->
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-title">Les 3 Vallées</div>
+                <a href="https://www.les3vallees.com/de/live/oeffnungszeiten-pisten-und-lifte" target="_blank" class="open-btn">In neuem Tab öffnen</a>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-loading"><div class="spinner"></div><span>Lade Pistenplan...</span></div>
+                <!-- Für 3 Vallees versuchen wir direkt die Karte einzubinden, ansonsten die Hauptseite -->
+                <iframe src="https://www.les3vallees.com/de/live/oeffnungszeiten-pisten-und-lifte" onload="this.previousElementSibling.style.display='none'"></iframe>
+            </div>
+        </div>
+
+        <!-- TIGNES -->
+        <div class="map-container">
+            <div class="map-header">
+                <div class="map-title">Tignes & Val d'Isère</div>
+                <a href="https://www.tignes.net/ski/domaine-skiable/plan-des-pistes" target="_blank" class="open-btn">In neuem Tab öffnen</a>
+            </div>
+            <div class="iframe-wrapper">
+                <div class="iframe-loading"><div class="spinner"></div><span>Lade Pistenplan...</span></div>
+                <iframe src="https://www.tignes.net/ski/domaine-skiable/plan-des-pistes" onload="this.previousElementSibling.style.display='none'"></iframe>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 MauriceBa. Alle Karten sind Eigentum der jeweiligen Skigebiete.</p>
+    </footer>
+
+    <script>
+        // Schnee-Animation im Hintergrund! ❄️
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, flakes = [];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initSnow();
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Snowflake {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 3 + 1;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > height) this.y = -10;
+                if (this.x > width) this.x = -10;
+                if (this.x < -10) this.x = width + 10;
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = "#ffffff";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initSnow() {
+            flakes = [];
+            const count = Math.floor((width * height) / 15000);
+            for (let i = 0; i < count; i++) flakes.push(new Snowflake());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let i = 0; i < flakes.length; i++) {
+                flakes[i].update();
+                flakes[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
