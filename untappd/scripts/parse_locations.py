@@ -203,9 +203,9 @@ def run():
         
     save_cache(cache)
     
-    # Generate Top 4 Venues for the overview grid (prioritizing high visits, keeping names short)
+    # Generate Top 6 Venues for the overview grid (prioritizing high visits, keeping names short)
     valid_venues = [h for h in heatmap_data if h['lat'] is not None]
-    top_venues = valid_venues[:4] if len(valid_venues) >= 4 else valid_venues
+    top_venues = valid_venues[:6] if len(valid_venues) >= 6 else valid_venues
     
     # Transform country map to sorted list
     checkin_countries_list = [{"country": k, "count": v} for k, v in checkin_countries_map.items()]
