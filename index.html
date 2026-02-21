@@ -264,6 +264,15 @@
             box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.35);
         }
 
+        /* === BTD6 CARD === */
+        .card.btd-card::before {
+            background: linear-gradient(to right, #3b82f6, #ef4444);
+        }
+        .card.btd-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35);
+        }
+
         .card-icon {
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -389,6 +398,7 @@
             <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
             <a href="/untappd/" class="nav-link">🍺 Bier Stats</a>
+            <a href="/btd6/" class="nav-link">🎈 BTD6</a>
         </div>
     </header>
 
@@ -421,6 +431,18 @@
         </div>
 
         <section class="grid">
+            <a href="/btd6/" class="card btd-card">
+                <div class="card-icon">🎈</div>
+                <h3>BTD6 Profil <span class="badge" style="background: linear-gradient(135deg, #3b82f6, #ef4444);">Neu</span></h3>
+                <p>Live Ninja Kiwi API Tracking! Schau dir meine Affen-Level, Medaillen und Monkey Money live an.</p>
+            </a>
+
+            <a href="/untappd/" class="card beer-card">
+                <div class="card-icon">🍺</div>
+                <h3>Bier Stats</h3>
+                <p>Meine persönlichen Bier-Statistiken. Check-ins, Favoriten und mehr – powered by Untappd.</p>
+            </a>
+
             <a href="/ski-resort-idle/" class="card">
                 <div class="card-icon">🏔️</div>
                 <h3>Ski Resort Idle</h3>
@@ -439,12 +461,6 @@
                 <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
             </a>
 
-            <a href="/untappd/" class="card beer-card">
-                <div class="card-icon">🍺</div>
-                <h3>Bier Stats</h3>
-                <p>Meine persönlichen Bier-Statistiken. Check-ins, Favoriten und mehr – powered by Untappd.</p>
-            </a>
-
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="card friend-card">
                 <div class="card-icon">🍽️</div>
                 <h3>uncreped.eu <span class="badge">Freund</span></h3>
@@ -459,6 +475,7 @@
             <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
             <a href="/untappd/" class="footer-link">🍺 Bier Stats</a>
+            <a href="/btd6/" class="footer-link">🎈 BTD6</a>
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
         </div>
         <p>&copy; 2026 MauriceBa. Built with passion &amp; beer. 🍺</p>
@@ -513,7 +530,6 @@
             const counterKey = 'mauricelol_global_counted';
             const hasVisitedGlobal = localStorage.getItem(counterKey);
             
-            // Verwende eine kostenlose API, die nur hochzählt, wenn der Nutzer neu ist
             let url = 'https://api.counterapi.dev/v1/mauricefun_lol/visitors';
             if (!hasVisitedGlobal) {
                 url += '/up';
