@@ -248,9 +248,9 @@
             const full    = Math.floor(rating);
             const quarter = Math.round((rating - full) * 4); // 0,1,2,3
             let s = '★'.repeat(full);
-            if (quarter === 1) s += '\\u00bc';
+            if (quarter === 1) s += '¼';
             else if (quarter === 2) s += '½';
-            else if (quarter === 3) s += '\\u00be';
+            else if (quarter === 3) s += '¾';
             s += '☆'.repeat(5 - full - (quarter > 0 ? 1 : 0));
             return `<span class="stars">${s}</span>`;
         }
