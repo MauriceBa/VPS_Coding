@@ -273,6 +273,9 @@
         .card.btd-card::before { background: linear-gradient(to right, #3b82f6, #ef4444); }
         .card.btd-card:hover { border-color: #3b82f6; box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.35); }
 
+        .card.ski-card::before { background: linear-gradient(to right, #0ea5e9, #bae6fd); }
+        .card.ski-card:hover { border-color: #0ea5e9; box-shadow: 0 20px 40px -10px rgba(14, 165, 233, 0.35); }
+
         .card.github-card::before { background: linear-gradient(to right, #6b7280, #cbd5e1); }
         .card.github-card:hover { border-color: #94a3b8; box-shadow: 0 20px 40px -10px rgba(148, 163, 184, 0.35); }
 
@@ -303,6 +306,10 @@
             letter-spacing: 0.5px;
             margin-left: 0.4rem;
             vertical-align: middle;
+        }
+
+        .badge.blue {
+            background: linear-gradient(135deg, #0284c7, #38bdf8);
         }
 
         /* === BOTTOM SERVER STATS TERMINAL === */
@@ -428,8 +435,9 @@
                 <span class="weather-loc">Aachen</span>
             </div>
             <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
+            <a href="/plan-des-pistes/" class="nav-link">🎿 Pistenpläne</a>
             <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
-            <a href="/untappd/" class="nav-link">🍺 Bier Stats</a>
+            <a href="/untappd/" class="nav-link">🍺 Bier</a>
             <a href="/btd6/" class="nav-link">🎈 BTD6</a>
         </div>
     </header>
@@ -469,6 +477,12 @@
                 <div class="card-icon">🎈</div>
                 <h3>BTD6 Profil <span class="badge" style="background: linear-gradient(135deg, #3b82f6, #ef4444);">Neu</span></h3>
                 <p>Live Ninja Kiwi API Tracking! Schau dir meine Affen-Level, Medaillen und Monkey Money live an.</p>
+            </a>
+
+            <a href="/plan-des-pistes/" class="card ski-card">
+                <div class="card-icon">🎿</div>
+                <h3>Plan des Pistes <span class="badge blue">Neu</span></h3>
+                <p>Interaktive Pistenpläne französischer Skigebiete wie 3 Vallées, Paradiski, Tignes und Valmeinier.</p>
             </a>
 
             <a href="/untappd/" class="card beer-card">
@@ -533,6 +547,7 @@
         <div class="footer-links">
             <a href="https://github.com/MauriceBa" target="_blank" class="footer-link">🐙 GitHub</a>
             <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
+            <a href="/plan-des-pistes/" class="footer-link">🎿 Pistenpläne</a>
             <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
             <a href="/untappd/" class="footer-link">🍺 Bier Stats</a>
             <a href="/btd6/" class="footer-link">🎈 BTD6</a>
@@ -679,7 +694,7 @@
                 const disk  = s.disk_root || {};
 
                 const line2 = `CPU load: ${load1.toFixed(2)} (1m), ${load5.toFixed(2)} (5m)`;
-                const line3 = `RAM: ${mem.percent ?? 0}%  (${(mem.used_gb ?? 0).toFixed(2)}/${(mem.total_gb ?? 0).toFixed(2)} GB)  |  SSD: ${disk.percent ?? 0}%  (${(disk.used_gb ?? 0).toFixed(1)}/${(disk.total_gb ?? 0).toFixed(1)} GB)`;
+                const line3 = `RAM: ${mem.percent ?? 0}%  ${(mem.used_gb ?? 0).toFixed(2)}/${(mem.total_gb ?? 0).toFixed(2)} GB)  |  SSD: ${disk.percent ?? 0}%  ${(disk.used_gb ?? 0).toFixed(1)}/${(disk.total_gb ?? 0).toFixed(1)} GB)`;
 
                 document.getElementById('server-line-2').textContent = line2;
                 document.getElementById('server-line-3').textContent = line3;
