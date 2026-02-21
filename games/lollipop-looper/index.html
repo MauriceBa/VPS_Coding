@@ -216,7 +216,7 @@
         </div>
     </div>
 
-    <div id="version-lbl">v1.3.0</div>
+    <div id="version-lbl">v1.3.1</div>
     <div class="damage-overlay" id="dmg-overlay"></div>
     <canvas id="gameCanvas"></canvas>
 
@@ -346,7 +346,11 @@
         function getCost(key) { return Math.floor(shop[key].baseCost * Math.pow(shop[key].mult, shop[key].lvl)); }
         
         function getStat(key) {
-            const l = shop[key].lvl;
+            let shopKey = key;
+            if (key === 'cannonDmg') shopKey = 'cannon';
+            if (key === 'pulseDmg') shopKey = 'pulse';
+
+            const l = shop[shopKey].lvl;
             const pMult = 1 + (prestige * 0.2);
             if(key === 'damage') return (10 + l * 6) * pMult;
             if(key === 'fireRate') return Math.max(80, 800 - l * 55);
