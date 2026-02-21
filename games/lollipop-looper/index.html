@@ -32,7 +32,7 @@
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); 
         }
         
-        /* Home Button */
+        /* Buttons */
         .btn-home { 
             position: absolute; top: 1.5rem; left: 1.5rem; 
             background: rgba(255,255,255,0.1); color: white; 
@@ -43,6 +43,17 @@
             backdrop-filter: blur(5px); transition: background 0.2s;
         }
         .btn-home:hover { background: rgba(255,255,255,0.25); }
+
+        .btn-settings {
+            position: absolute; top: 1.5rem; left: 8rem; 
+            background: rgba(255,255,255,0.1); color: white; 
+            text-decoration: none; padding: 0.6rem 1.2rem; 
+            border-radius: 8px; font-weight: bold; 
+            border: 1px solid rgba(255,255,255,0.2); 
+            cursor: pointer; z-index: 1000; backdrop-filter: blur(5px);
+            transition: background 0.2s;
+        }
+        .btn-settings:hover { background: rgba(255,255,255,0.25); }
 
         /* HUD */
         #hud { 
@@ -65,6 +76,26 @@
             color: rgba(255,255,255,0.3); font-size: 0.8rem;
             font-weight: bold; pointer-events: none; z-index: 1000;
         }
+
+        /* MODAL (Settings) */
+        #settings-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15,23,42,0.9); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        #settings-modal.active { opacity: 1; pointer-events: auto; }
+        .settings-box {
+            background: var(--card-bg); padding: 2rem; border-radius: 16px;
+            border: 1px solid var(--card-border); text-align: center;
+            min-width: 320px;
+        }
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin: 1.5rem 0; font-size: 1.2rem; font-weight: bold;}
+        .toggle-btn {
+            background: #334155; border: none; padding: 0.5rem 1.2rem; border-radius: 8px;
+            color: white; font-weight: bold; cursor: pointer; transition: 0.2s;
+        }
+        .toggle-btn.on { background: var(--primary); box-shadow: 0 0 10px rgba(236, 72, 153, 0.5); }
 
         /* SHOP OVERLAY */
         #shop { 
@@ -161,6 +192,7 @@
 </head>
 <body>
     <a href="/" class="btn-home">🏠 Home</a>
+    <button class="btn-settings" onclick="toggleSettings()">⚙️ Optionen</button>
     
     <div id="hud">
         <div class="hud-box"><div class="hud-val" id="hud-wave">1</div><div class="hud-lbl">Welle</div></div>
@@ -168,7 +200,23 @@
         <div class="hud-box"><div class="hud-val" id="hud-money" style="color:#fbbf24;">0 🍬</div><div class="hud-lbl">Candies</div></div>
     </div>
 
-    <div id="version-lbl">v1.2.1</div>
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div class="settings-box">
+            <h2 style="margin-bottom: 1.5rem; font-size: 2rem; color: var(--primary);">⚙️ Optionen</h2>
+            <div class="toggle-row">
+                <span>🎯 Lazy Mode (Auto-Aim):</span>
+                <button id="btn-lazy" class="toggle-btn" onclick="toggleLazy()">AUS</button>
+            </div>
+            <div class="toggle-row">
+                <span>🔊 Sound Effekte:</span>
+                <button id="btn-sound" class="toggle-btn" onclick="toggleSound()">AN</button>
+            </div>
+            <button class="btn" style="margin-top: 1.5rem;" onclick="toggleSettings()">Schließen</button>
+        </div>
+    </div>
+
+    <div id="version-lbl">v1.3.0</div>
     <div class="damage-overlay" id="dmg-overlay"></div>
     <canvas id="gameCanvas"></canvas>
 
@@ -178,7 +226,6 @@
             <div class="shop-header">
                 <div class="shop-title">🍭 Lauras Lollipop Looper</div>
                 <div class="shop-subtitle">Überlebe die Gummibärchen-Zombies. Candies: <strong id="shop-money" style="color:#fbbf24; font-size: 1.3rem;">0 🍬</strong></div>
-                <!-- PLAY BUTTON MOVED TO TOP -->
                 <button class="btn start-btn" onclick="startRun()">Spielen ▶</button>
             </div>
             
@@ -205,6 +252,60 @@
         function resize() { cw = canvas.width = window.innerWidth; ch = canvas.height = window.innerHeight; }
         window.addEventListener('resize', resize); resize();
 
+        // === SETTINGS & AUDIO ===
+        let appSettings = JSON.parse(localStorage.getItem('ll_settings')) || { lazyMode: false, sound: true };
+        
+        let audioCtx;
+        function initAudio() {
+            if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+        }
+        window.addEventListener('click', initAudio, {once: true}); // Init on first click
+        
+        // Procedural Retro Sound Effects
+        const sfx = {
+            play: (freq, type, dur, vol=0.1) => {
+                if(!appSettings.sound || !audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(); osc.stop(audioCtx.currentTime + dur);
+            },
+            shoot: () => sfx.play(600, 'square', 0.1, 0.02),
+            hit: () => sfx.play(300, 'sawtooth', 0.1, 0.03),
+            kill: () => { sfx.play(800, 'sine', 0.1, 0.04); setTimeout(()=>sfx.play(1200, 'sine', 0.15, 0.04), 80); },
+            hurt: () => sfx.play(150, 'sawtooth', 0.3, 0.1),
+            buy: () => { sfx.play(400, 'sine', 0.1, 0.05); setTimeout(()=>sfx.play(600, 'sine', 0.2, 0.05), 100); },
+            explosion: () => sfx.play(100, 'square', 0.4, 0.1)
+        };
+
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('active');
+            updateSettingsUI();
+        }
+        function toggleLazy() { appSettings.lazyMode = !appSettings.lazyMode; saveSettings(); }
+        function toggleSound() { appSettings.sound = !appSettings.sound; initAudio(); saveSettings(); }
+        function saveSettings() {
+            localStorage.setItem('ll_settings', JSON.stringify(appSettings));
+            updateSettingsUI();
+        }
+        function updateSettingsUI() {
+            const btnLazy = document.getElementById('btn-lazy');
+            const btnSound = document.getElementById('btn-sound');
+            if(btnLazy) {
+                btnLazy.className = 'toggle-btn ' + (appSettings.lazyMode ? 'on' : '');
+                btnLazy.innerText = appSettings.lazyMode ? 'AN' : 'AUS';
+            }
+            if(btnSound) {
+                btnSound.className = 'toggle-btn ' + (appSettings.sound ? 'on' : '');
+                btnSound.innerText = appSettings.sound ? 'AN' : 'AUS';
+            }
+        }
+
         // === STATE ===
         let state = 'SHOP'; // SHOP, PLAYING
         let money = parseInt(localStorage.getItem('ll_money') || '0');
@@ -217,8 +318,6 @@
 
         let mouse = { x: cw/2, y: ch/2 };
         window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-        
-        // Touch support for aiming
         window.addEventListener('touchmove', e => { 
             mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; 
         }, {passive: false});
@@ -241,13 +340,8 @@
         };
         
         let shop = JSON.parse(localStorage.getItem('ll_shop')) || {};
-        // Merge missing upgrades from defaultShop for old saves
-        for(let key in defaultShop) {
-            if(!shop[key]) shop[key] = JSON.parse(JSON.stringify(defaultShop[key]));
-        }
-        // Force update old "Zucker-Schild" text to the new Armor text
-        shop.shield.name = defaultShop.shield.name;
-        shop.shield.desc = defaultShop.shield.desc;
+        for(let key in defaultShop) { if(!shop[key]) shop[key] = JSON.parse(JSON.stringify(defaultShop[key])); }
+        shop.shield.name = defaultShop.shield.name; shop.shield.desc = defaultShop.shield.desc;
 
         function getCost(key) { return Math.floor(shop[key].baseCost * Math.pow(shop[key].mult, shop[key].lvl)); }
         
@@ -258,12 +352,12 @@
             if(key === 'fireRate') return Math.max(80, 800 - l * 55);
             if(key === 'double') return l * 0.1;
             if(key === 'crit') return l * 0.05;
-            if(key === 'pierce') return Math.min(l, 5); // 0 extra hits up to 5 extra hits
-            if(key === 'slow') return Math.min(l * 0.15, 0.75); // up to 75% slow
+            if(key === 'pierce') return Math.min(l, 5);
+            if(key === 'slow') return Math.min(l * 0.15, 0.75); 
             if(key === 'maxHp') return 100 + l * 50;
             if(key === 'regen') return l * 2;
-            if(key === 'shield') return Math.min(l * 0.05, 0.60); // Max 60% damage reduction
-            if(key === 'orbit') return Math.min(l, 5); // visual max 5
+            if(key === 'shield') return Math.min(l * 0.05, 0.60);
+            if(key === 'orbit') return Math.min(l, 5); 
             if(key === 'cannonDmg') return (30 + l * 20) * pMult;
             if(key === 'pulseDmg') return (20 + l * 15) * pMult;
         }
@@ -286,7 +380,6 @@
                 const cost = getCost(key);
                 const canAfford = money >= cost;
                 
-                // Max caps
                 const maxed = (key === 'crit' && u.lvl >= 10) || 
                               (key === 'double' && u.lvl >= 10) || 
                               (key === 'orbit' && u.lvl >= 5) || 
@@ -312,6 +405,7 @@
                 shop[key].lvl++;
                 save();
                 renderShop();
+                sfx.buy();
             }
         }
 
@@ -322,6 +416,7 @@
                 shop = JSON.parse(JSON.stringify(defaultShop));
                 save();
                 renderShop();
+                sfx.buy();
             }
         }
 
@@ -329,7 +424,7 @@
         let enemies = [];
         let projectiles = [];
         let particles = [];
-        let candies = []; // Physical money drops
+        let candies = [];
         
         let lastShot = 0, lastCannon = 0, lastPulse = 0, lastSpawn = 0;
         let enemiesToSpawn = 0, spawnInterval = 1000;
@@ -344,7 +439,6 @@
                 this.isMini = isMini;
                 this.isBoss = isBoss;
                 
-                // Difficulty scaling
                 let pMult = 1 + (prestige * 0.2);
                 let waveMult = Math.pow(1.15, wave - 1);
                 
@@ -352,20 +446,17 @@
                 this.hp = baseHp * waveMult * pMult;
                 this.maxHp = this.hp;
                 
-                // Adjusted Speed: starts slower, ramps up
                 let baseSpd = isBoss ? 0.2 : (isMini ? 0.35 : 0.45 + Math.random() * 0.2);
                 this.baseSpeed = baseSpd * (1 + (wave * 0.03)); 
                 
                 this.radius = isBoss ? 50 : isMini ? 30 : 18;
-                
-                // Colors: Boss=Red, Mini=Orange, Normal=Green
                 this.color = isBoss ? '#ef4444' : isMini ? '#f59e0b' : '#22c55e';
                 
-                // FX
                 this.wobble = Math.random() * Math.PI * 2;
                 this.wobbleSpeed = Math.random() * 0.1 + 0.05;
                 this.hitTimer = 0;
                 this.slowTimer = 0;
+                this.orbHitTimer = 0; // Cooldown for orbital hits
             }
             update() {
                 const dx = cw/2 - this.x;
@@ -375,21 +466,21 @@
                 let curSpeed = this.baseSpeed;
                 if(this.slowTimer > 0) {
                     this.slowTimer--;
-                    curSpeed *= (1 - getStat('slow')); // Apply slow multiplier
+                    curSpeed *= (1 - getStat('slow'));
                 }
                 
-                // Movement
                 this.x += (dx/dist) * curSpeed;
                 this.y += (dy/dist) * curSpeed;
                 this.wobble += this.wobbleSpeed * (curSpeed / this.baseSpeed);
                 
-                if(dist < this.radius + 25) { // Hit tower
+                if(dist < this.radius + 25) { 
                     let dmg = this.isBoss ? 150 : (this.isMini ? 50 : 20);
-                    dmg *= (1 + (wave - 1) * 0.1); // scaling collision damage
+                    dmg *= (1 + (wave - 1) * 0.1); 
                     takeDamage(dmg);
-                    this.hp = 0; // zombie kamikaze
+                    this.hp = 0;
                 }
                 if(this.hitTimer > 0) this.hitTimer--;
+                if(this.orbHitTimer > 0) this.orbHitTimer--;
             }
             draw() {
                 ctx.save();
@@ -399,15 +490,12 @@
                 let scaleY = 1 + Math.cos(this.wobble) * 0.1;
                 ctx.scale(scaleX, scaleY);
                 
-                // Body
                 ctx.fillStyle = this.hitTimer > 0 ? '#ffffff' : (this.slowTimer > 0 ? '#0284c7' : this.color);
                 ctx.beginPath(); ctx.arc(0, 0, this.radius, 0, Math.PI*2); ctx.fill();
                 
-                // Shine
                 ctx.fillStyle = 'rgba(255,255,255,0.3)';
                 ctx.beginPath(); ctx.arc(-this.radius*0.3, -this.radius*0.3, this.radius*0.3, 0, Math.PI*2); ctx.fill();
                 
-                // Slow effect indicator
                 if (this.slowTimer > 0) {
                     ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
                     ctx.beginPath(); ctx.arc(0, 0, this.radius + 4, 0, Math.PI*2); ctx.stroke();
@@ -415,7 +503,6 @@
                 
                 ctx.restore();
 
-                // HP Bar
                 const hpWidth = this.radius * 2;
                 ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
                 ctx.fillRect(this.x - hpWidth/2, this.y - this.radius - 12, hpWidth, 5);
@@ -445,7 +532,6 @@
                 this.x += this.vx; this.y += this.vy;
                 if(this.x < -100 || this.x > cw+100 || this.y < -100 || this.y > ch+100) this.active = false;
                 
-                // Trails
                 if(Math.random() < 0.3) {
                     particles.push({x:this.x, y:this.y, vx:0, vy:0, life:0.5, color:this.color, size:2});
                 }
@@ -471,7 +557,7 @@
         }
 
         function explode(x, y, radius, dmg) {
-            // Visual shockwave
+            sfx.explosion();
             let explRadius = 0;
             const explInterval = setInterval(() => {
                 explRadius += 7;
@@ -481,7 +567,6 @@
                 ctx.fillStyle = `rgba(251, 191, 36, ${0.5 * (1 - explRadius/radius)})`; ctx.fill();
             }, 16);
 
-            // Particles
             for(let i=0; i<30; i++) {
                 particles.push({
                     x, y, vx: (Math.random()-0.5)*15, vy: (Math.random()-0.5)*15, 
@@ -489,22 +574,20 @@
                 });
             }
 
-            // Damage
             enemies.forEach(e => {
                 if(Math.hypot(e.x - x, e.y - y) < radius + e.radius) {
-                    e.hp -= dmg;
-                    e.hitTimer = 3;
+                    e.hp -= dmg; e.hitTimer = 3;
                     spawnFCT(e.x, e.y, Math.round(dmg), false);
                 }
             });
         }
 
         function pulse() {
+            sfx.explosion();
             const dmg = getStat('pulseDmg');
             let pRadius = 10;
             const maxRadius = Math.max(cw, ch) * 0.8;
             
-            // Visual wave
             const interval = setInterval(() => {
                 pRadius += 25;
                 if(pRadius >= maxRadius) { clearInterval(interval); return; }
@@ -514,11 +597,9 @@
                 ctx.lineWidth = 15; ctx.stroke();
             }, 16);
             
-            // Damage
             enemies.forEach(e => {
                 if(Math.hypot(e.x - cw/2, e.y - ch/2) < maxRadius) { 
-                    e.hp -= dmg; 
-                    e.hitTimer = 3;
+                    e.hp -= dmg; e.hitTimer = 3;
                     spawnFCT(e.x, e.y, Math.round(dmg), false); 
                 }
             });
@@ -526,6 +607,7 @@
 
         // === RUN LOOP ===
         window.startRun = function() {
+            initAudio();
             state = 'PLAYING';
             maxHp = getStat('maxHp');
             hp = maxHp;
@@ -533,11 +615,9 @@
             document.getElementById('shop').classList.add('hidden');
             
             wave = 1; enemies = []; projectiles = []; particles = []; candies = [];
-            startWave();
-            updateHUD();
+            startWave(); updateHUD();
             
-            lastShot = performance.now();
-            lastRegen = performance.now();
+            lastShot = performance.now(); lastRegen = performance.now();
             requestAnimationFrame(loop);
         }
 
@@ -545,33 +625,25 @@
             bossActive = (wave % 10 === 0);
             const miniBoss = (wave % 5 === 0 && !bossActive);
             
-            if(bossActive) {
-                enemiesToSpawn = 1;
-            } else if(miniBoss) {
-                enemiesToSpawn = 2 + Math.floor(wave/5);
-            } else {
-                enemiesToSpawn = wave * 4 + 5;
-            }
+            if(bossActive) enemiesToSpawn = 1;
+            else if(miniBoss) enemiesToSpawn = 2 + Math.floor(wave/5);
+            else enemiesToSpawn = wave * 4 + 5;
             
-            // Starts slow, speeds up in later waves
             spawnInterval = Math.max(400, 2000 - wave * 60);
             updateHUD();
         }
 
         function takeDamage(baseDmg) {
+            sfx.hurt();
             let reduction = getStat('shield');
             let actualDmg = baseDmg * (1 - reduction);
             hp -= actualDmg;
             updateHUD();
             
-            // Flash screen
             document.getElementById('dmg-overlay').classList.add('flash');
             setTimeout(() => document.getElementById('dmg-overlay').classList.remove('flash'), 150);
-            
-            // Show damage text on player
             spawnFCT(cw/2 + (Math.random()*40-20), ch/2 - 40, '-' + Math.round(actualDmg), false, true);
 
-            // Knockback blast to prevent instakill from swarms
             explode(cw/2, ch/2, 180, getStat('damage') * 0.5);
             enemies.forEach(e => {
                 const dist = Math.hypot(e.x - cw/2, e.y - ch/2);
@@ -584,8 +656,7 @@
         function die() {
             state = 'SHOP';
             document.getElementById('shop').classList.remove('hidden');
-            renderShop();
-            save();
+            renderShop(); save();
         }
 
         function updateHUD() {
@@ -597,40 +668,50 @@
         function loop(time) {
             if(state !== 'PLAYING') return;
 
-            // Clear screen with trail
             ctx.fillStyle = 'rgba(15, 23, 42, 0.4)'; 
             ctx.fillRect(0, 0, cw, ch);
 
-            // Spawning
             if(time - lastSpawn > spawnInterval && enemiesToSpawn > 0) {
                 enemies.push(new Zombie(wave % 5 === 0 && !bossActive, bossActive));
-                enemiesToSpawn--;
-                lastSpawn = time;
+                enemiesToSpawn--; lastSpawn = time;
             } else if (enemiesToSpawn <= 0 && enemies.length === 0 && candies.length === 0) {
-                wave++; 
-                startWave();
+                wave++; startWave();
             }
 
-            // Health Regeneration
             if(time - lastRegen > 1000) {
                 let regenAmt = getStat('regen');
                 if(regenAmt > 0 && hp < maxHp) {
-                    hp = Math.min(maxHp, hp + regenAmt);
-                    updateHUD();
+                    hp = Math.min(maxHp, hp + regenAmt); updateHUD();
                 }
                 lastRegen = time;
             }
 
-            // Main Weapon Shooting
+            // Shooting
             if(time - lastShot > getStat('fireRate')) {
                 const dmg = getStat('damage');
                 const isCrit = Math.random() < getStat('crit');
                 const finalDmg = isCrit ? dmg * 2 : dmg;
                 
-                projectiles.push(new Projectile(cw/2, ch/2, mouse.x, mouse.y, finalDmg, isCrit, false));
+                let targetX = mouse.x;
+                let targetY = mouse.y;
+                
+                // Lazy Mode: Auto-Aim
+                if (appSettings.lazyMode && enemies.length > 0) {
+                    let closest = enemies[0];
+                    let cDist = Infinity;
+                    enemies.forEach(e => {
+                        let d = Math.hypot(e.x - cw/2, e.y - ch/2);
+                        if (d < cDist) { cDist = d; closest = e; }
+                    });
+                    targetX = closest.x;
+                    targetY = closest.y;
+                }
+                
+                sfx.shoot();
+                projectiles.push(new Projectile(cw/2, ch/2, targetX, targetY, finalDmg, isCrit, false));
                 
                 if(Math.random() < getStat('double')) {
-                    const angle = Math.atan2(mouse.y - ch/2, mouse.x - cw/2) + (Math.random()-0.5)*0.2;
+                    const angle = Math.atan2(targetY - ch/2, targetX - cw/2) + (Math.random()-0.5)*0.2;
                     const tx = cw/2 + Math.cos(angle)*100;
                     const ty = ch/2 + Math.sin(angle)*100;
                     projectiles.push(new Projectile(cw/2, ch/2, tx, ty, finalDmg, isCrit, false));
@@ -638,7 +719,6 @@
                 lastShot = time;
             }
 
-            // Cannon
             if(shop.cannon.lvl > 0 && time - lastCannon > 3000 && enemies.length > 0) {
                 let closest = enemies[0];
                 let cDist = Infinity;
@@ -646,14 +726,13 @@
                     let d = Math.hypot(e.x - cw/2, e.y - ch/2);
                     if(d < cDist) { cDist = d; closest = e; }
                 });
+                sfx.shoot();
                 projectiles.push(new Projectile(cw/2, ch/2, closest.x, closest.y, getStat('cannonDmg'), false, true));
                 lastCannon = time;
             }
 
-            // Pulse
             if(shop.pulse.lvl > 0 && time - lastPulse > 5000) {
-                pulse();
-                lastPulse = time;
+                pulse(); lastPulse = time;
             }
 
             // Orbiters
@@ -669,13 +748,20 @@
                 
                 enemies.forEach(e => {
                     if(Math.hypot(e.x - ox, e.y - oy) < 10 + e.radius) {
-                        e.hp -= getStat('damage') * 0.08; 
-                        e.hitTimer = 2;
+                        // Cooldown logic to prevent 60fps micro-ticks, does bigger damage
+                        if(e.orbHitTimer <= 0) {
+                            let dmg = getStat('damage') * 0.4;
+                            e.hp -= dmg; 
+                            e.hitTimer = 3;
+                            e.orbHitTimer = 15; // Hit ~4 times per second max per orb
+                            sfx.hit();
+                            spawnFCT(e.x, e.y, Math.round(dmg), false);
+                        }
                     }
                 });
             }
 
-            // Update Projectiles
+            // Projectiles
             projectiles.forEach(p => {
                 p.update(); p.draw();
                 if(p.active) {
@@ -688,8 +774,9 @@
                             } else {
                                 e.hp -= p.dmg;
                                 e.hitTimer = 3;
+                                sfx.hit();
                                 
-                                if (shop.slow.lvl > 0) e.slowTimer = 90; // Apply slow for 1.5s
+                                if (shop.slow.lvl > 0) e.slowTimer = 90; 
                                 spawnFCT(e.x, e.y, Math.round(p.dmg), p.isCrit);
                                 
                                 p.pierceLeft--;
@@ -701,11 +788,12 @@
             });
             projectiles = projectiles.filter(p => p.active);
 
-            // Update Enemies
+            // Enemies
             for(let i = enemies.length - 1; i >= 0; i--) {
                 const e = enemies[i];
                 e.update(); e.draw();
                 if(e.hp <= 0) {
+                    sfx.kill();
                     for(let j=0; j<15; j++) {
                         particles.push({
                             x:e.x, y:e.y, vx:(Math.random()-0.5)*8, vy:(Math.random()-0.5)*8, 
@@ -714,34 +802,26 @@
                     }
                     
                     const drop = (e.isBoss ? 250 : e.isMini ? 40 : 5) * (1 + prestige * 0.2);
-                    // Drop visual candy instead of instant money
                     candies.push({x: e.x, y: e.y, val: Math.floor(drop)});
-                    
                     enemies.splice(i, 1);
                 }
             }
 
-            // Update Candies (Flying to center)
+            // Candies
             for(let i = candies.length - 1; i >= 0; i--) {
                 const c = candies[i];
                 const dx = cw/2 - c.x; const dy = ch/2 - c.y;
                 const dist = Math.hypot(dx, dy);
                 
-                c.x += (dx/dist) * 15; // Fly speed
-                c.y += (dy/dist) * 15;
+                c.x += (dx/dist) * 15; c.y += (dy/dist) * 15;
                 
-                // Draw candy
                 ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(c.x, c.y, 6, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(c.x-2, c.y-2, 2, 0, Math.PI*2); ctx.fill();
                 
-                if(dist < 30) {
-                    money += c.val;
-                    updateHUD();
-                    candies.splice(i, 1);
-                }
+                if(dist < 30) { money += c.val; updateHUD(); candies.splice(i, 1); }
             }
 
-            // Draw Tower (Lollipop)
+            // Tower
             ctx.fillStyle = '#fbcfe8'; ctx.fillRect(cw/2 - 8, ch/2, 16, 70); 
             ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(cw/2, ch/2+10, 30, 10, 0, 0, Math.PI*2); ctx.fill();
             ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 35, 0, Math.PI*2); 
@@ -753,7 +833,7 @@
             ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 10, Math.PI, Math.PI*2.5, false); 
             ctx.stroke();
 
-            // Draw Tower HP Bar visually below the tower
+            // Tower HP Bar
             const towerHpWidth = 80;
             ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
             ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
@@ -774,6 +854,7 @@
             requestAnimationFrame(loop);
         }
 
+        updateSettingsUI(); // Init buttons state
         renderShop();
     </script>
 </body>
