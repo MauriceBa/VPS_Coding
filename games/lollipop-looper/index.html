@@ -168,7 +168,7 @@
         <div class="hud-box"><div class="hud-val" id="hud-money" style="color:#fbbf24;">0 🍬</div><div class="hud-lbl">Candies</div></div>
     </div>
 
-    <div id="version-lbl">v1.2.0</div>
+    <div id="version-lbl">v1.2.1</div>
     <div class="damage-overlay" id="dmg-overlay"></div>
     <canvas id="gameCanvas"></canvas>
 
@@ -755,8 +755,10 @@
 
             // Draw Tower HP Bar visually below the tower
             const towerHpWidth = 80;
-            ctx.fillStyle = 'rgba(0,0,0,0.6)'; \n            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
-            ctx.fillStyle = '#ef4444'; \n            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth * Math.max(0, hp/maxHp), 10);
+            ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
+            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
+            ctx.fillStyle = '#ef4444'; 
+            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth * Math.max(0, hp/maxHp), 10);
             ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
             ctx.strokeRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
 
