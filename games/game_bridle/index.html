@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridle - Idle Brick Breaker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <div id="canvas-container">
+            <canvas id="gameCanvas" width="600" height="800"></canvas>
+            <div id="overlay">
+                <h1 id="level-display">Level 1</h1>
+                <p id="money-display">$0</p>
+            </div>
+        </div>
+        
+        <div id="ui-panel">
+            <h2>Bridle Shop</h2>
+            <div class="stats">
+                <p>DPS: <span id="dps-display">0</span></p>
+                <p>Balls: <span id="ball-count-display">1</span></p>
+            </div>
+            
+            <div class="upgrades-list">
+                <button class="upgrade-btn" id="buy-ball-btn" onclick="buyBall()">
+                    <span class="name">Buy Ball</span>
+                    <span class="cost" id="buy-ball-cost">$10</span>
+                    <span class="desc">Add a new ball to the field</span>
+                </button>
+                
+                <button class="upgrade-btn" id="upgrade-power-btn" onclick="upgradePower()">
+                    <span class="name">Power Up</span>
+                    <span class="cost" id="upgrade-power-cost">$50</span>
+                    <span class="desc">Increase ball damage (+1)</span>
+                    <span class="level" id="power-level">Lvl 1</span>
+                </button>
+                
+                <button class="upgrade-btn" id="upgrade-speed-btn" onclick="upgradeSpeed()">
+                    <span class="name">Speed Up</span>
+                    <span class="cost" id="upgrade-speed-cost">$100</span>
+                    <span class="desc">Increase ball speed (+5%)</span>
+                    <span class="level" id="speed-level">Lvl 1</span>
+                </button>
+                
+                <button class="upgrade-btn" id="upgrade-income-btn" onclick="upgradeIncome()">
+                    <span class="name">Gold Rush</span>
+                    <span class="cost" id="upgrade-income-cost">$200</span>
+                    <span class="desc">Increase money per brick (+10%)</span>
+                    <span class="level" id="income-level">Lvl 1</span>
+                </button>
+                
+                <button class="upgrade-btn" id="upgrade-splash-btn" onclick="upgradeSplash()">
+                    <span class="name">Splash Damage</span>
+                    <span class="cost" id="upgrade-splash-cost">$1000</span>
+                    <span class="desc">Balls damage nearby bricks</span>
+                    <span class="level" id="splash-level">Lvl 0</span>
+                </button>
+
+                <button class="upgrade-btn prestige" id="prestige-btn" onclick="prestige()">
+                    <span class="name">Prestige</span>
+                    <span class="cost" id="prestige-req">Req: Level 50</span>
+                    <span class="desc">Reset for Gems (Damage Multiplier)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridle - Maurice Fun</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: clamp(2rem, 6vw, 3rem); margin-bottom: 1.5rem; font-weight: 800; }
+        .game-frame {
+            width: 100%;
+            height: 85vh;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: #111;
+        }
+        .back {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            opacity: 0.8;
+            transition: 0.2s;
+        }
+        .back:hover { opacity: 1; transform: translateX(-5px); }
+        .footer { margin-top: 2rem; font-size: 0.9rem; opacity: 0.7; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back">← Zurück zur Startseite</a>
+        <h1>🧱 Bridle - Idle Brick Breaker</h1>
+        <iframe src="index.html" class="game-frame" title="Bridle Game"></iframe>
+        <div class="footer">© 2026 Maurice Fun - Viel Spaß beim Steine zerbrechen!</div>
+    </div>
+</body>
+</html>
