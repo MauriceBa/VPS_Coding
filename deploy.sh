@@ -11,9 +11,18 @@ sudo rm -f /etc/nginx/sites-enabled/default
 # 2. Webroot vorbereiten
 sudo mkdir -p /var/www/mauricefun.lol/html
 sudo mkdir -p /var/www/mauricefun.lol/html/data
-sudo cp index.html /var/www/mauricefun.lol/html/
-sudo cp -r untappd /var/www/mauricefun.lol/html/
-sudo cp -r btd6 /var/www/mauricefun.lol/html/
+
+# Sync alle Dateien und Ordner, AUßER config, scripts, games und Git-bezogene Dateien
+# rsync eignet sich hierfür am besten
+sudo rsync -av --exclude '.git' \
+             --exclude '.gitignore' \
+             --exclude 'README.md' \
+             --exclude 'config' \
+             --exclude 'scripts' \
+             --exclude 'games' \
+             --exclude 'deploy.sh' \
+             ./ /var/www/mauricefun.lol/html/
+
 sudo chown -R www-data:www-data /var/www/mauricefun.lol/html
 
 # 3. Games als Symlinks verlinken
