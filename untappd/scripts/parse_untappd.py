@@ -57,9 +57,8 @@ def infer_style(name, badges):
     if re.search(r'Amber|Ambr\u00e9e|Red\b|Rouge\b', n, re.I): return 'Amber/Red'
     return 'Other'
 
-# Regex: mache eine gueltige Untappd Rating-Zeile (0.25 bis 5.0 in 0.25er Schritten)
-# z.B. "3.5", "4.25", "5.0", "5", "4"
-RATING_RE = re.compile(r'^([1-5](?:\.(?:0|25|5|75))?|0\.(?:25|5|75))$')
+# Regex: mache eine gueltige Untappd Rating-Zeile. Manchmal steht da "4.25", "5", "3.5", etc.
+RATING_RE = re.compile(r'^([0-5](?:\.\d{1,2})?)$')
 
 # ------------------------------------------------------------------ parse
 def parse_export(filepath):
@@ -118,18 +117,16 @@ def parse_export(filepath):
             if bm:
                 current['badges'].append(bm.group(1))
 
-        # --- RATING (NEU) ---
-        # Untappd exportiert das Rating als einfache Dezimalzahl in einer eigenen Zeile
-        # z.B. "4.5", "5.0", "3.25" etc.
+        # --- RATING ---
+        # Untappd exportiert das Rating als einfache Zahl
         elif RATING_RE.match(line) and current['rating'] is None:
             try:
                 val = float(line)
                 if 0.25 <= val <= 5.0:
-                    # Auf 0.25er Schritte runden (defensiv)
-                    current['rating'] = round(val * 4) / 4
+                    current['rating'] = val
             except ValueError:
                 pass
-
+        
         # --- Check-in end ---
         elif 'View Detailed Check-in Delete Check-In' in line:
             ds = line.replace('View Detailed Check-in Delete Check-In', '').strip()
