@@ -117,16 +117,6 @@
         .stat-row .lbl { color: var(--text-muted); }
         .stat-row .val { font-weight: 600; color: var(--text); text-align: right; }
 
-        /* RAW JSON VIEW (Fallback / Nerd View) */
-        .json-box {
-            background: rgba(0,0,0,0.4); border: 1px solid var(--card-border);
-            border-radius: 12px; padding: 1rem; color: #a5b4fc; font-family: monospace;
-            font-size: 0.85rem; overflow-x: auto; max-height: 400px;
-            animation: slideUp 0.8s ease-out 0.3s backwards;
-        }
-
-        .section-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; margin-top: 2rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; }
-
         #error-msg { color: var(--secondary); font-weight: bold; text-align: center; margin: 2rem 0; display: none; }
 
         footer { margin-top: 6rem; padding: 2rem; text-align: center; color: var(--text-muted); border-top: 1px solid var(--card-border); }
@@ -166,9 +156,6 @@
         <div class="grid-3" id="details-grid">
             <!-- Dynamically populated -->
         </div>
-
-        <div class="section-title">💻 API Raw Data (Nerd View)</div>
-        <div class="json-box" id="json-view">Fetching API...</div>
     </main>
 
     <footer>
@@ -179,8 +166,15 @@
         const OAK_KEY = "oak_22b8220d7e5253073845";
         const API_URL = `https://data.ninjakiwi.com/btd6/users/${OAK_KEY}`;
 
-        // Format Numbers (e.g. 1000000 -> 1,000,000)
-        const num = (n) => new Intl.NumberFormat('de-DE').format(n);
+        const fmtNum = (v) => (typeof v === "number" && Number.isFinite(v)) 
+            ? new Intl.NumberFormat('de-DE').format(v) 
+            : v;
+
+        function statRow(label, value, rawValueForCheck) {
+            const check = rawValueForCheck !== undefined ? rawValueForCheck : value;
+            if (check === undefined || check === null || check === 0 || check === "0" || check === "") return "";
+            return `<div class="stat-row"><span class="lbl">${label}</span><span class="val">${fmtNum(value)}</span></div>`;
+        }
 
         async function fetchBTD6Data() {
             try {
@@ -188,20 +182,15 @@
                 if (!res.ok) throw new Error("Network response was not ok");
                 const data = await res.json();
                 
-                document.getElementById('json-view').textContent = JSON.stringify(data, null, 2);
-
                 const body = data.body || data;
                 
-                // Wir parsen die gängigsten Stats aus der Ninja Kiwi API.
-                // Oft gibt es "rank", "veteranRank", "achievements", "monkeyMoney" etc.
                 const rank = body.rank || body.level || "--";
                 const vetRank = body.veteranRank || 0;
-                const mm = body.monkeyMoney || "--";
+                const mm = body.monkeyMoney || 0;
                 const username = body.displayName || body.name || "Maurice";
-                const avatar = body.avatar || "🐒";
 
                 // Update Highlights
-                document.getElementById('highlights').innerHTML = `
+                let highlightsHTML = `
                     <div class="stat-item">
                         <div class="stat-number">${username}</div>
                         <div class="stat-label">Spieler</div>
@@ -209,59 +198,79 @@
                     <div class="stat-item">
                         <div class="stat-number">${rank} ${vetRank > 0 ? `<span style="font-size:1.2rem; color:var(--accent)">+${vetRank}</span>` : ''}</div>
                         <div class="stat-label">Rang</div>
-                    </div>
+                    </div>`;
+                    
+                if (mm > 0) {
+                    highlightsHTML += `
                     <div class="stat-item">
-                        <div class="stat-number" style="color: var(--accent);">${num(mm)}</div>
+                        <div class="stat-number" style="color: var(--accent);">${fmtNum(mm)}</div>
                         <div class="stat-label">Monkey Money 💰</div>
-                    </div>
-                `;
+                    </div>`;
+                }
+                
+                document.getElementById('highlights').innerHTML = highlightsHTML;
 
-                // Update Grid mit tieferen Stats (wir versuchen Gameplay und Heroes zu finden)
+                // Update Grid
                 const grid = document.getElementById('details-grid');
                 grid.innerHTML = '';
 
                 // Stats Section
                 if(body.stats) {
-                    const stats = body.stats;
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-icon">⚔️</span>
-                                <span class="card-title">Gameplay Stats</span>
-                            </div>
-                            <div class="stat-row"><span class="lbl">Bloons Popped:</span><span class="val">${num(stats.bloonsPopped || 0)}</span></div>
-                            <div class="stat-row"><span class="lbl">MOABs Popped:</span><span class="val">${num(stats.moabsPopped || 0)}</span></div>
-                            <div class="stat-row"><span class="lbl">Lead Bloons:</span><span class="val">${num(stats.leadBloonsPopped || 0)}</span></div>
-                            <div class="stat-row"><span class="lbl">Camo Bloons:</span><span class="val">${num(stats.camoBloonsPopped || 0)}</span></div>
-                            <div class="stat-row"><span class="lbl">Games Played:</span><span class="val">${num(stats.gamesPlayed || 0)}</span></div>
-                            <div class="stat-row"><span class="lbl">Games Won:</span><span class="val">${num(stats.gamesWon || 0)}</span></div>
-                        </div>
-                    `;
+                    const s = body.stats;
                     
-                    grid.innerHTML += `
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-icon">🏆</span>
-                                <span class="card-title">Erfolge & Medaillen</span>
+                    let gameplayRows = 
+                        statRow("Bloons Popped:", s.bloonsPopped) +
+                        statRow("MOABs Popped:", s.moabsPopped) +
+                        statRow("Lead Bloons:", s.leadBloonsPopped) +
+                        statRow("Camo Bloons:", s.camoBloonsPopped) +
+                        statRow("Games Played:", s.gamesPlayed) +
+                        statRow("Games Won:", s.gamesWon);
+                        
+                    if (gameplayRows) {
+                        grid.innerHTML += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-icon">⚔️</span>
+                                    <span class="card-title">Gameplay Stats</span>
+                                </div>
+                                ${gameplayRows}
                             </div>
-                            <div class="stat-row"><span class="lbl">Achievements:</span><span class="val">${stats.achievements || 0}</span></div>
-                            <div class="stat-row"><span class="lbl">Daily Rewards:</span><span class="val">${stats.dailyRewards || 0}</span></div>
-                            <div class="stat-row"><span class="lbl">Highest Round:</span><span class="val">${stats.highestRound || 0}</span></div>
-                            <div class="stat-row"><span class="lbl">Black Borders:</span><span class="val" style="color: #000; text-shadow: 0 0 2px #fff;">${stats.blackBorders || 0}</span></div>
-                            <div class="stat-row"><span class="lbl">Gold Borders:</span><span class="val" style="color: gold;">${stats.goldBorders || 0}</span></div>
-                            <div class="stat-row"><span class="lbl">Insta Monkeys:</span><span class="val">${stats.instaMonkeys || 0}</span></div>
-                        </div>
-                    `;
+                        `;
+                    }
+                    
+                    let medalRows = 
+                        statRow("Achievements:", s.achievements) +
+                        statRow("Daily Rewards:", s.dailyRewards) +
+                        statRow("Highest Round:", s.highestRound) +
+                        statRow("Black Borders:", s.blackBorders) +
+                        statRow("Gold Borders:", s.goldBorders) +
+                        statRow("Insta Monkeys:", s.instaMonkeys);
+
+                    if (medalRows) {
+                        grid.innerHTML += `
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-icon">🏆</span>
+                                    <span class="card-title">Erfolge & Medaillen</span>
+                                </div>
+                                ${medalRows}
+                            </div>
+                        `;
+                    }
                 }
 
-                // Heroes Section (falls vorhanden)
-                if(body.heroesPlaced || body.heroes) {
-                    const heroKeys = Object.keys(body.heroesPlaced || {}).slice(0, 6); // Top 6
-                    if(heroKeys.length > 0) {
-                        let heroRows = '';
-                        heroKeys.forEach(h => {
-                            heroRows += `<div class="stat-row"><span class="lbl">${h}:</span><span class="val">${num(body.heroesPlaced[h])} x platziert</span></div>`;
-                        });
+                // Heroes Section
+                if(body.heroesPlaced) {
+                    const heroEntries = Object.entries(body.heroesPlaced)
+                        .filter(([_, v]) => typeof v === "number" && v > 0)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 6);
+                        
+                    if(heroEntries.length > 0) {
+                        let heroRows = heroEntries.map(([name, count]) => 
+                            statRow(name + ":", fmtNum(count) + " x platziert", count)
+                        ).join("");
+                        
                         grid.innerHTML += `
                             <div class="card">
                                 <div class="card-header">
@@ -274,32 +283,33 @@
                     }
                 }
 
-                // Fallback, wenn wir keine saubere Map machen konnten (dann listen wir einfach alles auf, was nicht Object ist)
+                // Fallback, falls keine Stats Karten gerendert wurden
                 if(grid.innerHTML === '') {
                     let genericRows = '';
                     for(const [key, value] of Object.entries(body)) {
                         if(typeof value !== 'object' && key !== 'id') {
-                            genericRows += `<div class="stat-row"><span class="lbl">${key}:</span><span class="val">${value}</span></div>`;
+                            genericRows += statRow(key + ":", value);
                         }
                     }
-                    grid.innerHTML = `
-                        <div class="card" style="grid-column: 1 / -1;">
-                            <div class="card-header">
-                                <span class="card-icon">📋</span>
-                                <span class="card-title">Allgemeine Infos</span>
+                    if(genericRows) {
+                        grid.innerHTML = `
+                            <div class="card" style="grid-column: 1 / -1;">
+                                <div class="card-header">
+                                    <span class="card-icon">📋</span>
+                                    <span class="card-title">Allgemeine Infos</span>
+                                </div>
+                                <div style="column-count: 2; column-gap: 2rem;">
+                                    ${genericRows}
+                                </div>
                             </div>
-                            <div style="column-count: 2; column-gap: 2rem;">
-                                ${genericRows}
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
 
             } catch (err) {
                 console.error(err);
                 document.getElementById('error-msg').style.display = 'block';
                 document.getElementById('highlights').style.display = 'none';
-                document.getElementById('json-view').textContent = "Error: " + err.message;
             }
         }
 
