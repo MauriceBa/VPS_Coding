@@ -55,6 +55,15 @@
             border-color: var(--primary); color: var(--secondary);
         }
 
+        /* === DROPDOWN MENU === */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; top: 100%; right: 0; background: rgba(15, 23, 42, 0.95); min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid var(--card-border); z-index: 1000; overflow: hidden; backdrop-filter: blur(12px); }
+        .dropdown-content a { color: var(--text); padding: 0.8rem 1.2rem; text-decoration: none; display: block; transition: all 0.2s; font-size: 0.95rem; font-weight: 500; border-left: 3px solid transparent; }
+        .dropdown-content a:hover { background: rgba(2, 132, 199, 0.15); color: var(--secondary); border-left-color: var(--secondary); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown:hover .nav-link.dropbtn { background: rgba(2, 132, 199, 0.15); color: var(--secondary); border-color: var(--primary); }
+        .dropbtn { cursor: pointer; font-family: inherit; font-size: inherit; background: transparent; }
+
         main {
             max-width: 1400px; margin: calc(var(--header-height) + 3rem) auto 2rem;
             padding: 0 1rem; position: relative; z-index: 1;
@@ -167,6 +176,10 @@
         
         /* SNOW ANIMATION */
         #snow-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; opacity: 0.6; }
+
+        @media (max-width: 768px) {
+            .dropdown-content { right: auto; left: 0; }
+        }
     </style>
 </head>
 <body>
@@ -176,11 +189,17 @@
         <a href="/" class="logo">mauricelol.fun</a>
         <div class="nav-group">
             <a href="/" class="nav-link">🏠 Home</a>
-            <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
             <a href="/plan-des-pistes/" class="nav-link active">🎿 Pistenpläne</a>
-            <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
             <a href="/untappd/" class="nav-link">🍺 Bier</a>
             <a href="/btd6/" class="nav-link">🎈 BTD6</a>
+            <div class="dropdown">
+                <button class="nav-link dropbtn">🎮 Games ▾</button>
+                <div class="dropdown-content">
+                    <a href="/lollipop-looper/">🍭 Lollipop Looper</a>
+                    <a href="/ski-resort-idle/">🏔️ Ski Resort</a>
+                    <a href="/game_bridle/">🧱 Bridle</a>
+                </div>
+            </div>
         </div>
     </header>
 
