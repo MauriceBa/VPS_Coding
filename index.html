@@ -104,6 +104,15 @@
             color: var(--primary);
         }
 
+        /* === DROPDOWN MENU === */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; top: 100%; right: 0; background: rgba(15, 23, 42, 0.95); min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid var(--card-border); z-index: 1000; overflow: hidden; backdrop-filter: blur(12px); }
+        .dropdown-content a { color: var(--text); padding: 0.8rem 1.2rem; text-decoration: none; display: block; transition: all 0.2s; font-size: 0.95rem; font-weight: 500; border-left: 3px solid transparent; }
+        .dropdown-content a:hover { background: rgba(255,255,255,0.05); color: var(--primary); border-left-color: var(--primary); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown:hover .nav-link.dropbtn { background: rgba(255,255,255,0.05); color: var(--primary); border-color: var(--primary); }
+        .dropbtn { cursor: pointer; font-family: inherit; font-size: inherit; background: transparent; }
+
         .weather-widget {
             display: flex;
             align-items: center;
@@ -279,6 +288,9 @@
         .card.github-card::before { background: linear-gradient(to right, #6b7280, #cbd5e1); }
         .card.github-card:hover { border-color: #94a3b8; box-shadow: 0 20px 40px -10px rgba(148, 163, 184, 0.35); }
 
+        .card.lolli-card::before { background: linear-gradient(to right, #ec4899, #8b5cf6); }
+        .card.lolli-card:hover { border-color: #ec4899; box-shadow: 0 20px 40px -10px rgba(236, 72, 153, 0.35); }
+
         .card-icon {
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -415,6 +427,7 @@
             .weather-loc { display: none; }
             .clock-widget { display: none; }
             .stats-bar { gap: 1.5rem; }
+            .dropdown-content { right: auto; left: 0; }
         }
     </style>
 </head>
@@ -434,11 +447,17 @@
                 <span id="w-temp" class="weather-temp">Lade...</span>
                 <span class="weather-loc">Aachen</span>
             </div>
-            <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
             <a href="/plan-des-pistes/" class="nav-link">🎿 Pistenpläne</a>
-            <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
             <a href="/untappd/" class="nav-link">🍺 Bier</a>
             <a href="/btd6/" class="nav-link">🎈 BTD6</a>
+            <div class="dropdown">
+                <button class="nav-link dropbtn">🎮 Games ▾</button>
+                <div class="dropdown-content">
+                    <a href="/lollipop-looper/">🍭 Lollipop Looper</a>
+                    <a href="/ski-resort-idle/">🏔️ Ski Resort</a>
+                    <a href="/game_bridle/">🧱 Bridle</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -461,7 +480,7 @@
                 <div class="stat-label">Total Besucher</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">2</div>
+                <div class="stat-number">3</div>
                 <div class="stat-label">Games</div>
             </div>
             <div class="stat-item">
@@ -501,6 +520,12 @@
         <!-- CATEGORY: GAMES -->
         <h2 class="section-heading">🎮 Web Games</h2>
         <section class="grid">
+            <a href="/lollipop-looper/" class="card lolli-card">
+                <div class="card-icon">🍭</div>
+                <h3>Lollipop Looper <span class="badge" style="background: linear-gradient(135deg, #ec4899, #8b5cf6);">Neu</span></h3>
+                <p>Verteidige den süßen Turm gegen Gummibärchen-Zombies. Roguelite Tower-Defense mit coolen Upgrades!</p>
+            </a>
+
             <a href="/ski-resort-idle/" class="card">
                 <div class="card-icon">🏔️</div>
                 <h3>Ski Resort Idle</h3>
@@ -546,9 +571,7 @@
     <footer>
         <div class="footer-links">
             <a href="https://github.com/MauriceBa" target="_blank" class="footer-link">🐙 GitHub</a>
-            <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
             <a href="/plan-des-pistes/" class="footer-link">🎿 Pistenpläne</a>
-            <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
             <a href="/untappd/" class="footer-link">🍺 Bier Stats</a>
             <a href="/btd6/" class="footer-link">🎈 BTD6</a>
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
