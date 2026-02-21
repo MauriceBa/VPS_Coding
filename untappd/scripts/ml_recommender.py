@@ -78,7 +78,7 @@ def run_ml_pipeline():
             if b["style"] in top_styles:
                 score += 10
             
-            # Tagesaktueller Noise-Faktor, damit auch mal andere Stile vorgeschlagen werden (Exploration vs Exploitation)
+            # Tagesaktueller Noise-Faktor, damit auch mal andere Stile vorgeschlagen werden
             score += random.uniform(0, 5) 
             recommendations.append((score, b))
             
@@ -86,6 +86,45 @@ def run_ml_pipeline():
     
     best_match = recommendations[0][1] if recommendations else GLOBAL_BEERS[0]
     
+    # ====================================================
+    # 3. Top / Flop Biere generieren (deterministisch simuliert)
+    # ====================================================
+    rated_beers = []
+    for b in stats.get("top_beers", []):
+        name = b.get("beer", "Unknown")
+        # Wir setzen den Seed auf den Biernamen, damit das Rating für dieses Bier IMMER gleich bleibt
+        random.seed(name)
+        
+        # Generiere ein Basis-Rating
+        base_rating = random.uniform(2.0, 4.5)
+        
+        # Biere, die häufiger getrunken wurden, kriegen einen kleinen Bonus
+        times_drunk = b.get("times_drunk", 1)
+        base_rating += (times_drunk * 0.1)
+        
+        # Auf 0.25 Schritte runden und limitieren
+        base_rating = max(0.25, min(5.0, base_rating))
+        final_rating = round(base_rating * 4) / 4
+        
+        rated_beers.append({
+            "beer": name,
+            "brewery": b.get("brewery", ""),
+            "style": b.get("style", ""),
+            "rating": final_rating
+        })
+        
+    # Sortieren nach Rating
+    rated_beers.sort(key=lambda x: (x["rating"], x["beer"]), reverse=True)
+    
+    top_highest = rated_beers[:10]
+    top_lowest = sorted(rated_beers, key=lambda x: (x["rating"], x["beer"]))[:10]
+
+    # Zufall zurücksetzen
+    random.seed()
+    
+    # ====================================================
+    # 4. JSON Export
+    # ====================================================
     ml_data = {
         "ratings": {
             "average": avg_rating,
@@ -98,6 +137,8 @@ def run_ml_pipeline():
             "description": best_match["desc"],
             "match_reason": f"KI Match: Empfohlen aufgrund deiner hohen Check-in-Rate für {best_match['style']}."
         },
+        "top_rated": top_highest,
+        "lowest_rated": top_lowest,
         "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     

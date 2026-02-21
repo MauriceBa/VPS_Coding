@@ -98,6 +98,9 @@
 
         .split-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.3s backwards; }
         @media (max-width: 900px) { .split-layout { grid-template-columns: 1fr; } }
+        
+        .split-half { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem; animation: slideUp 0.8s ease-out 0.3s backwards; }
+        @media (max-width: 900px) { .split-half { grid-template-columns: 1fr; } }
 
         .section-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 
@@ -112,12 +115,16 @@
         .table-box::-webkit-scrollbar { width: 6px; }
         .table-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 8px; }
         .table-box::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 8px; }
+        
         .styles-table { width: 100%; border-collapse: collapse; text-align: left; }
         .styles-table th { position: sticky; top: -1.5rem; background: var(--bg); padding: 0.75rem 0.5rem; font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--card-border); z-index: 5; }
         .styles-table td { padding: 0.75rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
         .styles-table tr:last-child td { border-bottom: none; }
         .styles-table tr:hover td { background: rgba(245, 158, 11, 0.05); }
         .col-num { text-align: right; font-weight: 700; color: var(--primary); }
+        
+        /* Neu: Sterne in Table */
+        .stars { color: #fbbf24; letter-spacing: 2px; font-size: 0.9rem;}
 
         .badge { display: inline-block; font-size: 0.65rem; padding: 0.15rem 0.55rem; border-radius: 50px; color: #fff; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 0.4rem; vertical-align: middle; }
 
@@ -209,6 +216,33 @@
                     <div class="card-sub" id="rec-style" style="margin-top:0.2rem; font-style:italic;"></div>
                     <p id="rec-desc" style="margin-top:1rem; font-size:0.9rem; color:var(--text-muted); line-height: 1.5; flex-grow: 1;"></p>
                     <div><span class="badge" id="rec-reason" style="margin-left:0; background: linear-gradient(135deg, var(--primary), var(--secondary)); white-space: normal;">Profil wird berechnet...</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: TOP & FLOP BEERS TABLES -->
+        <div class="split-half" style="margin-bottom: 2.5rem;">
+            <div class="left-col">
+                <div class="section-title">🥇 Top 10 Beste Biere</div>
+                <div class="table-box">
+                    <table class="styles-table">
+                        <thead><tr><th>Bier</th><th>Brauerei</th><th class="col-num">Rating</th></tr></thead>
+                        <tbody id="top-beers-tbody">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Top Biere...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="right-col">
+                <div class="section-title">📉 Top 10 Schlechteste Biere</div>
+                <div class="table-box">
+                    <table class="styles-table">
+                        <thead><tr><th>Bier</th><th>Brauerei</th><th class="col-num">Rating</th></tr></thead>
+                        <tbody id="flop-beers-tbody">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Lade Flop Biere...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -325,7 +359,7 @@
 
             } catch (error) { console.error("Stats JSON error", error); }
 
-            // 2. ML DATA LOAD (NEU: Chart.js und Empfehlung)
+            // 2. ML DATA LOAD (NEU: Chart.js, Empfehlung, Top/Flop)
             try {
                 const mlRes = await fetch('./data/ml_data.json');
                 const mlData = await mlRes.json();
@@ -339,6 +373,30 @@
                 document.getElementById('rec-style').textContent = mlData.recommendation.style;
                 document.getElementById('rec-desc').textContent = mlData.recommendation.description;
                 document.getElementById('rec-reason').textContent = mlData.recommendation.match_reason;
+                
+                // Top / Flop Beers Tables
+                const renderBeerTable = (tbodyId, beers) => {
+                    const tbody = document.getElementById(tbodyId);
+                    tbody.innerHTML = '';
+                    beers.forEach(b => {
+                        const tr = document.createElement('tr');
+                        // Helper to generate star text based on 0.25 steps
+                        const fullStars = Math.floor(b.rating);
+                        const quarter = b.rating - fullStars;
+                        let starStr = '★'.repeat(fullStars);
+                        if(quarter > 0) starStr += '½'; // simple representation
+                        
+                        tr.innerHTML = `
+                            <td><strong style="color:var(--text);">${b.beer}</strong><div style="font-size:0.75rem;color:var(--text-muted);">${b.style}</div></td>
+                            <td style="font-size:0.85rem;">${b.brewery}</td>
+                            <td class="col-num"><span class="stars">${starStr}</span><br><span style="font-size:0.8rem; color:var(--text-muted);">${b.rating.toFixed(2)}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                };
+                
+                if(mlData.top_rated) renderBeerTable('top-beers-tbody', mlData.top_rated);
+                if(mlData.lowest_rated) renderBeerTable('flop-beers-tbody', mlData.lowest_rated);
                 
                 // Rendering Chart.js
                 const ctxChart = document.getElementById('ratingChart').getContext('2d');
