@@ -6,11 +6,12 @@ import re, json, os, sys, random
 from datetime import datetime, timedelta
 from collections import defaultdict
 
-INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else 'untappd-Maurice.txt'
+BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_INPUT = os.path.join(BASE_DIR, "../data/untapped_maurice.txt")
+INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_INPUT
 
 # Pfade -- VPS hat Vorrang, sonst lokal
 VPS_STATS = "/var/www/mauricefun.lol/html/untappd/data/stats.json"
-BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
 STATS_PATH = VPS_STATS if os.path.exists(VPS_STATS) else os.path.join(BASE_DIR, "../data/stats.json")
 
 REF_DATE = datetime.today()
@@ -42,27 +43,89 @@ def infer_style(name, badges):
     if re.search(r'NEIPA|New England|Hazy', n, re.I): return 'NEIPA/Hazy IPA'
     if re.search(r'I\.?P\.?A\.?|India Pale Ale', n, re.I): return 'IPA'
     if re.search(r'Stout|Porter', n, re.I): return 'Stout/Porter'
-    if re.search(r'Weizen|Weisse|Wei\u00dfbier|Wit\b|Wheat|Hefe', n, re.I): return 'Wheat Beer'
+    if re.search(r'Weizen|Weisse|Weißbier|Wit\b|Wheat|Hefe', n, re.I): return 'Wheat Beer'
     if re.search(r'Gose|Berliner|Sour\b|Lambic|Kriek', n, re.I): return 'Sour/Wild'
     if re.search(r'Tripel|Triple', n, re.I): return 'Tripel'
     if re.search(r'Quad|Quadrupel', n, re.I): return 'Quadrupel'
     if re.search(r'Dubbel|Brune|Dunkel|Schwarz|Noir\b', n, re.I): return 'Dark/Dubbel'
-    if re.search(r'K\u00f6lsch|Kolsch', n, re.I): return 'K\u00f6lsch'
+    if re.search(r'Kölsch|Kolsch', n, re.I): return 'Kölsch'
     if re.search(r'Alt\b|Altbier', n, re.I): return 'Altbier'
-    if re.search(r'Bock\b|M\u00e4rzen|Oktoberfest', n, re.I): return 'Bock/M\u00e4rzen'
+    if re.search(r'Bock\b|Märzen|Oktoberfest', n, re.I): return 'Bock/Märzen'
     if re.search(r'Lager|Pils|Pilsner|Hell\b|Helles', n, re.I): return 'Lager/Pils'
     if re.search(r'Pale Ale|\bPA\b', n, re.I): return 'Pale Ale'
     if re.search(r'Blonde|Blond\b|Blanche|Golden', n, re.I): return 'Blonde/Golden'
-    if re.search(r'Amber|Ambr\u00e9e|Red\b|Rouge\b', n, re.I): return 'Amber/Red'
+    if re.search(r'Amber|Ambrée|Red\b|Rouge\b', n, re.I): return 'Amber/Red'
     return 'Other'
 
 # Extrahiere JEDE Dezimalzahl in der Export-Datei (auch mit Komma statt Punkt oder "Rating:" Präfix)
 RATING_RE_ANY = re.compile(r'(?:Rating:)?\s*([0-5][\.,](?:0|25|5|75|\d{1,2}))\b', re.IGNORECASE)
 
 def parse_export(filepath):
+    if not os.path.exists(filepath):
+        print(f"Datei nicht gefunden: {filepath}")
+        return []
+        
     with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
         lines = f.read().replace('\r\n', '\n').replace('\r', '\n').split('\n')
 
+    # Pruefen, ob dies das neue Web-Format (z.B. copy-pasted von der Seite) ist
+    is_new_format = any(line.strip().endswith(" label") for line in lines[:200])
+
+    if is_new_format:
+        checkins = []
+        i = 0
+        while i < len(lines):
+            line = lines[i].strip()
+            if line.endswith(" label"):
+                beer_name = line[:-6].strip()
+                current = {
+                    'beer_name': beer_name,
+                    'brewery': '',
+                    'venue': None,
+                    'serving_type': None,
+                    'date': None,
+                    'rating': None,
+                    'badges': [],
+                    'tagged_friends': []
+                }
+                
+                non_empty = []
+                j = i + 1
+                while j < len(lines):
+                    nxt = lines[j].strip()
+                    if nxt.endswith(" label"):
+                        break
+                    if nxt:
+                        non_empty.append(nxt)
+                    j += 1
+                
+                if len(non_empty) >= 4:
+                    current['brewery'] = non_empty[1]
+                    
+                    for nel in non_empty[3:]:
+                        rm = re.search(r'You?(?:r)?\s+Rating\s*\(([0-9.]+)\)', nel, re.IGNORECASE)
+                        if rm:
+                            current['rating'] = float(rm.group(1))
+                            break
+                    
+                    for nel in reversed(non_empty):
+                        dm = re.search(r'Recent:\s*(\d{2})/(\d{2})/(\d{2})', nel)
+                        if dm:
+                            m, d, y = dm.groups()
+                            current['date'] = f"20{y}-{m}-{d}"
+                            break
+                            
+                    checkins.append(current)
+                i = j
+            else:
+                i += 1
+                
+        for c in checkins:
+            c['style'] = infer_style(c['beer_name'], c['badges'])
+            
+        return checkins
+
+    # --- ALT FORMAT PARSING ---
     checkins, current, tagged = [], {}, False
 
     for raw in lines:
@@ -107,9 +170,7 @@ def parse_export(filepath):
             if bm:
                 current['badges'].append(bm.group(1))
 
-        # --- EXTREM AGGRESSIVE RATING SUCHE ---
         if current['rating'] is None:
-            # Suche nach 4.25, 4,25, Rating: 5.0, etc.
             match = RATING_RE_ANY.search(line)
             if match:
                 try:
@@ -118,7 +179,6 @@ def parse_export(filepath):
                         current['rating'] = val
                 except ValueError:
                     pass
-            # Wenn es eine exakte, alleinstehende Zahl von 1 bis 5 ist:
             elif line in ["1", "2", "3", "4", "5"]:
                 current['rating'] = float(line)
 
@@ -145,10 +205,7 @@ def build_rated_beers(checkins):
     for c in checkins:
         beer_name = c['beer_name']
         
-        # --- FALLBACK WENN WIRKLICH KEINE RATINGS IM EXPORT SIND ---
         if not found_any_ratings:
-            # Erzeuge ein festes (deterministisches) Rating aus dem Biernamen, 
-            # damit die Seite wenigstens funktioniert und gut aussieht
             random.seed(beer_name)
             base = random.uniform(2.5, 4.8)
             base = max(0.25, min(5.0, base))
@@ -159,7 +216,7 @@ def build_rated_beers(checkins):
             beer_data[beer_name]['style']   = c['style']
             beer_data[beer_name]['ratings'].append(c['rating'])
 
-    random.seed() # Seed wieder freigeben
+    random.seed()
 
     rated = []
     for beer_name, d in beer_data.items():
@@ -180,6 +237,10 @@ def build_rated_beers(checkins):
 if __name__ == '__main__':
     print(f'Parsing {INPUT_FILE}...')
     checkins = parse_export(INPUT_FILE)
+    if not checkins:
+        print("Keine Checkins gefunden oder Datei leer.")
+        sys.exit(0)
+        
     rated_beers, used_fallback = build_rated_beers(checkins)
 
     if used_fallback:
