@@ -254,6 +254,15 @@
             box-shadow: 0 20px 40px -10px rgba(249, 115, 22, 0.35);
         }
 
+        /* === BEER CARD === */
+        .card.beer-card::before {
+            background: linear-gradient(to right, #f59e0b, #ef4444);
+        }
+        .card.beer-card:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.35);
+        }
+
         .card-icon {
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -378,6 +387,7 @@
             </div>
             <a href="/ski-resort-idle/" class="nav-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="nav-link">🧱 Bridle</a>
+            <a href="/untappd/" class="nav-link">🍺 Bier Stats</a>
         </div>
     </header>
 
@@ -424,6 +434,12 @@
                 <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
             </a>
 
+            <a href="/untappd/" class="card beer-card">
+                <div class="card-icon">🍺</div>
+                <h3>Bier Stats</h3>
+                <p>Meine persönlichen Bier-Statistiken. Check-ins, Favoriten und mehr – powered by Untappd.</p>
+            </a>
+
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="card friend-card">
                 <div class="card-icon">🍽️</div>
                 <h3>uncreped.eu <span class="badge">Freund</span></h3>
@@ -437,6 +453,7 @@
             <a href="https://github.com/MauriceBa" target="_blank" class="footer-link">🐙 GitHub</a>
             <a href="/ski-resort-idle/" class="footer-link">🏔️ Ski Resort</a>
             <a href="/game_bridle/" class="footer-link">🧱 Bridle</a>
+            <a href="/untappd/" class="footer-link">🍺 Bier Stats</a>
             <a href="https://uncreped.eu" target="_blank" rel="noopener" class="footer-link">🍽️ uncreped.eu</a>
         </div>
         <p>&copy; 2026 MauriceBa. Built with passion &amp; coffee. ☕</p>
@@ -477,7 +494,6 @@
             const KEY_LAST  = 'mauricelol_last_visit';
             const now = Date.now();
             const last = parseInt(localStorage.getItem(KEY_LAST) || '0');
-            // New session = more than 30 min since last visit
             if (now - last > 30 * 60 * 1000) {
                 const visits = parseInt(localStorage.getItem(KEY_COUNT) || '0') + 1;
                 localStorage.setItem(KEY_COUNT, visits);
