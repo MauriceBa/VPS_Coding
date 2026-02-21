@@ -54,6 +54,7 @@
             padding: 0.75rem 1.5rem; border-radius: 12px; 
             backdrop-filter: blur(10px); text-align: center; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            min-width: 100px;
         }
         .hud-val { font-size: 1.6rem; font-weight: 800; color: var(--primary); }
         .hud-lbl { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px;}
@@ -130,6 +131,7 @@
             text-shadow: 0 2px 5px rgba(0,0,0,0.8); font-size: 1.2rem; z-index: 50; 
         }
         .fct.crit { color: #fcd34d; font-size: 1.8rem; text-shadow: 0 0 10px rgba(251, 191, 36, 0.8); }
+        .fct.dmg { color: #ef4444; font-size: 1.5rem; text-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
         @keyframes floatUp { 
             0% { transform: translateY(0) scale(0.5); opacity: 1; } 
             20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
@@ -155,7 +157,7 @@
     
     <div id="hud">
         <div class="hud-box"><div class="hud-val" id="hud-wave">1</div><div class="hud-lbl">Welle</div></div>
-        <div class="hud-box"><div class="hud-val" id="hud-lives" style="color:#ef4444;">❤️ 1</div><div class="hud-lbl">Leben</div></div>
+        <div class="hud-box"><div class="hud-val" id="hud-hp" style="color:#ef4444;">100</div><div class="hud-lbl">Leben</div></div>
         <div class="hud-box"><div class="hud-val" id="hud-money" style="color:#fbbf24;">0 🍬</div><div class="hud-lbl">Candies</div></div>
     </div>
 
@@ -199,7 +201,12 @@
         let state = 'SHOP'; // SHOP, PLAYING
         let money = parseInt(localStorage.getItem('ll_money') || '0');
         let wave = 1;
-        let lives = 1;
+        
+        // HP SYSTEM
+        let hp = 100;
+        let maxHp = 100;
+        let lastRegen = 0;
+
         let mouse = { x: cw/2, y: ch/2 };
         window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
         
@@ -217,7 +224,9 @@
             crit: { lvl: 0, baseCost: 40, mult: 1.8, name: '💥 Krit-Chance', desc: '+5% Chance auf verheerenden doppelten Schaden.' },
             pierce: { lvl: 0, baseCost: 80, mult: 2.5, name: '🗡️ Durchschlag', desc: 'Lollis durchbohren weitere Gegner (Max +5).' },
             slow: { lvl: 0, baseCost: 120, mult: 2.2, name: '🍯 Sirup-Guss', desc: 'Treffer verlangsamen Gegner extrem (Max Lvl 5).' },
-            shield: { lvl: 0, baseCost: 150, mult: 2.5, name: '🛡️ Zucker-Schild', desc: 'Überlebe +1 Treffer pro Lauf, bevor du stirbst.' },
+            maxHp: { lvl: 0, baseCost: 50, mult: 1.5, name: '💖 Zucker-Herz', desc: 'Erhöht deine maximalen Lebenspunkte (+50 pro Level).' },
+            regen: { lvl: 0, baseCost: 100, mult: 2.0, name: '🩹 Heil-Sirup', desc: 'Regeneriert 2 HP pro Sekunde (pro Level).' },
+            shield: { lvl: 0, baseCost: 150, mult: 2.5, name: '🛡️ Karamell-Panzer', desc: 'Absorbiert dauerhaft 5% des erlittenen Schadens (Max 60%).' },
             orbit: { lvl: 0, baseCost: 100, mult: 2.5, name: '🌀 Kreisende Lollis', desc: 'Fügt orbitierende Abwehr-Lollis hinzu (Max 5).' },
             cannon: { lvl: 0, baseCost: 250, mult: 3.0, name: '💣 Kaugummi-Kanone', desc: 'Schießt alle 3s explosiv auf zufällige Gegner!' },
             pulse: { lvl: 0, baseCost: 500, mult: 3.5, name: '🌊 Zucker-Pulswelle', desc: 'Löst alle 5s eine gewaltige Schockwelle aus.' }
@@ -228,6 +237,9 @@
         for(let key in defaultShop) {
             if(!shop[key]) shop[key] = JSON.parse(JSON.stringify(defaultShop[key]));
         }
+        // Force update old "Zucker-Schild" text to the new Armor text
+        shop.shield.name = defaultShop.shield.name;
+        shop.shield.desc = defaultShop.shield.desc;
 
         function getCost(key) { return Math.floor(shop[key].baseCost * Math.pow(shop[key].mult, shop[key].lvl)); }
         
@@ -240,7 +252,9 @@
             if(key === 'crit') return l * 0.05;
             if(key === 'pierce') return Math.min(l, 5); // 0 extra hits up to 5 extra hits
             if(key === 'slow') return Math.min(l * 0.15, 0.75); // up to 75% slow
-            if(key === 'shield') return 1 + l; // 1 base life + shield level
+            if(key === 'maxHp') return 100 + l * 50;
+            if(key === 'regen') return l * 2;
+            if(key === 'shield') return Math.min(l * 0.05, 0.60); // Max 60% damage reduction
             if(key === 'orbit') return Math.min(l, 5); // visual max 5
             if(key === 'cannonDmg') return (30 + l * 20) * pMult;
             if(key === 'pulseDmg') return (20 + l * 15) * pMult;
@@ -253,7 +267,7 @@
         }
 
         function renderShop() {
-            document.getElementById('shop-money').innerText = money + ' 🍬';
+            document.getElementById('shop-money').innerText = Math.floor(money) + ' 🍬';
             document.getElementById('prestige-lvl').innerText = prestige;
             document.getElementById('btn-prestige').disabled = money < 5000;
 
@@ -269,7 +283,8 @@
                               (key === 'double' && u.lvl >= 10) || 
                               (key === 'orbit' && u.lvl >= 5) || 
                               (key === 'pierce' && u.lvl >= 5) || 
-                              (key === 'slow' && u.lvl >= 5);
+                              (key === 'slow' && u.lvl >= 5) ||
+                              (key === 'shield' && u.lvl >= 12);
                 
                 grid.innerHTML += `
                     <div class="upg-card">
@@ -361,8 +376,10 @@
                 this.wobble += this.wobbleSpeed * (curSpeed / this.baseSpeed);
                 
                 if(dist < this.radius + 25) { // Hit tower
-                    takeDamage();
-                    this.hp = 0; // kill enemy that hit us
+                    let dmg = this.isBoss ? 150 : (this.isMini ? 50 : 20);
+                    dmg *= (1 + (wave - 1) * 0.1); // scaling collision damage
+                    takeDamage(dmg);
+                    this.hp = 0; // zombie kamikaze
                 }
                 if(this.hitTimer > 0) this.hitTimer--;
             }
@@ -435,9 +452,9 @@
         }
 
         // === COMBAT FX ===
-        function spawnFCT(x, y, text, isCrit) {
+        function spawnFCT(x, y, text, isCrit, isDmg = false) {
             const fct = document.createElement('div');
-            fct.className = 'fct' + (isCrit ? ' crit' : '');
+            fct.className = 'fct' + (isCrit ? ' crit' : '') + (isDmg ? ' dmg' : '');
             fct.innerText = text;
             fct.style.left = (x - 10) + 'px';
             fct.style.top = (y - 20) + 'px';
@@ -502,13 +519,17 @@
         // === RUN LOOP ===
         window.startRun = function() {
             state = 'PLAYING';
-            lives = getStat('shield'); // Calculate lives based on Shield level
+            maxHp = getStat('maxHp');
+            hp = maxHp;
+            
             document.getElementById('shop').classList.add('hidden');
             
             wave = 1; enemies = []; projectiles = []; particles = []; candies = [];
             startWave();
             updateHUD();
+            
             lastShot = performance.now();
+            lastRegen = performance.now();
             requestAnimationFrame(loop);
         }
 
@@ -529,22 +550,27 @@
             updateHUD();
         }
 
-        function takeDamage() {
-            lives--;
+        function takeDamage(baseDmg) {
+            let reduction = getStat('shield');
+            let actualDmg = baseDmg * (1 - reduction);
+            hp -= actualDmg;
             updateHUD();
             
             // Flash screen
             document.getElementById('dmg-overlay').classList.add('flash');
             setTimeout(() => document.getElementById('dmg-overlay').classList.remove('flash'), 150);
             
-            // Knockback blast to give breathing room
-            explode(cw/2, ch/2, 250, getStat('damage') * 2);
+            // Show damage text on player
+            spawnFCT(cw/2 + (Math.random()*40-20), ch/2 - 40, '-' + Math.round(actualDmg), false, true);
+
+            // Knockback blast to prevent instakill from swarms
+            explode(cw/2, ch/2, 180, getStat('damage') * 0.5);
             enemies.forEach(e => {
                 const dist = Math.hypot(e.x - cw/2, e.y - ch/2);
-                if(dist < 300) { e.x += (e.x-cw/2)*0.5; e.y += (e.y-ch/2)*0.5; }
+                if(dist < 250) { e.x += (e.x-cw/2)*0.4; e.y += (e.y-ch/2)*0.4; }
             });
 
-            if(lives <= 0) die();
+            if(hp <= 0) die();
         }
 
         function die() {
@@ -556,8 +582,8 @@
 
         function updateHUD() {
             document.getElementById('hud-wave').innerText = wave;
-            document.getElementById('hud-lives').innerText = '❤️ ' + lives;
-            document.getElementById('hud-money').innerText = money + ' 🍬';
+            document.getElementById('hud-hp').innerText = Math.ceil(hp) + ' / ' + maxHp;
+            document.getElementById('hud-money').innerText = Math.floor(money) + ' 🍬';
         }
 
         function loop(time) {
@@ -575,6 +601,16 @@
             } else if (enemiesToSpawn <= 0 && enemies.length === 0 && candies.length === 0) {
                 wave++; 
                 startWave();
+            }
+
+            // Health Regeneration
+            if(time - lastRegen > 1000) {
+                let regenAmt = getStat('regen');
+                if(regenAmt > 0 && hp < maxHp) {
+                    hp = Math.min(maxHp, hp + regenAmt);
+                    updateHUD();
+                }
+                lastRegen = time;
             }
 
             // Main Weapon Shooting
@@ -708,6 +744,15 @@
             ctx.strokeStyle = '#fbcfe8'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.stroke();
             ctx.beginPath(); ctx.arc(cw/2, ch/2 - 15, 10, Math.PI, Math.PI*2.5, false); 
             ctx.stroke();
+
+            // Draw Tower HP Bar visually below the tower
+            const towerHpWidth = 80;
+            ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
+            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
+            ctx.fillStyle = '#ef4444'; 
+            ctx.fillRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth * Math.max(0, hp/maxHp), 10);
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+            ctx.strokeRect(cw/2 - towerHpWidth/2, ch/2 + 50, towerHpWidth, 10);
 
             // Particles
             particles.forEach(p => {
