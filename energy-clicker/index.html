@@ -530,7 +530,10 @@
             { id: 'a12', name: 'Sternenfänger', desc: 'Kaufe eine Dyson-Sphäre', icon: '🪐', check: () => state.buildings['b8'] >= 1 },
             { id: 'a13', name: 'Sonnenanbeter', desc: 'Fange deine erste Sonneneruption', icon: '☀️', check: () => state.flaresCaught >= 1 },
             { id: 'a14', name: 'Aufgestiegen', desc: 'Erreiche Prestige-Level 1', icon: '✨', check: () => state.prestige >= 1 },
-            { id: 'a15', name: 'Energie-Gott', desc: 'Erreiche Prestige-Level 100', icon: '👑', check: () => state.prestige >= 100 }
+            { id: 'a15', name: 'Energie-Gott', desc: 'Erreiche Prestige-Level 100', icon: '👑', check: () => state.prestige >= 100 },
+            { id: 'a16', name: 'Umweltschützer', desc: 'Pflanze deinen ersten Baum', icon: '🌳', check: () => state.treesPlanted >= 1 },
+            { id: 'a17', name: 'Waldläufer', desc: 'Pflanze 100 Bäume', icon: '🌲', check: () => state.treesPlanted >= 100 },
+            { id: 'a18', name: 'Retter der Erde', desc: 'Pflanze 1.000 Bäume', icon: '🌍', check: () => state.treesPlanted >= 1000 }
         ];
 
         // Random Events
