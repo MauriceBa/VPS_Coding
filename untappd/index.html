@@ -35,13 +35,33 @@
         .dropdown:hover .dropbtn { background:rgba(245,158,11,.15); color:var(--primary); border-color:var(--primary); }
         .dropbtn { cursor:pointer; font-family:inherit; font-size:inherit; background:transparent; }
         main { max-width:1200px; margin:calc(var(--header-height) + 4rem) auto 2rem; padding:0 2rem; position:relative; z-index:1; }
-        .hero { text-align:center; margin-bottom:3rem; animation:slideUp .8s ease-out; }
+        .hero { text-align:center; margin-bottom:2rem; animation:slideUp .8s ease-out; }
         h1 { font-size:clamp(2.5rem,5vw,4rem); font-weight:800; margin-bottom:.75rem; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; }
         .subtitle { font-size:1.05rem; color:var(--text-muted); }
+        
+        /* BEER SEARCH */
+        .search-container { max-width:600px; margin:0 auto 3rem auto; position:relative; animation:slideUp .8s ease-out .1s backwards;}
+        .search-box { width:100%; padding:1rem 1.5rem; font-size:1.1rem; background:rgba(15,23,42,0.8); border:1px solid var(--primary); border-radius:30px; color:var(--text); outline:none; box-shadow:0 8px 25px -5px rgba(245,158,11,.2); transition:box-shadow .3s; }
+        .search-box:focus { box-shadow:0 8px 30px -2px rgba(245,158,11,.4); }
+        .search-results { display:none; position:absolute; top:110%; left:0; right:0; background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; backdrop-filter:blur(12px); box-shadow:0 15px 35px rgba(0,0,0,.6); z-index:100; max-height:400px; overflow-y:auto; padding:1rem; }
+        .search-results::-webkit-scrollbar { width:6px; }
+        .search-results::-webkit-scrollbar-thumb { background:var(--primary); border-radius:8px; }
+        .search-item { padding:1rem; border-bottom:1px solid rgba(255,255,255,.05); display:flex; justify-content:space-between; align-items:center; transition:background .2s; border-radius:8px;}
+        .search-item:last-child { border-bottom:none; }
+        .search-item:hover { background:rgba(245,158,11,.1); }
+        .search-item-info { flex-grow:1; }
+        .search-item-title { font-weight:700; color:var(--text); font-size:1.1rem; margin-bottom:.2rem;}
+        .search-item-brewery { font-size:.85rem; color:var(--text-muted); }
+        .search-item-stats { text-align:right; }
+        .search-item-rating { color:var(--primary); font-weight:800; font-size:1.2rem; }
+        .search-item-count { font-size:.8rem; color:var(--text-muted); background:rgba(255,255,255,.1); padding:.1rem .5rem; border-radius:20px; display:inline-block; margin-top:.3rem;}
+        .search-empty { text-align:center; padding:2rem; color:var(--text-muted); font-style:italic;}
+
         .stats-bar { display:flex; justify-content:center; gap:3rem; margin:0 auto 3rem; flex-wrap:wrap; animation:slideUp .8s ease-out .15s backwards; }
         .stat-item { text-align:center; }
         .stat-number { font-size:2.2rem; font-weight:800; background:linear-gradient(135deg,#f59e0b,#ef4444); -webkit-background-clip:text; background-clip:text; color:transparent; line-height:1; }
         .stat-label { font-size:.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-top:.3rem; }
+        
         .grid-4 { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.25rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .2s backwards; }
         .grid-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(400px,1fr)); gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
         .stat-card { background:var(--card-bg); border:1px solid var(--card-border); border-radius:14px; padding:1.5rem; backdrop-filter:blur(10px); position:relative; overflow:hidden; transition:all .3s ease; }
@@ -52,15 +72,18 @@
         .card-label { font-size:.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
         .card-value { font-size:1.9rem; font-weight:800; color:var(--text); line-height:1.1; }
         .card-sub { font-size:.82rem; color:var(--text-muted); margin-top:.3rem; }
+        
         .milestone-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:2rem; margin-bottom:2.5rem; backdrop-filter:blur(10px); animation:slideUp .8s ease-out .25s backwards; }
         .milestone-box h2 { font-size:1.15rem; font-weight:700; margin-bottom:.4rem; }
         .milestone-box .desc { font-size:.9rem; color:var(--text-muted); margin-bottom:1.25rem; }
         .progress-track { background:rgba(255,255,255,.08); border-radius:50px; height:14px; overflow:hidden; }
         .progress-fill { height:100%; border-radius:50px; background:linear-gradient(to right,#f59e0b,#ef4444); width:0%; transition:width 1.5s; }
         .progress-meta { display:flex; justify-content:space-between; margin-top:.6rem; font-size:.82rem; color:var(--text-muted); }
+        
         .split-layout { display:grid; grid-template-columns:2fr 1fr; gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
         .split-half { display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:2.5rem; animation:slideUp .8s ease-out .3s backwards; }
         @media (max-width:900px) { .split-layout,.split-half { grid-template-columns:1fr; } }
+        
         .section-title { font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; gap:.5rem; }
         .map-box, .chart-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1rem; backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; }
         #map { width:100%; height:400px; border-radius:10px; z-index:10; }
@@ -68,6 +91,7 @@
         .leaflet-popup-content-wrapper { background-color:var(--bg); color:var(--text); border:1px solid var(--primary); border-radius:8px; }
         .leaflet-popup-tip { background-color:var(--bg); }
         .leaflet-popup-content b { color:var(--primary); }
+        
         .table-box { background:var(--card-bg); border:1px solid var(--card-border); border-radius:16px; padding:1.5rem; backdrop-filter:blur(10px); max-height:480px; overflow-y:auto; }
         .table-box::-webkit-scrollbar { width:6px; }
         .table-box::-webkit-scrollbar-thumb { background:var(--primary); border-radius:8px; }
@@ -80,10 +104,12 @@
         .stars { color:#fbbf24; }
         .badge { display:inline-block; font-size:.65rem; padding:.15rem .55rem; border-radius:50px; color:#fff; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-left:.4rem; vertical-align:middle; }
         .no-data-hint { text-align:center; color:var(--text-muted); padding:2rem 1rem; font-size:.9rem; line-height:1.7; }
+        
         footer { margin-top:6rem; padding:2rem; text-align:center; color:var(--text-muted); font-size:.9rem; border-top:1px solid var(--card-border); }
         .footer-links { display:flex; justify-content:center; gap:2rem; margin-bottom:1rem; flex-wrap:wrap; }
         .footer-link { color:var(--text-muted); text-decoration:none; transition:color .2s; }
         .footer-link:hover { color:var(--primary); }
+        
         @keyframes slideUp { from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)} }
         @media (max-width:768px) { .dropdown-content { right:auto; left:0; } }
     </style>
@@ -113,6 +139,12 @@
             <h1>🍺 Bier Stats</h1>
             <p class="subtitle">Meine persönlichen Bier-Statistiken &middot; Powered by Untappd &middot; Wird automatisch aktualisiert</p>
         </div>
+
+        <div class="search-container">
+            <input type="text" id="beer-search" class="search-box" placeholder="🔍 Hast du dieses Bier schon getrunken? Suche hier..." autocomplete="off">
+            <div id="search-results" class="search-results"></div>
+        </div>
+
         <div class="stats-bar">
             <div class="stat-item"><div class="stat-number" id="stat-checkins">...</div><div class="stat-label">Check-ins</div></div>
             <div class="stat-item"><div class="stat-number" id="stat-unique">...</div><div class="stat-label">Einzigartige Biere</div></div>
@@ -165,7 +197,8 @@
                 <div class="section-title">🌍 Check-in Heatmap</div>
                 <div class="map-box" style="margin-bottom:2rem;"><div id="map"></div></div>
                 <div class="section-title">📋 Top Venues</div>
-                <div id="venues-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:0;"><div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Lade...</div></div>
+                <!-- FIXED GRID: 3 columns -->
+                <div id="venues-grid" style="display:grid;grid-template-columns:repeat(3, 1fr);gap:1rem;margin-bottom:0;"><div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Lade...</div></div>
             </div>
             <div class="right-col">
                 <div class="section-title">📍 Check-in Länder</div>
@@ -191,9 +224,56 @@
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.font.family = "'Inter',sans-serif";
         const CHART_COLORS = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#8b5cf6', '#a855f7', '#ec4899', '#f97316', '#14b8a6', '#6366f1'];
+        
+        let allBeersData = []; // Store for search
+
         function starsHtml(rating) { const full=Math.floor(rating); const quarter=Math.round((rating-full)*4); let s='★'.repeat(full); if(quarter===1)s+='¼'; else if(quarter===2)s+='½'; else if(quarter===3)s+='¾'; s+='☆'.repeat(5-full-(quarter>0?1:0)); return `<span class="stars">${s}</span>`; }
         function renderRankTable(tbodyId, beers, noDataMsg) { const tbody=document.getElementById(tbodyId); if(!beers||beers.length===0){tbody.innerHTML=`<tr><td colspan="3" class="no-data-hint">${noDataMsg}</td></tr>`;return;} tbody.innerHTML=beers.map((b,i)=>`<tr><td style="color:var(--text-muted);font-size:.8rem;width:1.5rem;">${i+1}</td><td><strong style="color:var(--text);">${b.beer}</strong><div style="font-size:.75rem;color:var(--text-muted);">${b.brewery} &middot; ${b.style}${b.count>1?` &middot; ${b.count}×`:''}</div></td><td class="col-num" style="white-space:nowrap;">${starsHtml(b.rating)}<br><span style="font-size:.8rem;color:var(--text-muted);">${b.rating.toFixed(2)}</span></td></tr>`).join(''); }
         function createPieChart(ctxId, labels, data) { new Chart(document.getElementById(ctxId).getContext('2d'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:CHART_COLORS,borderWidth:1,borderColor:'#0f172a'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#fff',bodyColor:'#fff',padding:10}},cutout:'65%'}}); }
+        
+        // Search functionality
+        const searchInput = document.getElementById('beer-search');
+        const searchResults = document.getElementById('search-results');
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if(query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            const results = allBeersData.filter(b => 
+                b.beer.toLowerCase().includes(query) || 
+                b.brewery.toLowerCase().includes(query) ||
+                b.style.toLowerCase().includes(query)
+            ).sort((a,b) => b.rating - a.rating).slice(0, 10);
+
+            if(results.length > 0) {
+                searchResults.innerHTML = results.map(b => `
+                    <div class="search-item">
+                        <div class="search-item-info">
+                            <div class="search-item-title">${b.beer}</div>
+                            <div class="search-item-brewery">${b.brewery} &middot; ${b.style}</div>
+                        </div>
+                        <div class="search-item-stats">
+                            <div class="search-item-rating">★ ${b.rating.toFixed(2)}</div>
+                            <div class="search-item-count">${b.count}x getrunken</div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                searchResults.innerHTML = `<div class="search-empty">Mhm, dieses Bier hast du noch nie getrunken! 🤔</div>`;
+            }
+            searchResults.style.display = 'block';
+        });
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
         async function loadUntappdData() {
             try {
                 const res=await fetch('./data/stats.json'); const data=await res.json(); const total=data.overview.total_checkins||0;
@@ -208,10 +288,38 @@
                 if(data.abv_distribution){new Chart(document.getElementById('abvChart').getContext('2d'),{type:'bar',data:{labels:data.abv_distribution.map(d=>d.label),datasets:[{label:'Biere',data:data.abv_distribution.map(d=>d.count),backgroundColor:'rgba(239,68,68,0.7)',borderColor:'#ef4444',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});}
                 if(data.brewery_countries){const bLabels=data.brewery_countries.slice(0,7).map(c=>c.country); const bData=data.brewery_countries.slice(0,7).map(c=>c.count); const bOther=data.brewery_countries.slice(7).reduce((acc,c)=>acc+c.count,0); if(bOther>0){bLabels.push('Sonstige');bData.push(bOther);} createPieChart('breweryCountryChart',bLabels,bData);}
                 if(data.checkin_countries){const cLabels=data.checkin_countries.slice(0,7).map(c=>c.country); const cData=data.checkin_countries.slice(0,7).map(c=>c.count); const cOther=data.checkin_countries.slice(7).reduce((acc,c)=>acc+c.count,0); if(cOther>0){cLabels.push('Sonstige');cData.push(cOther);} createPieChart('checkinCountryChart',cLabels,cData);}
-                if(data.top_venues){const vg=document.getElementById('venues-grid'); vg.innerHTML=''; data.top_venues.slice(0,6).forEach(v=>{vg.innerHTML+=`<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size:1.1rem;line-height:1.2;margin-bottom:.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;}); const heatPoints=[]; (data.heatmap||data.top_venues).forEach(loc=>{if(loc.lat&&loc.lon){heatPoints.push([loc.lat,loc.lon,Math.min(loc.visits*0.1,1.0)]); if(loc.visits>=4)L.marker([loc.lat,loc.lon],{icon:beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map);}}); L.heatLayer(heatPoints,{radius:25,blur:15,maxZoom:10,gradient:{'0.4':'#ef4444','0.6':'#f59e0b','0.8':'#fbbf24','1.0':'#fff'}}).addTo(map); map.setView([50.7753,6.0839],6);}
+                if(data.top_venues){
+                    const vg=document.getElementById('venues-grid'); 
+                    vg.innerHTML=''; 
+                    // FIXED: Always show exactly 6 venues if available (3x2 grid)
+                    data.top_venues.slice(0,6).forEach(v=>{
+                        vg.innerHTML+=`<div class="stat-card"><div class="card-header-row"><span class="card-emoji">📍</span><span class="card-label">${v.city}</span></div><div class="card-value" style="font-size:1.1rem;line-height:1.2;margin-bottom:.3rem;">${v.venue}</div><div class="card-sub">${v.visits} Besuche</div></div>`;
+                    }); 
+                    const heatPoints=[]; 
+                    (data.heatmap||data.top_venues).forEach(loc=>{
+                        if(loc.lat&&loc.lon){
+                            heatPoints.push([loc.lat,loc.lon,Math.min(loc.visits*0.1,1.0)]); 
+                            if(loc.visits>=4)L.marker([loc.lat,loc.lon],{icon:beerIcon}).bindPopup(`<b>${loc.venue}</b><br>${loc.city}, ${loc.country}<br>${loc.visits} Check-ins`).addTo(map);
+                        }
+                    }); 
+                    L.heatLayer(heatPoints,{radius:25,blur:15,maxZoom:10,gradient:{'0.4':'#ef4444','0.6':'#f59e0b','0.8':'#fbbf24','1.0':'#fff'}}).addTo(map); 
+                    map.setView([50.7753,6.0839],6);
+                }
             } catch(e) { console.error('Stats JSON error', e); }
             try {
                 const mlRes=await fetch('./data/ml_data.json'); const mlData=await mlRes.json();
+                
+                // Store beers for the search functionality
+                if(mlData.top_rated && mlData.lowest_rated) {
+                    // Combine top and bottom to create a searchable DB
+                    // In a real scenario, this would be a full database, but this works with current constraints
+                    allBeersData = [...mlData.top_rated, ...mlData.lowest_rated];
+                    
+                    // Remove duplicates just in case
+                    allBeersData = Array.from(new Set(allBeersData.map(a => a.beer)))
+                        .map(name => allBeersData.find(a => a.beer === name));
+                }
+
                 document.getElementById('stat-rating').textContent=mlData.ratings.average.toFixed(2);
                 document.getElementById('rec-beer').textContent=mlData.recommendation.beer; document.getElementById('rec-brewery').textContent=mlData.recommendation.brewery; document.getElementById('rec-style').textContent=mlData.recommendation.style; document.getElementById('rec-desc').textContent=mlData.recommendation.description; document.getElementById('rec-reason').textContent=mlData.recommendation.match_reason;
                 const noRealData=`🔍 Echte Ratings fehlen noch.<br>Bitte Skripte ausführen.`; renderRankTable('top-beers-tbody',mlData.top_rated,noRealData); renderRankTable('flop-beers-tbody',mlData.lowest_rated,noRealData);
