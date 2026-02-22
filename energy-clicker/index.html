@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Eco Clicker | mauricelol.fun</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌍</text></svg>">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --secondary: #3b82f6;
+            --bg: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --header-height: 70px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Nav (Similar to other pages) */
+        header { 
+            height: var(--header-height); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 2rem; 
+            background: rgba(15, 23, 42, 0.95); 
+            border-bottom: 1px solid var(--border); 
+            z-index: 1000; 
+        }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; background-clip: text; color: transparent; text-decoration: none; }
+        .nav-group { display: flex; align-items: center; gap: 0.75rem; }
+        .nav-link { color: var(--text); text-decoration: none; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s; border: 1px solid transparent; background: rgba(255,255,255,0.03); }
+        .nav-link:hover, .nav-link.active { background: rgba(16, 185, 129, 0.15); border-color: var(--primary); color: var(--primary); }
+
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-content { display: none; position: absolute; top: 100%; right: 0; background: rgba(15,23,42,0.95); min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid var(--border); z-index: 1000; overflow: hidden; backdrop-filter: blur(12px); }
+        .dropdown-content a { color: var(--text); padding: 0.8rem 1.2rem; text-decoration: none; display: block; font-size: 0.95rem; font-weight: 500; border-left: 3px solid transparent; transition: all 0.2s; }
+        .dropdown-content a:hover { background: rgba(16,185,129,0.15); color: var(--primary); border-left-color: var(--primary); }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown:hover .dropbtn { background: rgba(16,185,129,0.15); color: var(--primary); border-color: var(--primary); }
+        .dropbtn { cursor: pointer; font-family: inherit; font-size: inherit; background: transparent; }
+
+        /* Game Layout */
+        #game-container {
+            display: flex;
+            flex-grow: 1;
+            height: calc(100vh - var(--header-height));
+            position: relative;
+        }
+
+        .panel {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+        .panel::-webkit-scrollbar { width: 6px; }
+        .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* Left Panel - The Clicker */
+        #left-panel {
+            flex: 1;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-right: 1px solid var(--border);
+            position: relative;
+        }
+
+        #score-box {
+            text-align: center;
+            margin-top: 2rem;
+            background: rgba(0,0,0,0.4);
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            width: 80%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+        #joules-display { font-size: 2.5rem; font-weight: 800; color: var(--primary); text-shadow: 0 0 10px rgba(16,185,129,0.5); }
+        #eps-display { font-size: 1.1rem; color: var(--text-muted); font-weight: 500; }
+
+        #earth-btn {
+            font-size: 10rem;
+            cursor: pointer;
+            margin-top: auto;
+            margin-bottom: auto;
+            filter: drop-shadow(0 0 30px rgba(59,130,246,0.6));
+            transition: transform 0.05s;
+            z-index: 10;
+        }
+        #earth-btn:active { transform: scale(0.95); }
+
+        .floating-text {
+            position: absolute;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            animation: floatUp 1s ease-out forwards;
+            z-index: 20;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-50px) scale(1.5); }
+        }
+
+        /* Center Panel - Upgrades & News */
+        #center-panel {
+            flex: 1;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+        }
+
+        #news-ticker {
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            font-style: italic;
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            height: 40px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #upgrades-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .upgrade-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            aspect-ratio: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .upgrade-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--primary); }
+        .upgrade-btn.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+        
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(15,23,42,0.95);
+            border: 1px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 250px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .tooltip h4 { color: var(--primary); margin-bottom: 0.3rem; }
+        .tooltip .cost { color: #fbbf24; font-weight: bold; margin-bottom: 0.5rem; }
+        .tooltip .desc { color: var(--text-muted); }
+
+        /* Right Panel - Buildings */
+        #right-panel {
+            width: 320px;
+            background: var(--panel-bg);
+        }
+
+        .building-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .building-btn:hover { background: rgba(255,255,255,0.05); border-color: var(--text-muted); }
+        .building-btn.disabled { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
+        .building-btn.disabled:hover { background: rgba(0,0,0,0.3); border-color: var(--border); }
+        
+        .b-icon { font-size: 2.2rem; filter: drop-shadow(0 0 5px rgba(255,255,255,0.2)); }
+        .b-info { flex-grow: 1; }
+        .b-name { font-weight: 700; font-size: 1.1rem; }
+        .b-cost { color: #fbbf24; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
+        .b-count { font-size: 1.8rem; font-weight: 800; color: rgba(255,255,255,0.1); position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); }
+
+        /* Golden Cookie equivalent */
+        #solar-flare {
+            position: absolute;
+            font-size: 4rem;
+            cursor: pointer;
+            display: none;
+            z-index: 500;
+            filter: drop-shadow(0 0 20px #f59e0b);
+            animation: pulseFlare 2s infinite alternate, rotateFlare 10s linear infinite;
+        }
+
+        @keyframes pulseFlare {
+            0% { transform: scale(0.9); }
+            100% { transform: scale(1.1); }
+        }
+        @keyframes rotateFlare {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Save & Prestige Buttons */
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .control-btn {
+            flex: 1;
+            padding: 0.6rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+        .control-btn:hover { background: rgba(255,255,255,0.1); }
+        .control-btn.danger { color: #ef4444; border-color: rgba(239,68,68,0.3); }
+        .control-btn.danger:hover { background: rgba(239,68,68,0.1); }
+        .control-btn.prestige { background: rgba(139, 92, 246, 0.1); border-color: #8b5cf6; color: #a855f7; font-weight: bold; }
+        .control-btn.prestige:hover { background: rgba(139, 92, 246, 0.3); }
+
+        #particles-js { position: absolute; width: 100%; height: 100%; top:0; left:0; z-index: 0; pointer-events: none; }
+
+        @media (max-width: 900px) {
+            #game-container { flex-direction: column; overflow-y: auto; }
+            #left-panel, #center-panel, #right-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); flex: none; height: auto;}
+            #left-panel { min-height: 400px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">mauricelol.fun</a>
+        <div class="nav-group">
+            <a href="/" class="nav-link">🏠 Home</a>
+            <a href="/plan-des-pistes/" class="nav-link">🎿 Pistenpläne</a>
+            <a href="/btd6/" class="nav-link">🎈 BTD6</a>
+            <a href="/untappd/" class="nav-link">🍺 Bier</a>
+            <div class="dropdown">
+                <button class="nav-link dropbtn active">🎮 Games ▾</button>
+                <div class="dropdown-content">
+                    <a href="/lollipop-looper/">🍭 Lollipop Looper</a>
+                    <a href="/ski-resort-idle/">🏔️ Ski Resort</a>
+                    <a href="/game_bridle/">🧱 Bridle</a>
+                    <a href="/energy-clicker/" style="color:var(--primary);">🌍 Eco Clicker</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="game-container">
+        <div id="particles-js"></div>
+        <div id="solar-flare" onclick="catchFlare(event)">☀️</div>
+
+        <!-- LEFT PANEL: CLICKER -->
+        <div id="left-panel" class="panel">
+            <div id="score-box">
+                <div id="joules-display">0 J</div>
+                <div id="eps-display">0 Watt (J/s)</div>
+                <div id="prestige-display" style="display:none; color:#a855f7; font-size:0.8rem; margin-top:0.5rem;">+0% Prestige Bonus</div>
+            </div>
+            <div id="earth-btn" onmousedown="clickEarth(event)">🌍</div>
+        </div>
+
+        <!-- CENTER PANEL: UPGRADES -->
+        <div id="center-panel" class="panel">
+            <div id="news-ticker">Lade Nachrichten...</div>
+            
+            <div class="panel-header">
+                <span>Forschung & Upgrades</span>
+            </div>
+            <div id="upgrades-grid">
+                <!-- Upgrades injected via JS -->
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="saveGame()">💾 Speichern</button>
+                <button class="control-btn danger" onclick="wipeSave()">🗑️ Reset</button>
+                <button class="control-btn prestige" onclick="ascend()">✨ Aufsteigen</button>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: BUILDINGS -->
+        <div id="right-panel" class="panel">
+            <div class="panel-header">
+                <span>Anlagen</span>
+            </div>
+            <div id="buildings-container">
+                <!-- Buildings injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Tooltip Element -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        // --- GAME DATA ---
+        const initBuildings = [
+            { id: 'b0', name: 'Handkurbel', icon: '🖐️', baseCost: 15, baseGen: 0.1, desc: 'Erzeugt Energie durch reine Muskelkraft.' },
+            { id: 'b1', name: 'Solarpanel', icon: '☀️', baseCost: 100, baseGen: 1, desc: 'Wandelt Sonnenlicht effizient in Energie um.' },
+            { id: 'b2', name: 'Windkraftrad', icon: '🌬️', baseCost: 1100, baseGen: 8, desc: 'Nutzt den Wind für sauberen Strom.' },
+            { id: 'b3', name: 'Wasserkraftwerk', icon: '🌊', baseCost: 12000, baseGen: 47, desc: 'Staut Flüsse für massive Energiegewinnung.' },
+            { id: 'b4', name: 'Geothermie', icon: '🌋', baseCost: 130000, baseGen: 260, desc: 'Zapft die unendliche Hitze des Erdkerns an.' },
+            { id: 'b5', name: 'Biomasse', icon: '🌱', baseCost: 1400000, baseGen: 1400, desc: 'Verfeuert organische Abfälle für Strom.' },
+            { id: 'b6', name: 'Atomkraftwerk', icon: '⚛️', baseCost: 20000000, baseGen: 7800, desc: 'Kernspaltung bringt gigantische Erträge.' },
+            { id: 'b7', name: 'Fusionsreaktor', icon: '🌟', baseCost: 330000000, baseGen: 44000, desc: 'Die unbändige Kraft der Sonne auf der Erde.' },
+            { id: 'b8', name: 'Dyson-Sphäre', icon: '🪐', baseCost: 5100000000, baseGen: 260000, desc: 'Umschließt einen ganzen Stern.' }
+        ];
+
+        let initUpgrades = [
+            { id: 'u_c1', name: 'Kupferkabel', desc: 'Klicks sind doppelt so effektiv.', cost: 500, target: 'click', reqType: 'total', req: 100, icon: '🖱️' },
+            { id: 'u_c2', name: 'Silberkabel', desc: 'Klicks sind doppelt so effektiv.', cost: 5000, target: 'click', reqType: 'total', req: 10000, icon: '🖱️' },
+            { id: 'u_c3', name: 'Supraleiter', desc: 'Klicks sind doppelt so effektiv.', cost: 50000, target: 'click', reqType: 'total', req: 1000000, icon: '🖱️' },
+            { id: 'u_c4', name: 'Quanten-Maus', desc: 'Klicks sind doppelt so effektiv.', cost: 5000000, target: 'click', reqType: 'total', req: 100000000, icon: '🖱️' }
+        ];
+
+        // Procedurally generate 3 upgrades per building
+        initBuildings.forEach((b, i) => {
+            initUpgrades.push({ id: `u_b${i}_1`, name: `${b.name} Forschung I`, desc: `${b.name} produziert doppelt so viel.`, cost: b.baseCost * 10, target: b.id, reqType: 'building', reqTarget: b.id, req: 10, icon: b.icon });
+            initUpgrades.push({ id: `u_b${i}_2`, name: `${b.name} Forschung II`, desc: `${b.name} produziert doppelt so viel.`, cost: b.baseCost * 100, target: b.id, reqType: 'building', reqTarget: b.id, req: 50, icon: b.icon });
+            initUpgrades.push({ id: `u_b${i}_3`, name: `${b.name} Forschung III`, desc: `${b.name} produziert doppelt so viel.`, cost: b.baseCost * 10000, target: b.id, reqType: 'building', reqTarget: b.id, req: 100, icon: b.icon });
+        });
+
+        // --- GAME STATE ---
+        let state = {
+            joules: 0,
+            totalJoules: 0,
+            prestige: 0,
+            clickMult: 1,
+            startTime: Date.now(),
+            buildings: {}, // id: count
+            upgrades: {} // id: boolean (bought)
+        };
+
+        // Initialize missing state items
+        initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
+        initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
+
+        let currentEps = 0;
+
+        // --- FORMATTING ---
+        function format(num) {
+            if (num < 1000) return Math.floor(num).toString();
+            const suffixes = ["", " Tsd", " Mio", " Mrd", " Bio", " Brd", " Tril"];
+            const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
+            let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
+            if (shortValue % 1 !== 0) shortValue = shortValue.toFixed(1);
+            return shortValue + suffixes[suffixNum];
+        }
+
+        // --- CORE LOGIC ---
+        function calculateEPS() {
+            let eps = 0;
+            initBuildings.forEach(b => {
+                let count = state.buildings[b.id];
+                if (count > 0) {
+                    let mult = 1;
+                    if(state.upgrades[`u_${b.id}_1`]) mult *= 2;
+                    if(state.upgrades[`u_${b.id}_2`]) mult *= 2;
+                    if(state.upgrades[`u_${b.id}_3`]) mult *= 2;
+                    eps += b.baseGen * count * mult;
+                }
+            });
+            // Prestige Bonus (1 prestige = +1% EPS)
+            if (state.prestige > 0) {
+                eps *= (1 + (state.prestige * 0.01));
+            }
+            currentEps = eps;
+            document.getElementById('eps-display').innerText = format(currentEps) + " Watt (J/s)";
+        }
+
+        function calculateClickPower() {
+            let power = 1;
+            if(state.upgrades['u_c1']) power *= 2;
+            if(state.upgrades['u_c2']) power *= 2;
+            if(state.upgrades['u_c3']) power *= 2;
+            if(state.upgrades['u_c4']) power *= 2;
+            
+            // Add 1% of EPS to click
+            power += currentEps * 0.01;
+            
+            if (state.prestige > 0) power *= (1 + (state.prestige * 0.01));
+            return power;
+        }
+
+        function getBuildingCost(id) {
+            let b = initBuildings.find(x => x.id === id);
+            let count = state.buildings[id];
+            return b.baseCost * Math.pow(1.15, count);
+        }
+
+        function updateUI() {
+            document.getElementById('joules-display').innerText = format(state.joules) + " J";
+            
+            if(state.prestige > 0) {
+                document.getElementById('prestige-display').style.display = 'block';
+                document.getElementById('prestige-display').innerText = `+${format(state.prestige)}% Prestige Bonus`;
+            }
+
+            // Update Buildings
+            initBuildings.forEach(b => {
+                let cost = getBuildingCost(b.id);
+                let el = document.getElementById(`btn-${b.id}`);
+                if (el) {
+                    el.querySelector('.b-count').innerText = state.buildings[b.id] > 0 ? state.buildings[b.id] : '';
+                    el.querySelector('.b-cost-val').innerText = format(cost);
+                    if (state.joules >= cost) {
+                        el.classList.remove('disabled');
+                    } else {
+                        el.classList.add('disabled');
+                    }
+                }
+            });
+
+            // Update Upgrades (visibility & affordability)
+            initUpgrades.forEach(u => {
+                if (state.upgrades[u.id]) return; // Already bought
+                
+                let unlocked = false;
+                if (u.reqType === 'total' && state.totalJoules >= u.req) unlocked = true;
+                if (u.reqType === 'building' && state.buildings[u.reqTarget] >= u.req) unlocked = true;
+
+                let el = document.getElementById(`upg-${u.id}`);
+                
+                if (unlocked && !el) {
+                    // Create upgrade button
+                    let btn = document.createElement('div');
+                    btn.id = `upg-${u.id}`;
+                    btn.className = 'upgrade-btn';
+                    btn.innerHTML = u.icon;
+                    btn.onmouseover = (e) => showTooltip(e, u.name, u.cost, u.desc);
+                    btn.onmouseout = hideTooltip;
+                    btn.onclick = () => buyUpgrade(u.id);
+                    document.getElementById('upgrades-grid').appendChild(btn);
+                    el = btn;
+                }
+
+                if (el) {
+                    if (state.joules >= u.cost) el.classList.remove('disabled');
+                    else el.classList.add('disabled');
+                }
+            });
+        }
+
+        // --- ACTIONS ---
+        function clickEarth(e) {
+            let clickPower = calculateClickPower();
+            state.joules += clickPower;
+            state.totalJoules += clickPower;
+            
+            // Floating text
+            let floater = document.createElement('div');
+            floater.className = 'floating-text';
+            floater.innerText = `+${format(clickPower)}`;
+            floater.style.left = (e.clientX - 20 + (Math.random()*40 - 20)) + 'px';
+            floater.style.top = (e.clientY - 20) + 'px';
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 1000);
+            
+            updateUI();
+        }
+
+        function buyBuilding(id) {
+            let cost = getBuildingCost(id);
+            if (state.joules >= cost) {
+                state.joules -= cost;
+                state.buildings[id]++;
+                calculateEPS();
+                updateUI();
+            }
+        }
+
+        function buyUpgrade(id) {
+            let u = initUpgrades.find(x => x.id === id);
+            if (state.joules >= u.cost && !state.upgrades[id]) {
+                state.joules -= u.cost;
+                state.upgrades[id] = true;
+                document.getElementById(`upg-${id}`).remove();
+                hideTooltip();
+                calculateEPS();
+                updateUI();
+            }
+        }
+
+        // --- GOLDEN EVENT (Solar Flare) ---
+        function spawnFlare() {
+            let flare = document.getElementById('solar-flare');
+            let x = Math.random() * (window.innerWidth - 100);
+            let y = Math.random() * (window.innerHeight - 150) + 70;
+            flare.style.left = x + 'px';
+            flare.style.top = y + 'px';
+            flare.style.display = 'block';
+            
+            setTimeout(() => { flare.style.display = 'none'; }, 10000); // Dissapear after 10s
+            
+            // Next spawn in 1-3 minutes
+            setTimeout(spawnFlare, Math.random() * 120000 + 60000);
+        }
+
+        function catchFlare(e) {
+            e.stopPropagation();
+            let flare = document.getElementById('solar-flare');
+            flare.style.display = 'none';
+            
+            // Reward: 15 minutes of EPS, minimum 100
+            let reward = Math.max(currentEps * 60 * 15, 100);
+            state.joules += reward;
+            state.totalJoules += reward;
+            
+            // Show alert
+            let floater = document.createElement('div');
+            floater.className = 'floating-text';
+            floater.style.fontSize = '2rem';
+            floater.style.color = '#f59e0b';
+            floater.innerText = `Sonneneruption! +${format(reward)} J!`;
+            floater.style.left = (e.clientX - 100) + 'px';
+            floater.style.top = (e.clientY - 20) + 'px';
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 2000);
+            
+            updateUI();
+        }
+
+        // --- PRESTIGE ---
+        function ascend() {
+            // 1 Prestige point per 1 Million Total Joules (cube root scale roughly)
+            let pendingPrestige = Math.floor(Math.cbrt(state.totalJoules / 1000000));
+            if (pendingPrestige <= 0) {
+                alert("Du brauchst mehr Energie um aufzusteigen! (min. 1 Mio Total Joules für 1 Token)");
+                return;
+            }
+            if (confirm(`Möchtest du das Spiel zurücksetzen und aufsteigen?\nDu erhältst ${format(pendingPrestige)} Prestige Token!\nJeder Token bringt permanent +1% EPS.`)) {
+                let newPrestige = state.prestige + pendingPrestige;
+                state = {
+                    joules: 0,
+                    totalJoules: 0,
+                    prestige: newPrestige,
+                    clickMult: 1,
+                    startTime: Date.now(),
+                    buildings: {},
+                    upgrades: {}
+                };
+                initBuildings.forEach(b => { state.buildings[b.id] = 0; });
+                initUpgrades.forEach(u => { state.upgrades[u.id] = false; });
+                document.getElementById('upgrades-grid').innerHTML = '';
+                saveGame();
+                calculateEPS();
+                updateUI();
+            }
+        }
+
+        // --- TOOLTIP ---
+        const tooltip = document.getElementById('tooltip');
+        function showTooltip(e, title, cost, desc) {
+            tooltip.innerHTML = `<h4>${title}</h4><div class="cost">💰 ${format(cost)} J</div><div class="desc">${desc}</div>`;
+            tooltip.style.display = 'block';
+            let x = e.clientX + 15;
+            let y = e.clientY + 15;
+            if(x + 250 > window.innerWidth) x = e.clientX - 265;
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+        function hideTooltip() { tooltip.style.display = 'none'; }
+
+        // --- NEWS TICKER ---
+        const newsStrings = [
+            "Wissenschaftler warnen vor zu viel sauberer Energie...",
+            "Handkurbel-Verkäufe steigen rasant an.",
+            "Bürger beschweren sich über Dyson-Sphäre, die die Sonne blockiert.",
+            "Windkrafträder wehen angeblich Vögel in den Weltraum.",
+            "Klimawandel erfolgreich gestoppt! Jetzt wird's kalt.",
+            "Lokaler Held erzeugt Strom durch wildes Klicken auf eine Erd-Kugel."
+        ];
+        function updateNews() {
+            let el = document.getElementById('news-ticker');
+            el.style.opacity = 0;
+            setTimeout(() => {
+                el.innerText = newsStrings[Math.floor(Math.random() * newsStrings.length)];
+                el.style.opacity = 1;
+            }, 500);
+        }
+
+        // --- SAVE/LOAD ---
+        function saveGame() {
+            localStorage.setItem('wattClickerSave', JSON.stringify(state));
+            let floater = document.createElement('div');
+            floater.className = 'floating-text';
+            floater.style.fontSize = '1rem';
+            floater.style.color = '#10b981';
+            floater.innerText = `Spiel gespeichert!`;
+            floater.style.left = '50%';
+            floater.style.top = '80px';
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 1000);
+        }
+
+        function loadGame() {
+            let saved = localStorage.getItem('wattClickerSave');
+            if (saved) {
+                let parsed = JSON.parse(saved);
+                // Merge with default state to prevent missing keys on updates
+                state = { ...state, ...parsed };
+                // Ensure new buildings/upgrades exist
+                initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
+                initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
+            }
+        }
+
+        function wipeSave() {
+            if(confirm("Bist du sicher? Dein gesamter Fortschritt (inkl. Prestige) wird gelöscht!")) {
+                localStorage.removeItem('wattClickerSave');
+                location.reload();
+            }
+        }
+
+        // --- INIT ---
+        function init() {
+            loadGame();
+
+            // Render Buildings
+            const bCont = document.getElementById('buildings-container');
+            initBuildings.forEach(b => {
+                let div = document.createElement('div');
+                div.className = 'building-btn';
+                div.id = `btn-${b.id}`;
+                div.onclick = () => buyBuilding(b.id);
+                div.onmouseover = (e) => showTooltip(e, b.name, getBuildingCost(b.id), `${b.desc}<br><br>Gibt <b>${format(b.baseGen)} W</b> Basis.`);
+                div.onmouseout = hideTooltip;
+                
+                div.innerHTML = `
+                    <div class="b-icon">${b.icon}</div>
+                    <div class="b-info">
+                        <div class="b-name">${b.name}</div>
+                        <div class="b-cost">💰 <span class="b-cost-val">${format(b.baseCost)}</span></div>
+                    </div>
+                    <div class="b-count">${state.buildings[b.id] > 0 ? state.buildings[b.id] : ''}</div>
+                `;
+                bCont.appendChild(div);
+            });
+
+            calculateEPS();
+            updateUI();
+
+            // Game Loop (10 ticks per second)
+            setInterval(() => {
+                state.joules += currentEps / 10;
+                state.totalJoules += currentEps / 10;
+                updateUI();
+            }, 100);
+
+            // Auto Save
+            setInterval(saveGame, 30000);
+
+            // News Update
+            setInterval(updateNews, 15000);
+            updateNews();
+
+            // Start Solar Flare timer
+            setTimeout(spawnFlare, 60000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
