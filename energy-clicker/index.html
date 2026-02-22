@@ -425,6 +425,7 @@
             <div class="controls">
                 <button class="control-btn" onclick="saveGame()">💾 Speichern</button>
                 <button class="control-btn" onclick="showStats()">📊 Stats</button>
+                <button class="control-btn" onclick="showExportImport()">📋 Export/Import</button>
                 <button class="control-btn danger" onclick="wipeSave()">🗑️ Reset</button>
                 <button class="control-btn prestige" onclick="ascend()">✨ Aufsteigen</button>
             </div>
@@ -438,6 +439,21 @@
             </div>
             <div id="buildings-container">
                 <!-- Buildings injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Export/Import Modal -->
+    <div id="export-modal" class="modal-overlay" onclick="if(event.target===this)closeExportImport()">
+        <div class="modal">
+            <h2>📋 Spielstand exportieren/importieren</h2>
+            <p style="color:var(--text-muted); margin-bottom:1rem;">Kopiere den Code um deinen Spielstand zu speichern oder füge einen Code ein um einen Spielstand zu laden.</p>
+            <textarea id="save-code" style="width:100%; height:150px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:var(--text); padding:0.5rem; border-radius:8px; font-family:monospace; font-size:0.8rem; resize:none;"></textarea>
+            
+            <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button class="close-modal" onclick="copySaveCode()" style="flex:1; background:#3b82f6;">📋 Kopieren</button>
+                <button class="close-modal" onclick="importSaveCode()" style="flex:1; background:#10b981;">📥 Importieren</button>
+                <button class="close-modal" onclick="closeExportImport()" style="flex:1;">Schließen</button>
             </div>
         </div>
     </div>
@@ -720,6 +736,39 @@
                 popup.classList.remove('show');
                 setTimeout(() => popup.remove(), 500);
             }, 5000);
+        }
+
+        // --- EXPORT/IMPORT ---
+        function showExportImport() {
+            let saveData = btoa(JSON.stringify(state));
+            document.getElementById('save-code').value = saveData;
+            document.getElementById('export-modal').classList.add('show');
+        }
+        function closeExportImport() {
+            document.getElementById('export-modal').classList.remove('show');
+        }
+        function copySaveCode() {
+            let textarea = document.getElementById('save-code');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Spielstand kopiert!');
+        }
+        function importSaveCode() {
+            let code = document.getElementById('save-code').value.trim();
+            if (!code) return;
+            
+            try {
+                let decoded = atob(code);
+                let parsed = JSON.parse(decoded);
+                
+                if (confirm('Bist du sicher? Dein aktueller Fortschritt wird überschrieben!')) {
+                    state = { ...state, ...parsed };
+                    saveGame();
+                    location.reload();
+                }
+            } catch (e) {
+                alert('Ungültiger Spielstand-Code!');
+            }
         }
 
         // --- STATS MODAL ---
