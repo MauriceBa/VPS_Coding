@@ -9,8 +9,11 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 try:
     import ml_recommender
+    from parse_untappd import infer_style, guess_brewery_country
 except ImportError:
     ml_recommender = None
+    infer_style = lambda n, b: "Other"
+    guess_brewery_country = lambda b: "Unknown"
 
 # URL deines Profils
 UNTAPPD_URL = "https://untappd.com/user/MauriceDE"
@@ -35,6 +38,8 @@ def update_stats_with_new_beers():
             return
             
         soup = BeautifulSoup(response.text, "html.parser")
+        
+        # 1. Globale Stats parsen
         stats_blocks = soup.select(".stats .stat")
         total_checkins_web = None
         unique_beers_web = None
@@ -54,29 +59,124 @@ def update_stats_with_new_beers():
         with open(STATS_JSON_PATH, "r", encoding="utf-8") as f:
             stats = json.load(f)
             
-        current_total = stats["overview"]["total_checkins"]
+        current_total = stats.get("overview", {}).get("total_checkins", 0)
+        last_checkin_id = stats.get("overview", {}).get("last_checkin_id", 0)
         
-        if total_checkins_web and total_checkins_web > current_total:
-            diff = total_checkins_web - current_total
-            print(f"Found {diff} new check-in(s)!")
+        # 2. Neue Biere aus dem Activity Feed (Recent Check-ins) auslesen
+        highest_id_seen = last_checkin_id
+        new_checkins_processed = 0
+        
+        # Finde alle Check-in Items auf der Seite
+        for item in soup.select(".item[data-checkin-id]"):
+            try:
+                cid = int(item["data-checkin-id"])
+                if cid <= last_checkin_id:
+                    continue # Check-in haben wir schon verarbeitet
+                    
+                if cid > highest_id_seen:
+                    highest_id_seen = cid
+                    
+                text_p = item.select_one("p.text")
+                if not text_p:
+                    continue
+                    
+                links = text_p.find_all("a")
+                beer_name = None
+                brewery_name = "Unknown"
+                
+                for link in links:
+                    href = link.get("href", "")
+                    if "/beer/" in href or "/b/" in href:
+                        beer_name = link.text.strip()
+                    elif "/brewery/" in href:
+                        brewery_name = link.text.strip()
+                
+                if not beer_name:
+                    continue
+                    
+                # Rating auslesen
+                rating = 3.0 # Fallback
+                caps = item.select_one(".caps")
+                if caps and caps.has_attr("data-rating"):
+                    try:
+                        rating = float(caps["data-rating"])
+                    except ValueError:
+                        pass
+                
+                # Checken, ob wir das Bier schon in der Datenbank haben
+                rated_beers = stats.get("rated_beers", [])
+                found_beer = False
+                for b in rated_beers:
+                    if b["beer"] == beer_name:
+                        found_beer = True
+                        # Update rating average & count
+                        old_count = b.get("rated_count", 1)
+                        old_avg = b.get("avg_rating", rating)
+                        # Neues gewichtetes Mittel
+                        new_avg = ((old_avg * old_count) + rating) / (old_count + 1)
+                        b["avg_rating"] = round(new_avg * 4) / 4 # Runden auf Untappd 0.25er Schritte
+                        b["rated_count"] = old_count + 1
+                        break
+                
+                if not found_beer:
+                    print(f"-> NEUES BIER ENTDECKT: {beer_name} von {brewery_name} ({rating} Sterne)")
+                    style = infer_style(beer_name, [])
+                    new_beer_entry = {
+                        "beer": beer_name,
+                        "brewery": brewery_name,
+                        "style": style,
+                        "avg_rating": rating,
+                        "rated_count": 1
+                    }
+                    rated_beers.append(new_beer_entry)
+                    
+                    # Optional: Auch Top Breweries und Styles updaten, damit die Diagramme stimmen
+                    top_breweries = stats.get("top_breweries", [])
+                    found_brewery = False
+                    for br in top_breweries:
+                        if br["brewery"] == brewery_name:
+                            br["count"] += 1
+                            found_brewery = True
+                            break
+                    if not found_brewery:
+                        top_breweries.append({"brewery": brewery_name, "count": 1})
+                    stats["top_breweries"] = sorted(top_breweries, key=lambda x: x["count"], reverse=True)
+
+                new_checkins_processed += 1
+                
+            except Exception as e:
+                print(f"Fehler beim Verarbeiten eines Checkins: {e}")
+
+        # Update JSON wenn es etwas Neues gab
+        if new_checkins_processed > 0 or (total_checkins_web and total_checkins_web > current_total):
+            print(f"Speichere Updates: {new_checkins_processed} neue Checkins verarbeitet.")
             
-            stats["overview"]["total_checkins"] = total_checkins_web
+            stats.setdefault("overview", {})
+            if total_checkins_web:
+                stats["overview"]["total_checkins"] = total_checkins_web
             if unique_beers_web:
                 stats["overview"]["unique_beers"] = unique_beers_web
+                
             stats["overview"]["date_to"] = datetime.now().strftime("%Y-%m-%d")
+            stats["overview"]["last_checkin_id"] = highest_id_seen
             
-            with open(STATS_JSON_PATH, "w", encoding="utf-8") as f:
-                json.dump(stats, f, indent=4)
+            # Rated Beers neu sortieren
+            stats["rated_beers"] = sorted(stats.get("rated_beers", []), key=lambda x: (x.get('avg_rating', 0), x.get('rated_count', 0)), reverse=True)
+            
+            # Speichern
+            tmp = STATS_JSON_PATH + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
+                json.dump(stats, f, indent=4, ensure_ascii=False)
+            os.replace(tmp, STATS_JSON_PATH)
+            
             print("Successfully updated stats.json!")
+            
+            # Immer die ML-Pipeline anwerfen, damit das neue Bier in die Listen/Suche rutscht!
+            if ml_recommender:
+                print("Running Data Science / ML Recommendation pipeline...")
+                ml_recommender.run_ml_pipeline()
         else:
-            print("No new check-ins found.")
-
-        # ====================================================
-        # Immer die ML-Pipeline anwerfen, damit das "Bier des Tages" erneuert wird!
-        # ====================================================
-        if ml_recommender:
-            print("Running Data Science / ML Recommendation pipeline...")
-            ml_recommender.run_ml_pipeline()
+            print("Keine neuen Check-ins gefunden.")
 
     except Exception as e:
         print(f"Error occurred: {e}")
