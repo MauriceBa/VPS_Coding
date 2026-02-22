@@ -228,6 +228,36 @@
         .b-cost { color: #fbbf24; font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
         .b-count { font-size: 1.8rem; font-weight: 800; color: rgba(255,255,255,0.1); position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); }
 
+        /* Event Banner */
+        .event-banner {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            padding: 0.8rem;
+            text-align: center;
+            font-weight: 700;
+            z-index: 1500;
+            animation: slideDown 0.5s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .event-banner.positive {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+        }
+        .event-banner.negative {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: white;
+        }
+        .event-banner.neutral {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
         /* Golden Cookie equivalent */
         #solar-flare {
             position: absolute;
@@ -501,12 +531,26 @@
             { id: 'a15', name: 'Energie-Gott', desc: 'Erreiche Prestige-Level 100', icon: '👑', check: () => state.prestige >= 100 }
         ];
 
+        // Random Events
+        const randomEvents = [
+            { id: 'e1', name: 'Starker Wind', desc: 'Die Windkrafträder drehen sich schneller! (+50% EPS für 30s)', type: 'positive', duration: 30000, effect: () => { state.eventMultiplier = 1.5; }, icon: '🌬️' },
+            { id: 'e2', name: 'Sonnensturm', desc: 'Massive Solarenergie! (+100% EPS für 20s)', type: 'positive', duration: 20000, effect: () => { state.eventMultiplier = 2.0; }, icon: '☀️' },
+            { id: 'e3', name: 'Wartungsarbeiten', desc: 'Einige Anlagen stehen still. (-30% EPS für 30s)', type: 'negative', duration: 30000, effect: () => { state.eventMultiplier = 0.7; }, icon: '🔧' },
+            { id: 'e4', name: 'Klimakonferenz', desc: 'Politiker unterstützen grüne Energie! (+20% Klick-Power für 60s)', type: 'positive', duration: 60000, effect: () => { state.clickEventMult = 1.2; }, icon: '🏛️' },
+            { id: 'e5', name: 'Erdbeben', desc: 'Geothermie-Anlagen sind beschädigt. (-50% EPS für 15s)', type: 'negative', duration: 15000, effect: () => { state.eventMultiplier = 0.5; }, icon: '🌋' },
+            { id: 'e6', name: 'Technologie-Boost', desc: 'Neue Effizienz! (+25% EPS für 45s)', type: 'positive', duration: 45000, effect: () => { state.eventMultiplier = 1.25; }, icon: '💡' }
+        ];
+        let currentEvent = null;
+        let eventTimeout = null;
+
         // Initialize missing state items
         initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
         initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
         if(typeof state.totalClicks === 'undefined') state.totalClicks = 0;
         if(typeof state.flaresCaught === 'undefined') state.flaresCaught = 0;
         if(typeof state.achievements === 'undefined') state.achievements = {};
+        if(typeof state.eventMultiplier === 'undefined') state.eventMultiplier = 1;
+        if(typeof state.clickEventMult === 'undefined') state.clickEventMult = 1;
 
         let currentEps = 0;
 
@@ -533,10 +577,12 @@
                     eps += b.baseGen * count * mult;
                 }
             });
-            // Prestige Bonus (1 prestige = +1% EPS)
+            // Prestige Bonus
             if (state.prestige > 0) {
                 eps *= (1 + (state.prestige * 0.01));
             }
+            // Event Multiplier
+            eps *= (state.eventMultiplier || 1);
             currentEps = eps;
             document.getElementById('eps-display').innerText = format(currentEps) + " Watt (J/s)";
         }
@@ -551,11 +597,62 @@
             // Add 1% of EPS to click
             power += currentEps * 0.01;
             
+            // Event multiplier
+            power *= (state.clickEventMult || 1);
+            
             if (state.prestige > 0) power *= (1 + (state.prestige * 0.01));
             return power;
         }
 
-        // --- ACHIEVEMENTS ---
+        // --- RANDOM EVENTS ---
+        function triggerRandomEvent() {
+            if (currentEvent) return; // Don't stack events
+            
+            let event = randomEvents[Math.floor(Math.random() * randomEvents.length)];
+            currentEvent = event;
+            
+            // Reset previous multipliers
+            state.eventMultiplier = 1;
+            state.clickEventMult = 1;
+            
+            // Apply effect
+            event.effect();
+            calculateEPS();
+            
+            // Show banner
+            showEventBanner(event);
+            
+            // Schedule end
+            eventTimeout = setTimeout(endEvent, event.duration);
+            
+            // Schedule next event (2-5 minutes)
+            setTimeout(triggerRandomEvent, Math.random() * 180000 + 120000);
+        }
+
+        function showEventBanner(event) {
+            let banner = document.createElement('div');
+            banner.className = `event-banner ${event.type}`;
+            banner.id = 'active-event-banner';
+            banner.innerHTML = `${event.icon} ${event.name}: ${event.desc}`;
+            document.body.appendChild(banner);
+        }
+
+        function endEvent() {
+            if (!currentEvent) return;
+            
+            state.eventMultiplier = 1;
+            state.clickEventMult = 1;
+            calculateEPS();
+            
+            let banner = document.getElementById('active-event-banner');
+            if (banner) {
+                banner.style.opacity = '0';
+                setTimeout(() => banner.remove(), 500);
+            }
+            
+            currentEvent = null;
+            eventTimeout = null;
+        }
         function checkAchievements() {
             achievements.forEach(a => {
                 if (!state.achievements[a.id] && a.check()) {
@@ -835,7 +932,8 @@
             initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
             if(typeof state.totalClicks === 'undefined') state.totalClicks = 0;
             if(typeof state.flaresCaught === 'undefined') state.flaresCaught = 0;
-            if(typeof state.achievements === 'undefined') state.achievements = {};
+            if(typeof state.eventMultiplier === 'undefined') state.eventMultiplier = 1;
+            if(typeof state.clickEventMult === 'undefined') state.clickEventMult = 1;
         }
 
         function wipeSave() {
@@ -890,6 +988,9 @@
 
             // Start Solar Flare timer
             setTimeout(spawnFlare, 60000);
+            
+            // Start Random Events (2-5 minutes interval)
+            setTimeout(triggerRandomEvent, Math.random() * 180000 + 120000);
         }
 
         init();
