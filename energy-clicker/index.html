@@ -1038,6 +1038,34 @@
             
             // Start Random Events (2-5 minutes interval)
             setTimeout(triggerRandomEvent, Math.random() * 180000 + 120000);
+            
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key >= '1' && e.key <= '9') {
+                    let idx = parseInt(e.key) - 1;
+                    if (initBuildings[idx]) {
+                        if (e.shiftKey) {
+                            buyMaxBuilding(initBuildings[idx].id);
+                        } else {
+                            buyBuilding(initBuildings[idx].id);
+                        }
+                    }
+                } else if (e.key === 'm' || e.key === 'M') {
+                    buyMaxAll();
+                } else if (e.key === 's' || e.key === 'S') {
+                    saveGame();
+                } else if (e.key === ' ') {
+                    e.preventDefault();
+                    // Simulate click on earth
+                    let earth = document.getElementById('earth-btn');
+                    let rect = earth.getBoundingClientRect();
+                    let fakeEvent = {
+                        clientX: rect.left + rect.width / 2,
+                        clientY: rect.top + rect.height / 2
+                    };
+                    clickEarth(fakeEvent);
+                }
+            });
         }
 
         init();
