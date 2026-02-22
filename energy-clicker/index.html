@@ -239,6 +239,70 @@
             animation: pulseFlare 2s infinite alternate, rotateFlare 10s linear infinite;
         }
 
+        /* Achievements */
+        .achievement-popup {
+            position: fixed;
+            top: 80px;
+            right: -400px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: right 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-width: 300px;
+        }
+        .achievement-popup.show { right: 20px; }
+        .achievement-popup .icon { font-size: 2.5rem; }
+        .achievement-popup .text { display: flex; flex-direction: column; }
+        .achievement-popup .title { font-weight: 800; font-size: 1.1rem; }
+        .achievement-popup .desc { font-size: 0.85rem; opacity: 0.9; }
+
+        /* Stats Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h2 { margin-bottom: 1rem; color: var(--primary); }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .close-modal {
+            margin-top: 1rem;
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         @keyframes pulseFlare {
             0% { transform: scale(0.9); }
             100% { transform: scale(1.1); }
@@ -329,6 +393,7 @@
 
             <div class="controls">
                 <button class="control-btn" onclick="saveGame()">💾 Speichern</button>
+                <button class="control-btn" onclick="showStats()">📊 Stats</button>
                 <button class="control-btn danger" onclick="wipeSave()">🗑️ Reset</button>
                 <button class="control-btn prestige" onclick="ascend()">✨ Aufsteigen</button>
             </div>
@@ -342,6 +407,34 @@
             <div id="buildings-container">
                 <!-- Buildings injected via JS -->
             </div>
+        </div>
+    </div>
+
+    <!-- Stats Modal -->
+    <div id="stats-modal" class="modal-overlay" onclick="if(event.target===this)closeStats()">
+        <div class="modal">
+            <h2>📊 Spielstatistiken</h2>
+            <div class="stat-row">
+                <span>Spielzeit</span>
+                <span id="stat-playtime">0h 0m 0s</span>
+            </div>
+            <div class="stat-row">
+                <span>Gesamte Klicks</span>
+                <span id="stat-total-clicks">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Gesamte Energie</span>
+                <span id="stat-total-joules">0 J</span>
+            </div>
+            <div class="stat-row">
+                <span>Sonneneruptionen gefangen</span>
+                <span id="stat-flares">0</span>
+            </div>
+            <div class="stat-row">
+                <span>Achievements</span>
+                <span id="stat-achievements">0/15</span>
+            </div>
+            <button class="close-modal" onclick="closeStats()">Schließen</button>
         </div>
     </div>
 
@@ -383,13 +476,37 @@
             prestige: 0,
             clickMult: 1,
             startTime: Date.now(),
+            totalClicks: 0,
             buildings: {}, // id: count
-            upgrades: {} // id: boolean (bought)
+            upgrades: {}, // id: boolean (bought)
+            achievements: {} // id: boolean (unlocked)
         };
+
+        // Achievements Definition
+        const achievements = [
+            { id: 'a1', name: 'Erste Schritte', desc: 'Erzeuge deine ersten 100 Joule', icon: '🌱', check: () => state.totalJoules >= 100 },
+            { id: 'a2', name: 'Kleinanleger', desc: 'Erzeuge 1.000 Joule', icon: '⚡', check: () => state.totalJoules >= 1000 },
+            { id: 'a3', name: 'Energieversorger', desc: 'Erzeuge 1 Mio Joule', icon: '🔋', check: () => state.totalJoules >= 1000000 },
+            { id: 'a4', name: 'Kraftwerk', desc: 'Erzeuge 1 Mrd Joule', icon: '🏭', check: () => state.totalJoules >= 1000000000 },
+            { id: 'a5', name: 'Erdretter', desc: 'Erzeuge 1 Bio Joule', icon: '🌍', check: () => state.totalJoules >= 1000000000000 },
+            { id: 'a6', name: 'Klick-Profi', desc: 'Klicke 100 mal', icon: '🖱️', check: () => state.totalClicks >= 100 },
+            { id: 'a7', name: 'Klick-Meister', desc: 'Klicke 1.000 mal', icon: '👆', check: () => state.totalClicks >= 1000 },
+            { id: 'a8', name: 'Klick-Legende', desc: 'Klicke 10.000 mal', icon: '🏆', check: () => state.totalClicks >= 10000 },
+            { id: 'a9', name: 'Solarpionier', desc: 'Kaufe 10 Solarpanels', icon: '☀️', check: () => state.buildings['b1'] >= 10 },
+            { id: 'a10', name: 'Windbeutel', desc: 'Kaufe 10 Windkrafträder', icon: '🌬️', check: () => state.buildings['b2'] >= 10 },
+            { id: 'a11', name: 'Atomforscher', desc: 'Kaufe dein erstes Atomkraftwerk', icon: '⚛️', check: () => state.buildings['b6'] >= 1 },
+            { id: 'a12', name: 'Sternenfänger', desc: 'Kaufe eine Dyson-Sphäre', icon: '🪐', check: () => state.buildings['b8'] >= 1 },
+            { id: 'a13', name: 'Sonnenanbeter', desc: 'Fange deine erste Sonneneruption', icon: '☀️', check: () => state.flaresCaught >= 1 },
+            { id: 'a14', name: 'Aufgestiegen', desc: 'Erreiche Prestige-Level 1', icon: '✨', check: () => state.prestige >= 1 },
+            { id: 'a15', name: 'Energie-Gott', desc: 'Erreiche Prestige-Level 100', icon: '👑', check: () => state.prestige >= 100 }
+        ];
 
         // Initialize missing state items
         initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
         initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
+        if(typeof state.totalClicks === 'undefined') state.totalClicks = 0;
+        if(typeof state.flaresCaught === 'undefined') state.flaresCaught = 0;
+        if(typeof state.achievements === 'undefined') state.achievements = {};
 
         let currentEps = 0;
 
@@ -436,6 +553,59 @@
             
             if (state.prestige > 0) power *= (1 + (state.prestige * 0.01));
             return power;
+        }
+
+        // --- ACHIEVEMENTS ---
+        function checkAchievements() {
+            achievements.forEach(a => {
+                if (!state.achievements[a.id] && a.check()) {
+                    state.achievements[a.id] = true;
+                    showAchievement(a);
+                }
+            });
+        }
+
+        function showAchievement(a) {
+            let popup = document.createElement('div');
+            popup.className = 'achievement-popup';
+            popup.innerHTML = `
+                <div class="icon">${a.icon}</div>
+                <div class="text">
+                    <div class="title">Achievement Freigeschaltet!</div>
+                    <div class="desc">${a.name}: ${a.desc}</div>
+                </div>
+            `;
+            document.body.appendChild(popup);
+            
+            setTimeout(() => popup.classList.add('show'), 100);
+            setTimeout(() => {
+                popup.classList.remove('show');
+                setTimeout(() => popup.remove(), 500);
+            }, 5000);
+        }
+
+        // --- STATS MODAL ---
+        function showStats() {
+            document.getElementById('stats-modal').classList.add('show');
+            updateStatsDisplay();
+        }
+        function closeStats() {
+            document.getElementById('stats-modal').classList.remove('show');
+        }
+        function updateStatsDisplay() {
+            let playTime = Math.floor((Date.now() - state.startTime) / 1000);
+            let hours = Math.floor(playTime / 3600);
+            let mins = Math.floor((playTime % 3600) / 60);
+            let secs = playTime % 60;
+            let timeStr = `${hours}h ${mins}m ${secs}s`;
+            
+            let unlockedCount = Object.keys(state.achievements).length;
+            
+            document.getElementById('stat-playtime').innerText = timeStr;
+            document.getElementById('stat-total-clicks').innerText = format(state.totalClicks || 0);
+            document.getElementById('stat-total-joules').innerText = format(state.totalJoules);
+            document.getElementById('stat-flares').innerText = state.flaresCaught || 0;
+            document.getElementById('stat-achievements').innerText = `${unlockedCount}/${achievements.length}`;
         }
 
         function getBuildingCost(id) {
@@ -502,6 +672,9 @@
             let clickPower = calculateClickPower();
             state.joules += clickPower;
             state.totalJoules += clickPower;
+            state.totalClicks++;
+            
+            checkAchievements();
             
             // Floating text
             let floater = document.createElement('div');
@@ -556,6 +729,7 @@
             e.stopPropagation();
             let flare = document.getElementById('solar-flare');
             flare.style.display = 'none';
+            state.flaresCaught = (state.flaresCaught || 0) + 1;
             
             // Reward: 15 minutes of EPS, minimum 100
             let reward = Math.max(currentEps * 60 * 15, 100);
@@ -655,10 +829,13 @@
                 let parsed = JSON.parse(saved);
                 // Merge with default state to prevent missing keys on updates
                 state = { ...state, ...parsed };
-                // Ensure new buildings/upgrades exist
-                initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
-                initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
             }
+            // Ensure new buildings/upgrades/achievements exist
+            initBuildings.forEach(b => { if(typeof state.buildings[b.id] === 'undefined') state.buildings[b.id] = 0; });
+            initUpgrades.forEach(u => { if(typeof state.upgrades[u.id] === 'undefined') state.upgrades[u.id] = false; });
+            if(typeof state.totalClicks === 'undefined') state.totalClicks = 0;
+            if(typeof state.flaresCaught === 'undefined') state.flaresCaught = 0;
+            if(typeof state.achievements === 'undefined') state.achievements = {};
         }
 
         function wipeSave() {
@@ -700,6 +877,7 @@
             setInterval(() => {
                 state.joules += currentEps / 10;
                 state.totalJoules += currentEps / 10;
+                checkAchievements();
                 updateUI();
             }, 100);
 
