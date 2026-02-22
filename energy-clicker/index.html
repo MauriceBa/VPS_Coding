@@ -292,6 +292,70 @@
         .achievement-popup .title { font-weight: 800; font-size: 1.1rem; }
         .achievement-popup .desc { font-size: 0.85rem; opacity: 0.9; }
 
+        /* Settings Toggle */
+        .settings-toggle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        .settings-toggle:hover { background: rgba(255,255,255,0.1); transform: rotate(30deg); }
+
+        /* Toggle Switch */
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        .toggle-switch {
+            width: 50px;
+            height: 26px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle-switch.active { background: var(--primary); }
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+        }
+        .toggle-switch.active::after { transform: translateX(24px); }
+
+        /* Select Dropdown */
+        select {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
         /* Stats Modal */
         .modal-overlay {
             position: fixed;
@@ -443,6 +507,52 @@
         </div>
     </div>
 
+    <!-- Settings Toggle -->
+    <button class="settings-toggle" onclick="showSettings()" title="Einstellungen">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal-overlay" onclick="if(event.target===this)closeSettings()">
+        <div class="modal">
+            <h2>⚙️ Einstellungen</h2>
+            
+            <div class="toggle-row">
+                <span>🔊 Soundeffekte</span>
+                <div class="toggle-switch" id="sound-toggle" onclick="toggleSound()"></div>
+            </div>
+            
+            <div class="toggle-row">
+                <span>🎵 Hintergrundmusik</span>
+                <div class="toggle-switch" id="music-toggle" onclick="toggleMusic()"></div>
+            </div>
+            
+            <div class="toggle-row">
+                <span>🔢 Zahlenformat</span>
+                <select id="number-format" onchange="changeNumberFormat()">
+                    <option value="short" selected>Kurz (1.5k, 2.3M)</option>
+                    <option value="full">Voll (1,500, 2,300,000)</option>
+                    <option value="scientific">Wissenschaftlich (1.5e3)</option>
+                </select>
+            </div>
+            
+            <div class="toggle-row">
+                <span>✨ Partikeleffekte</span>
+                <div class="toggle-switch active" id="particles-toggle" onclick="toggleParticles()"></div>
+            </div>
+            
+            <div class="toggle-row">
+                <span>🎯 Achievement-Popups</span>
+                <div class="toggle-switch active" id="popup-toggle" onclick="togglePopups()"></div>
+            </div>
+            
+            <div class="toggle-row">
+                <span>🎨 Hoher Kontrast</span>
+                <div class="toggle-switch" id="contrast-toggle" onclick="toggleContrast()"></div>
+            </div>
+            
+            <button class="close-modal" onclick="closeSettings()">Schließen</button>
+        </div>
+    </div>
+
     <!-- Export/Import Modal -->
     <div id="export-modal" class="modal-overlay" onclick="if(event.target===this)closeExportImport()">
         <div class="modal">
@@ -576,14 +686,175 @@
 
         let currentEps = 0;
 
-        // --- FORMATTING ---
+        // --- SETTINGS ---
+        let settings = {
+            soundEnabled: false,
+            musicEnabled: false,
+            numberFormat: 'short',
+            particlesEnabled: true,
+            popupsEnabled: true,
+            highContrast: false
+        };
+
+        function loadSettings() {
+            let saved = localStorage.getItem('ecoClickerSettings');
+            if (saved) {
+                settings = { ...settings, ...JSON.parse(saved) };
+            }
+            applySettings();
+        }
+
+        function saveSettings() {
+            localStorage.setItem('ecoClickerSettings', JSON.stringify(settings));
+        }
+
+        function applySettings() {
+            // Update toggle visuals
+            document.getElementById('sound-toggle').classList.toggle('active', settings.soundEnabled);
+            document.getElementById('music-toggle').classList.toggle('active', settings.musicEnabled);
+            document.getElementById('particles-toggle').classList.toggle('active', settings.particlesEnabled);
+            document.getElementById('popup-toggle').classList.toggle('active', settings.popupsEnabled);
+            document.getElementById('contrast-toggle').classList.toggle('active', settings.highContrast);
+            document.getElementById('number-format').value = settings.numberFormat;
+            
+            // Apply high contrast
+            if (settings.highContrast) {
+                document.body.style.setProperty('--primary', '#22c55e');
+                document.body.style.setProperty('--text', '#ffffff');
+            } else {
+                document.body.style.removeProperty('--primary');
+                document.body.style.removeProperty('--text');
+            }
+        }
+
+        function showSettings() {
+            document.getElementById('settings-modal').classList.add('show');
+        }
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.remove('show');
+        }
+        function toggleSound() {
+            settings.soundEnabled = !settings.soundEnabled;
+            saveSettings();
+            applySettings();
+            if (settings.soundEnabled) playSound('click');
+        }
+        function toggleMusic() {
+            settings.musicEnabled = !settings.musicEnabled;
+            saveSettings();
+            applySettings();
+        }
+        function toggleParticles() {
+            settings.particlesEnabled = !settings.particlesEnabled;
+            saveSettings();
+            applySettings();
+        }
+        function togglePopups() {
+            settings.popupsEnabled = !settings.popupsEnabled;
+            saveSettings();
+            applySettings();
+        }
+        function toggleContrast() {
+            settings.highContrast = !settings.highContrast;
+            saveSettings();
+            applySettings();
+        }
+        function changeNumberFormat() {
+            settings.numberFormat = document.getElementById('number-format').value;
+            saveSettings();
+            updateUI();
+        }
+
+        // --- SOUND EFFECTS ---
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (!settings.soundEnabled) return;
+            
+            try {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                switch(type) {
+                    case 'click':
+                        osc.frequency.value = 800;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.1);
+                        break;
+                    case 'buy':
+                        osc.frequency.value = 600;
+                        osc.type = 'triangle';
+                        gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.2);
+                        break;
+                    case 'achievement':
+                        osc.frequency.value = 1200;
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                        osc.start();
+                        // Play a little melody
+                        setTimeout(() => {
+                            osc.frequency.value = 1500;
+                        }, 100);
+                        setTimeout(() => {
+                            osc.frequency.value = 1800;
+                        }, 200);
+                        osc.stop(audioContext.currentTime + 0.5);
+                        break;
+                    case 'event':
+                        osc.frequency.value = 400;
+                        osc.type = 'sawtooth';
+                        gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                        osc.start();
+                        osc.stop(audioContext.currentTime + 0.3);
+                        break;
+                }
+            } catch(e) { console.log('Audio error:', e); }
+        }
+
+        // --- FORMATTING (FIXED) ---
         function format(num) {
-            if (num < 1000) return Math.floor(num).toString();
-            const suffixes = ["", " Tsd", " Mio", " Mrd", " Bio", " Brd", " Tril"];
-            const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
-            let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
-            if (shortValue % 1 !== 0) shortValue = shortValue.toFixed(1);
-            return shortValue + suffixes[suffixNum];
+            if (num === 0) return '0';
+            
+            // Handle very small numbers
+            if (num < 0.01) return num.toExponential(2);
+            
+            switch(settings.numberFormat) {
+                case 'full':
+                    return num.toLocaleString('de-DE', { maximumFractionDigits: 0 });
+                
+                case 'scientific':
+                    return num.toExponential(2);
+                
+                case 'short':
+                default:
+                    if (num < 1000) return Math.floor(num).toString();
+                    
+                    const suffixes = ["", " k", " M", " Md", " Bio", " Brd", " Trd"];
+                    const suffixNum = Math.floor(("" + Math.floor(num)).length / 3);
+                    let shortValue = parseFloat((suffixNum !== 0 ? (num / Math.pow(1000, suffixNum)) : num).toPrecision(3));
+                    
+                    // Fix decimal display
+                    if (shortValue >= 100) {
+                        shortValue = Math.floor(shortValue);
+                    } else if (shortValue >= 10) {
+                        shortValue = Math.floor(shortValue * 10) / 10;
+                    } else {
+                        shortValue = Math.floor(shortValue * 100) / 100;
+                    }
+                    
+                    return shortValue + suffixes[suffixNum];
+            }
         }
 
         // --- CORE LOGIC ---
@@ -678,6 +949,7 @@
             
             // Show banner
             showEventBanner(event);
+            playSound('event');
             
             // Schedule end
             eventTimeout = setTimeout(endEvent, event.duration);
@@ -720,6 +992,9 @@
         }
 
         function showAchievement(a) {
+            if (!settings.popupsEnabled) return;
+            
+            playSound('achievement');
             let popup = document.createElement('div');
             popup.className = 'achievement-popup';
             popup.innerHTML = `
@@ -868,6 +1143,7 @@
             state.totalJoules += clickPower;
             state.totalClicks++;
             
+            playSound('click');
             checkAchievements();
             
             // Floating text
@@ -887,6 +1163,7 @@
             if (state.joules >= cost) {
                 state.joules -= cost;
                 state.buildings[id]++;
+                playSound('buy');
                 calculateEPS();
                 updateUI();
             }
@@ -912,6 +1189,7 @@
             if (canBuy > 0) {
                 state.joules -= totalCost;
                 state.buildings[id] += canBuy;
+                playSound('buy');
                 calculateEPS();
                 updateUI();
             }
@@ -1078,6 +1356,7 @@
 
         // --- INIT ---
         function init() {
+            loadSettings();
             loadGame();
 
             // Render Buildings
