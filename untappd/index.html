@@ -257,18 +257,22 @@
             ).sort((a,b) => b.rating - a.rating).slice(0, 10);
 
             if(results.length > 0) {
-                searchResults.innerHTML = results.map(b => `
+                searchResults.innerHTML = results.map(b => {
+                    // Don't show style if it's "Other" and brewery is known
+                    const showStyle = b.style && b.style !== 'Other';
+                    const styleText = showStyle ? ` · ${b.style}` : '';
+                    return `
                     <div class="search-item">
                         <div class="search-item-info">
                             <div class="search-item-title">${b.beer}</div>
-                            <div class="search-item-brewery">${b.brewery} &middot; ${b.style}</div>
+                            <div class="search-item-brewery">${b.brewery}${styleText}</div>
                         </div>
                         <div class="search-item-stats">
                             <div class="search-item-rating">★ ${b.rating.toFixed(2)}</div>
                             <div class="search-item-count">${b.count}x getrunken</div>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             } else {
                 searchResults.innerHTML = `<div class="search-empty">Mhm, dieses Bier hast du noch nie getrunken! 🤔</div>`;
             }
@@ -312,14 +316,17 @@
                 
                 if(data.recent_checkins && data.recent_checkins.length > 0){
                     const rcGrid = document.getElementById('recent-checkins-grid');
-                    rcGrid.innerHTML = data.recent_checkins.slice(0, 5).map(c => `
+                    rcGrid.innerHTML = data.recent_checkins.slice(0, 5).map(c => {
+                        // Remove +0000 timezone from time display
+                        const cleanTime = c.time ? c.time.replace(' +0000', '').replace(' GMT', '') : 'Kürzlich';
+                        return `
                         <div class="stat-card">
-                            <div class="card-header-row"><span class="card-emoji">⏱️</span><span class="card-label" style="text-transform:none;">${c.time}</span></div>
+                            <div class="card-header-row"><span class="card-emoji">⏱️</span><span class="card-label" style="text-transform:none;">${cleanTime}</span></div>
                             <div class="card-value" style="font-size:1.15rem; line-height:1.2; margin-bottom:.3rem; color:var(--primary);">${c.beer}</div>
                             <div class="card-sub" style="margin-bottom:.8rem;">${c.brewery}</div>
                             <div>${starsHtml(c.rating)} <span style="font-size:.8rem;color:var(--text-muted);">${c.rating.toFixed(2)}</span></div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 } else {
                     const rcGrid = document.getElementById('recent-checkins-grid');
                     if(rcGrid) rcGrid.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Keine aktuellen Check-ins gefunden.</div>';
