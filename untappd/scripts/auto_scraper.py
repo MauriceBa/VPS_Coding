@@ -182,27 +182,28 @@ def update_stats_with_new_beers():
         soup = BeautifulSoup(response.text, "html.parser")
         
         # 1. Globale Stats parsen
-        stats_blocks = soup.select(".stats .stat")
+        stats_container = soup.select_one(".stats")
         total_checkins_web = None
         unique_beers_web = None
         
-        for stat in stats_blocks:
-            try:
-                title_el = stat.select_one(".title")
-                val_el = stat.select_one(".stat-val")
-                
-                if not title_el or not val_el:
-                    continue
+        if stats_container:
+            for link in stats_container.find_all("a"):
+                try:
+                    title_el = link.select_one(".title")
+                    val_el = link.select_one(".stat")
                     
-                title = title_el.text.strip().lower()
-                val = val_el.text.strip().replace(",", "")
-                
-                if "total" in title:
-                    total_checkins_web = int(val)
-                elif "unique" in title:
-                    unique_beers_web = int(val)
-            except Exception as e:
-                print(f"Fehler beim Parsen der Profil-Statistik: {e}")
+                    if not title_el or not val_el:
+                        continue
+                        
+                    title = title_el.text.strip().lower()
+                    val = val_el.text.strip().replace(",", "")
+                    
+                    if "total" in title:
+                        total_checkins_web = int(val)
+                    elif "unique" in title:
+                        unique_beers_web = int(val)
+                except Exception as e:
+                    print(f"Fehler beim Parsen der Profil-Statistik: {e}")
             
         current_total = stats.get("overview", {}).get("total_checkins", 0)
         last_checkin_id = stats.get("overview", {}).get("last_checkin_id", 0)
