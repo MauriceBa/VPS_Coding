@@ -406,6 +406,7 @@
                 <div id="joules-display">0 J</div>
                 <div id="eps-display">0 Watt (J/s)</div>
                 <div id="prestige-display" style="display:none; color:#a855f7; font-size:0.8rem; margin-top:0.5rem;">+0% Prestige Bonus</div>
+                <div id="trees-display" style="color:#10b981; font-size:0.9rem; margin-top:0.3rem;">🌳 0 Bäume gepflanzt</div>
             </div>
             <div id="earth-btn" onmousedown="clickEarth(event)">🌍</div>
         </div>
@@ -509,7 +510,8 @@
             totalClicks: 0,
             buildings: {}, // id: count
             upgrades: {}, // id: boolean (bought)
-            achievements: {} // id: boolean (unlocked)
+            achievements: {}, // id: boolean (unlocked)
+            treesPlanted: 0
         };
 
         // Achievements Definition
@@ -713,6 +715,13 @@
 
         function updateUI() {
             document.getElementById('joules-display').innerText = format(state.joules) + " J";
+            
+            // Update trees based on total joules (1 tree per 10,000 J)
+            let trees = Math.floor(state.totalJoules / 10000);
+            if (trees > state.treesPlanted) {
+                state.treesPlanted = trees;
+            }
+            document.getElementById('trees-display').innerText = `🌳 ${format(state.treesPlanted)} Bäume gepflanzt`;
             
             if(state.prestige > 0) {
                 document.getElementById('prestige-display').style.display = 'block';
@@ -934,6 +943,7 @@
             if(typeof state.flaresCaught === 'undefined') state.flaresCaught = 0;
             if(typeof state.eventMultiplier === 'undefined') state.eventMultiplier = 1;
             if(typeof state.clickEventMult === 'undefined') state.clickEventMult = 1;
+            if(typeof state.treesPlanted === 'undefined') state.treesPlanted = 0;
         }
 
         function wipeSave() {
