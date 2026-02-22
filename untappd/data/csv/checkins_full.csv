@@ -1,0 +1,739 @@
+id,beer_name,brewery,style,venue,city,country,lat,lon,serving_type,checkin_date,year,month,year_month,weekday
+1,Münchner Hell,Paulaner Brauerei,Lager/Pils,,,,,,,2026-02-21,2026,02,2026-02,Saturday
+2,Paulaner Hefe-Weißbier / Hefe-Weizen / Weissbier,Paulaner Brauerei,Wheat Beer,L’Osteria,,,,,,2026-02-21,2026,02,2026-02,Saturday
+3,I Lost My Heart In Oregon - Spezialsud #29,Eremita Braukunst,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-21,2026,02,2026-02,Saturday
+4,In Bloom,Eremita Braukunst,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-21,2026,02,2026-02,Saturday
+5,Fledermausland,Eremita Braukunst,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-21,2026,02,2026-02,Saturday
+6,Fernweh Hazy IPA Spezialsud #24,Eremita Braukunst,NEIPA/Hazy IPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-21,2026,02,2026-02,Saturday
+7,Kozel Světlý / Kozel 10,Pivovar Velké Popovice,Other,,,,,,,2026-02-21,2026,02,2026-02,Saturday
+8,NIJPA,Brouwerij 't IJ,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-02-20,2026,02,2026-02,Friday
+9,Baltic Tripel,Rügener Insel-Brauerei,Tripel,,,,,,,2026-02-19,2026,02,2026-02,Thursday
+10,NEIPA,Brand Bierbrouwerij,NEIPA/Hazy IPA,,,,,,,2026-02-16,2026,02,2026-02,Monday
+11,Somersby Winter Cider Apple & Cinnamon,Carlsberg Group,Cider,,,,,,,2026-02-16,2026,02,2026-02,Monday
+12,Mönchshof Natur Radler,Kulmbacher Brauerei,Radler/Malt,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-02-16,2026,02,2026-02,Monday
+13,Pélican Rouge,Brasserie du Pélican,Amber/Red,Restaurant Au Bercail,Florenville,BE,49.7025,5.891,,2026-02-14,2026,02,2026-02,Saturday
+14,Affligem Blanche,Affligem Brouwerij,Blonde/Golden,Restaurant Au Bercail,Florenville,BE,49.7025,5.891,,2026-02-14,2026,02,2026-02,Saturday
+15,Fischer Doreleï Bière Ambrée D'Alsace,Heineken France,Amber/Red,,,,,,,2026-02-14,2026,02,2026-02,Saturday
+16,Askania,Brasserie Champigneulles,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-02-12,2026,02,2026-02,Thursday
+17,Bon Secours Myrtille,Brasserie Caulier,Other,Le Chardon Bleu,Valmeinier,FR,45.1836,6.497,,2026-02-12,2026,02,2026-02,Thursday
+18,Oh Yes,Gwape,Other,Le Chardon Bleu,Valmeinier,FR,45.1836,6.497,,2026-02-12,2026,02,2026-02,Thursday
+19,2600 M,Gwape,Other,Le Chardon Bleu,Valmeinier,FR,45.1836,6.497,,2026-02-12,2026,02,2026-02,Thursday
+20,La Cristal IPA,Brasserie du Mont Blanc,IPA,Valmeinier 1800,Valmeinier,FR,45.1835,6.4967,,2026-02-11,2026,02,2026-02,Wednesday
+21,Fram Bush,Brasserie Dubuisson,Other,Télésiège Les Jeux,Valmeinier,FR,45.186,6.501,,2026-02-11,2026,02,2026-02,Wednesday
+22,India Pale Ale,Gwape,IPA,Télésiège Les Jeux,Valmeinier,FR,45.186,6.501,,2026-02-11,2026,02,2026-02,Wednesday
+23,Stella Artois,Stella Artois,Other,,,,,,,2026-02-11,2026,02,2026-02,Wednesday
+24,La Verte,Brasserie du Mont Blanc,Other,,,,,,,2026-02-11,2026,02,2026-02,Wednesday
+25,Bird of Prey,Uiltje Brewing Company,Other,Le Panoramic,Valmeinier,FR,45.184,6.5,,2026-02-11,2026,02,2026-02,Wednesday
+26,1500m - Mountain Pale Ale,Gwape,Pale Ale,Le Marmiton,Valmeinier,FR,45.1838,6.4977,,2026-02-11,2026,02,2026-02,Wednesday
+27,Slash Citrus,Brasserie Licorne,Other,,,,,,,2026-02-10,2026,02,2026-02,Tuesday
+28,Slash Mango,Brasserie Licorne,Other,,,,,,,2026-02-10,2026,02,2026-02,Tuesday
+29,Pêche Mel Bush,Brasserie Dubuisson,Other,,,,,,,2026-02-10,2026,02,2026-02,Tuesday
+30,Paix Dieu Triple,Brasserie Caulier,Tripel,Le Panoramic,Valmeinier,FR,45.184,6.5,,2026-02-10,2026,02,2026-02,Tuesday
+31,Sas Pils,Leroy Breweries,Lager/Pils,La Glisse,Valmeinier,FR,45.1836,6.497,,2026-02-10,2026,02,2026-02,Tuesday
+32,Slash Mango,Brasserie Licorne,Other,Le Refuge,Valmeinier,FR,45.1835,6.4967,,2026-02-09,2026,02,2026-02,Monday
+33,El Grande,Brasserie Licorne,Other,,,,,,,2026-02-09,2026,02,2026-02,Monday
+34,La Goudale - Blonde à l'Ancienne,Brasserie Goudale,Blonde/Golden,,,,,,,2026-02-09,2026,02,2026-02,Monday
+35,Matchut,Brasserie Galibier,Other,La Gwape,Valmeinier,FR,45.1835,6.4967,,2026-02-09,2026,02,2026-02,Monday
+36,Avalanche,Brasserie Galibier,Other,La Gwape,Valmeinier,FR,45.1835,6.4967,,2026-02-09,2026,02,2026-02,Monday
+37,Snowball Lager,Brasserie Galibier,Lager/Pils,,,,,,,2026-02-09,2026,02,2026-02,Monday
+38,India Pale Ale,Gwape,IPA,La Glisse,Valmeinier,FR,45.1836,6.497,,2026-02-09,2026,02,2026-02,Monday
+39,Querelle De Clochers,Gwape,Other,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+40,Pinks Not Dead,Gwape,Other,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+41,Koenigsbier Forte,Karlsberg Brauerei,Other,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+42,Saer Bräu,H-West B.V.,Other,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+43,Pélican – Blonde de Caractère,Brasserie du Pélican,Blonde/Golden,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+44,India Pale Ale,Gwape,IPA,,,,,,,2026-02-08,2026,02,2026-02,Sunday
+45,Gallia Nouveau Western IPA,Gallia,IPA,Valmeinier 1800,Valmeinier,FR,45.1835,6.4967,,2026-02-08,2026,02,2026-02,Sunday
+46,Douce Prohibition,Gwape,Other,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+47,Oh Yes,Gwape,Other,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-07,2026,02,2026-02,Saturday
+48,2600 M,Gwape,Other,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+49,Amber Ale,Gwape,Amber/Red,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+50,1500m - Mountain Pale Ale,Gwape,Pale Ale,Valmeinier Chalet C11,Valmeinier,FR,45.1835,6.4967,,2026-02-07,2026,02,2026-02,Saturday
+51,ALL I WANT FOR CHRISTMAS IS KLOUG - Tarte De Linz Style,Brasserie Sainte Cru,Other,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+52,Don Ancho,Savoy Craft,Other,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+53,Lost In the Woods,Sapaudia Brewing Co,Other,,,,,,,2026-02-07,2026,02,2026-02,Saturday
+54,Paix Dieu Triple,Brasserie Caulier,Tripel,,,,,,,2026-02-06,2026,02,2026-02,Friday
+55,Leffe Rituel 9°,Abbaye de Leffe,Other,,,,,,,2026-02-06,2026,02,2026-02,Friday
+56,Bush Blonde Triple,Brasserie Dubuisson,Tripel,,,,,,,2026-02-06,2026,02,2026-02,Friday
+57,Mylar Dust,Other Half Brewing Co.,Other,,,,,,,2026-02-05,2026,02,2026-02,Thursday
+58,"NORTHERN STAR™ // CHOCOLATE, CARAMEL & BISCUIT PORTER",Northern Monk,Stout/Porter,,,,,,,2026-02-05,2026,02,2026-02,Thursday
+59,Beck's Unfiltered,Brauerei Beck,Amber/Red,,,,,,,2026-02-05,2026,02,2026-02,Thursday
+60,Everyday Weekend,LERVIG,Other,,,,,,,2026-02-05,2026,02,2026-02,Thursday
+61,Big Bangin' IPA,Rye River Brewing Company,IPA,,,,,,,2026-02-03,2026,02,2026-02,Tuesday
+62,Triple To The Tropics,Jopen,Tripel,,,,,,,2026-02-03,2026,02,2026-02,Tuesday
+63,Lux,Beak,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-03,2026,02,2026-02,Tuesday
+64,SCHWERST EINEN SITZEN,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-02-03,2026,02,2026-02,Tuesday
+65,Maisel & Friends - Hazy IPA - Artbeer #7 LEDANIA,Brauerei Gebr. Maisel,NEIPA/Hazy IPA,,,,,,,2026-02-02,2026,02,2026-02,Monday
+66,Piranha Tripel,Stadshaven Brouwerij,Tripel,,,,,,,2026-02-02,2026,02,2026-02,Monday
+67,Dulcis 12,Brauhaus Riegele,Other,,,,,,,2026-02-02,2026,02,2026-02,Monday
+68,Gouverneur I.P.A.,Lindeboom,IPA,,,,,,,2026-01-31,2026,01,2026-01,Saturday
+69,Weiherer India Pale Ale,Brauerei Kundmüller,IPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+70,Extinction Is Forever!: Addax,Bevog Brewery,Other,,,,,,,2026-01-30,2026,01,2026-01,Friday
+71,Maisel & Friends Hoplander: Eclipse,Brauerei Gebr. Maisel,Other,,,,,,,2026-01-30,2026,01,2026-01,Friday
+72,Eden,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+73,PoC#14 Ginger Lager,Totenhopfen Brauhaus,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+74,Jute Weisse,Hopfen+Malz,Wheat Beer,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+75,Daily Nectar,Totenhopfen Brauhaus,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+76,SCHWERST EINEN SITZEN,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-30,2026,01,2026-01,Friday
+77,Krombacher’s Fassbrause Himbeere,Krombacher Gruppe,Radler/Malt,,,,,,,2026-01-30,2026,01,2026-01,Friday
+78,Mosaic Hop,Brouwerij Kees,Other,,,,,,,2026-01-30,2026,01,2026-01,Friday
+79,Double Juice Punch,Frontaal Brewing Co.,Other,,,,,,,2026-01-30,2026,01,2026-01,Friday
+80,Tricky Tripel,Gebrouwen door Vrouwen,Tripel,,,,,,,2026-01-30,2026,01,2026-01,Friday
+81,Burst,Mikkeller,Other,,,,,,,2026-01-30,2026,01,2026-01,Friday
+82,Brand IPA 0.0,Brand Bierbrouwerij,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-28,2026,01,2026-01,Wednesday
+83,Hazy Weekend,vandeStreek bier,NEIPA/Hazy IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-27,2026,01,2026-01,Tuesday
+84,Quatrième Dimension,Fauve,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-27,2026,01,2026-01,Tuesday
+85,Misty Mango,Gebrouwen door Vrouwen,Other,,,,,,,2026-01-26,2026,01,2026-01,Monday
+86,Budweiser Budvar / Czechvar Original,Budějovický Budvar,Other,,,,,,,2026-01-26,2026,01,2026-01,Monday
+87,Moray IPA,Stadshaven Brouwerij,IPA,,,,,,,2026-01-26,2026,01,2026-01,Monday
+88,Head First,Frontaal Brewing Co.,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-26,2026,01,2026-01,Monday
+89,Hazy Jane,BrewDog,NEIPA/Hazy IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-26,2026,01,2026-01,Monday
+90,Dead Guy Ale,Mackinac Island Brewhouse,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+91,Dead Guy Imperial IPA,Rogue Ales,DIPA,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+92,Kompel L'or Noir,Brouwerij Kompel,Dark/Dubbel,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+93,Cacao Vida Ale,SinghBräu,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+94,Chardonnay Ale,SinghBräu,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+95,Sidekick,Two Brothers Brewing Company,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+96,Delirium Noël / Christmas,Delirium - Huyghe Brewery,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+97,Rodenbach FruitAge,Brouwerij Rodenbach,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+98,Rochehaut Hivern'ale,Brasserie de Rochehaut,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+99,Bayreuther URSTOFF,Bayreuther Bierbrauerei,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+100,Pineapple Punch,Hawkes,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+101,Moment NEIPA SUPERDELIC / CITRA,Maryensztadt,NEIPA/Hazy IPA,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-24,2026,01,2026-01,Saturday
+102,"Krombacher Weizen Alkoholfrei (0,4%)",Krombacher Gruppe,Non-Alcoholic,Xiao,Aachen,DE,50.7757,6.0843,,2026-01-23,2026,01,2026-01,Friday
+103,Krombacher Weizen,Krombacher Gruppe,Wheat Beer,Xiao,Aachen,DE,50.7757,6.0843,,2026-01-23,2026,01,2026-01,Friday
+104,Krombacher’s Fassbrause Mango,Krombacher Gruppe,Radler/Malt,,,,,,,2026-01-22,2026,01,2026-01,Thursday
+105,Green Bullet,Two Chefs Brewing,Other,,,,,,,2026-01-22,2026,01,2026-01,Thursday
+106,East Coast,Rügener Insel-Brauerei,Other,,,,,,,2026-01-22,2026,01,2026-01,Thursday
+107,Blueprints: Microscope,Moersleutel Craft Brewery,Other,,,,,,,2026-01-22,2026,01,2026-01,Thursday
+108,Caramel Fudge Stout,Brouwerij Kees,Stout/Porter,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-22,2026,01,2026-01,Thursday
+109,Punk IPA Alcohol Free,BrewDog,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-22,2026,01,2026-01,Thursday
+110,Triple Juice Punch (10 Years Edition),Frontaal Brewing Co.,Tripel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+111,Apricot Berliner Weisse,Ārpus Brewing Co.,Wheat Beer,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+112,Tannen Hell,Hohenthanner Schlossbrauerei,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+113,12 ANNIVERSARY // DDH DIPA,Northern Monk,DIPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+114,Agasse,La Cahute,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+115,Hop Opera,Mikkeller,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+116,Weiherer Keller-Pils,Brauerei Kundmüller,Lager/Pils,,,,,,,2026-01-21,2026,01,2026-01,Wednesday
+117,Celebration,Sierra Nevada Brewing Co.,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+118,Big Load,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+119,Outer Limit,Vocation Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+120,Dolly Don‘t Dance,Sudden Death Brewing Co.,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-21,2026,01,2026-01,Wednesday
+121,Bitburger Radler,Bitburger Brauerei,Radler/Malt,AKL,Aachen,DE,50.7753,6.0839,,2026-01-21,2026,01,2026-01,Wednesday
+122,"Schloss Hell 0,0%",Netto Marken-Discount,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-20,2026,01,2026-01,Tuesday
+123,Bertinchamps Triple,Bertinchamps,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-19,2026,01,2026-01,Monday
+124,Guinness Draught 0.0,Guinness,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-19,2026,01,2026-01,Monday
+125,Bavaria 0.0% IPA,Royal Swinkels,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-18,2026,01,2026-01,Sunday
+126,Fronk Bier IPA Simcoe,Biermanufaktur Langguth,IPA,,,,,,,2026-01-17,2026,01,2026-01,Saturday
+127,IPA,Brand Bierbrouwerij,IPA,,,,,,,2026-01-17,2026,01,2026-01,Saturday
+128,Original Fassbrause Holunderblüte,Uerige Obergärige Hausbrauerei,Radler/Malt,,,,,,,2026-01-17,2026,01,2026-01,Saturday
+129,Zirndorfer Landbier,Brauerei Zirndorf,Other,,,,,,,2026-01-17,2026,01,2026-01,Saturday
+130,Maisel & Friends Pale Ale,Brauerei Gebr. Maisel,Pale Ale,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-17,2026,01,2026-01,Saturday
+131,Krombacher Fassbrause Rhabarber,Krombacher Gruppe,Radler/Malt,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-17,2026,01,2026-01,Saturday
+132,Kosmos,Põhjala,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-17,2026,01,2026-01,Saturday
+133,Gaffel Kölsch,Privatbrauerei Gaffel Becker,Kölsch,Haus Kattwinkel,Aachen,DE,50.7748,6.0812,,2026-01-16,2026,01,2026-01,Friday
+134,Paulaner Hefe-Weißbier Dunkel / Weissbier Dunkel,Paulaner Brauerei,Wheat Beer,Haus Kattwinkel,Aachen,DE,50.7748,6.0812,,2026-01-16,2026,01,2026-01,Friday
+135,SUPER 8 IPA,Brouwerij Haacht Brasserie,IPA,,,,,,,2026-01-16,2026,01,2026-01,Friday
+136,Tsar Pjotr-tje,Brouwerij Hoop,Other,,,,,,,2026-01-16,2026,01,2026-01,Friday
+137,Blueprints: Stapler,Moersleutel Craft Brewery,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-16,2026,01,2026-01,Friday
+138,Sion Kölsch,Radeberger Gruppe,Kölsch,,,,,,,2026-01-15,2026,01,2026-01,Thursday
+139,Kilkenny,Guinness,Other,City Pub,Aachen,DE,50.775,6.083,,2026-01-15,2026,01,2026-01,Thursday
+140,Triple Fruit Bomb,Moersleutel Craft Brewery,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-15,2026,01,2026-01,Thursday
+141,Ārpus X Celestial Beerworks QDH Peacharine X Citra X Rakau X Strata TIPA,Ārpus Brewing Co.,TIPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-15,2026,01,2026-01,Thursday
+142,Maisel & Friends West Coast IPA,Brauerei Gebr. Maisel,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-15,2026,01,2026-01,Thursday
+143,Hazy Sakura Daylight/Midnight,BrewDog Deutschland,NEIPA/Hazy IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-15,2026,01,2026-01,Thursday
+144,IPA Liberis 2+3,Brauhaus Riegele,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-14,2026,01,2026-01,Wednesday
+145,Übersee Hopfen,Rügener Insel-Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-13,2026,01,2026-01,Tuesday
+146,Tweet IPA,Rügener Insel-Brauerei,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-13,2026,01,2026-01,Tuesday
+147,German Coast,Rügener Insel-Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-13,2026,01,2026-01,Tuesday
+148,Maisel & Friends URBAN IPA,Brauerei Gebr. Maisel,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-13,2026,01,2026-01,Tuesday
+149,Eifel Brune,Eifel Craft Beer,Dark/Dubbel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-12,2026,01,2026-01,Monday
+150,Tongerlo Bruin - Brune,Brouwerij Haacht Brasserie,Dark/Dubbel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-11,2026,01,2026-01,Sunday
+151,Eifel Blonde,Eifel Craft Beer,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-11,2026,01,2026-01,Sunday
+152,Tongerlo Blond - Blonde,Brouwerij Haacht Brasserie,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-11,2026,01,2026-01,Sunday
+153,SOUP,Garage Beer Co.,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+154,Buzz,Bevog Brewery,Other,,,,,,,2026-01-10,2026,01,2026-01,Saturday
+155,Must Kuld,Põhjala,Other,,,,,,,2026-01-10,2026,01,2026-01,Saturday
+156,Funky Falcon,Two Chefs Brewing,Other,,,,,,,2026-01-10,2026,01,2026-01,Saturday
+157,Route Six,LHG Brewpub,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+158,Alexander,Brouwerij Rodenbach,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+159,Cherry Chouffe,Brasserie d'Achouffe,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+160,Organic Chocolate Stout,Samuel Smith,Stout/Porter,,,,,,,2026-01-10,2026,01,2026-01,Saturday
+161,Orange Velvet,LERVIG,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+162,LICHTENHAINER,Popihn,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+163,ICAUNA,Popihn,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+164,LASSI GOSE - Cassis / Citron / Fleur de Sel,Popihn,Sour/Wild,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+165,TIPA DDH KRUSH / NELSON SAUVIN / CITRA,Popihn,TIPA,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2026-01-10,2026,01,2026-01,Saturday
+166,Lagerbier Hell,Augustiner-Bräu München,Lager/Pils,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+167,Diebels Alt,Brauerei Diebels,Altbier,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+168,Krönes' Eifeler Landbier,Gemünder Brauerei,Other,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+169,Aecht Schlenkerla Rauchbier – Märzen,"Schlenkerla (""Heller-Bräu"" Trum)",Bock/Märzen,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+170,Hofbräu Oktoberfestbier,Staatliches Hofbräuhaus München,Bock/Märzen,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+171,Staropramen Premium / Ležák 12,Pivovary Staropramen,Other,BierMuseum,Köln,DE,50.9383,6.9616,,2026-01-10,2026,01,2026-01,Saturday
+172,Avec Les Bons Vœux de la Brasserie Dupont,Brasserie Dupont,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-10,2026,01,2026-01,Saturday
+173,Sion Kölsch,Radeberger Gruppe,Kölsch,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-10,2026,01,2026-01,Saturday
+174,Urstoff / Bio Urstoff,Neumarkter Lammsbräu,Other,,,,,,,2026-01-10,2026,01,2026-01,Saturday
+175,Gilden Kölsch,Radeberger Gruppe,Kölsch,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-10,2026,01,2026-01,Saturday
+176,Tipsy,Gebroeders Hermans Frères bv,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-10,2026,01,2026-01,Saturday
+177,Tennent's Stout,Tennent's Caledonian Brewery,Stout/Porter,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+178,La Grelotte,Brasserie Grain d'Orge,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+179,PILGRIM // RAT BREWERY // IMPERIAL STOUT,Northern Monk,Stout/Porter,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+180,Willkommen In Heislhausen,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+181,Steenbrugge Blond,Brouwerij Palm,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-10,2026,01,2026-01,Saturday
+182,Peak IPA,Belgium Peak Beer,IPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+183,Weiherer Keller-Märzen,Brauerei Kundmüller,Bock/Märzen,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+184,Kriek,Brouwerij Lindemans,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+185,GrischBEERla,Brauerei Kundmüller,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+186,Agasse,La Cahute,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2026-01-10,2026,01,2026-01,Saturday
+187,Rodenbach Grand Cru,Brouwerij Rodenbach,Other,,,,,,,2026-01-09,2026,01,2026-01,Friday
+188,Weißbier,Brauerei Simon,Wheat Beer,,,,,,,2026-01-09,2026,01,2026-01,Friday
+189,GISH GALOPP | grainfog series 4/5,ATELIER VRAI,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-09,2026,01,2026-01,Friday
+190,CYBER CHICK,Blech.Brut,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2026-01-09,2026,01,2026-01,Friday
+191,Chouffe IPA,Brasserie d'Achouffe,IPA,Café Einstein,Aachen,DE,50.7751,6.0838,,2026-01-09,2026,01,2026-01,Friday
+192,Salitos Blue,MBG International Premium Brands,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-09,2026,01,2026-01,Friday
+193,"Bitburger 0,0% Herb",Bitburger Brauerei,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-09,2026,01,2026-01,Friday
+194,"Veltins Pilsener 0,0% Alkoholfrei",Brauerei VELTINS,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-08,2026,01,2026-01,Thursday
+195,Meckatzer Fest-Märzen,Meckatzer Löwenbräu,Bock/Märzen,Untappd at Home,Aachen,DE,50.7753,6.0839,,2026-01-07,2026,01,2026-01,Wednesday
+196,Hoptimum,Sierra Nevada Brewing Co.,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+197,Ardenne Givrée,Brasserie Minne,Other,,,,,,,2025-12-31,2025,12,2025-12,Wednesday
+198,Spezial,Brauerei Simon,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+199,Ammerndorfer Hefe-Weisse,Dorn-Bräu Privatbrauerei Ammerndorf,Wheat Beer,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+200,Ammerndorfer Hell,Dorn-Bräu Privatbrauerei Ammerndorf,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+201,Rotbier,Brauerei Schanzenbräu,Amber/Red,,,,,,,2025-12-31,2025,12,2025-12,Wednesday
+202,Hapkin,Brouwerij Alken-Maes,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+203,La Redoutable Triple Blonde,La Redoutable,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+204,Tripick 8,Tripick,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+205,Duvel Tripel Hop Citra,Duvel Moortgat,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-31,2025,12,2025-12,Wednesday
+206,Kettenriss,BrewDog Deutschland,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+207,Dortmunder Union Export,Dortmunder Actien-Brauerei,Other,,,,,,,2025-12-30,2025,12,2025-12,Tuesday
+208,Bock Brûlée,Two Chefs Brewing,Bock/Märzen,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+209,"Mango, Maracuja Sour",Straßenbräu,Sour/Wild,,,,,,,2025-12-30,2025,12,2025-12,Tuesday
+210,Dominica,Kehrwieder Kreativbrauerei,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+211,Feierabend,Straßenbräu,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+212,No Wheels,Garage Beer Co.,Other,,,,,,,2025-12-30,2025,12,2025-12,Tuesday
+213,Santa's Hjelper,Salama Brewing Company,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+214,Bret THE HOPMAN Hart,Hopacabana Brewing,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+215,Nestehukka,Panimoyhtiö Tuju,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+216,Zombie Dead Boys,Salama Brewing Company,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-12-30,2025,12,2025-12,Tuesday
+217,Schumacher Alt,Brauerei Schumacher,Altbier,,,,,,,2025-12-30,2025,12,2025-12,Tuesday
+218,La Redoutable Blonde IPA,La Redoutable,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-29,2025,12,2025-12,Monday
+219,Juicy Crime of Passion,Brouwerij Mort Subite,Other,,,,,,,2025-12-29,2025,12,2025-12,Monday
+220,Kubiak's Howl,Experiment'Ale,Other,,,,,,,2025-12-29,2025,12,2025-12,Monday
+221,Orbit Ale,Experiment'Ale,Other,Chalet L'experimentale,Châtel,FR,46.265,6.8355,,2025-12-29,2025,12,2025-12,Monday
+222,Badjawe Festive,Badjawe Brasserie Coopérative,Other,Le Chalet Alsacien,Châtel,FR,46.266,6.838,,2025-12-29,2025,12,2025-12,Monday
+223,La Binamé Triple Bio,Badjawe Brasserie Coopérative,Tripel,Le Chalet Alsacien,Châtel,FR,46.266,6.838,,2025-12-29,2025,12,2025-12,Monday
+224,White Noise,Norm Brewing,Other,Chalet Chatel,Châtel,FR,46.2656,6.8369,,2025-12-29,2025,12,2025-12,Monday
+225,Krönes' Eifeler Landbier,Gemünder Brauerei,Other,,,,,,,2025-12-28,2025,12,2025-12,Sunday
+226,Boltens Alt,Privatbrauerei Bolten,Altbier,,,,,,,2025-12-28,2025,12,2025-12,Sunday
+227,Gaffels Fassbrause Apfel Naturtrüb,Privatbrauerei Gaffel Becker,Radler/Malt,,,,,,,2025-12-28,2025,12,2025-12,Sunday
+228,Früh Kölsch,Cölner Hofbräu Früh,Kölsch,Pizza Mann,Aachen,DE,50.776,6.0845,,2025-12-28,2025,12,2025-12,Sunday
+229,JUNGLE BITE | Tattoo Series 4/4,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+230,Kreativsud #7,Bundesverband der Kreativbrauer e.V.,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+231,Floris Fraise,Delirium - Huyghe Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+232,Blanche de Namur Rosée,Brasserie du Bocq,Blonde/Golden,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+233,Barking Around the Christmas Tree,Lieber Waldi,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+234,Berg Original Hell,Berg Brauerei Ulrich Zimmermann,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+235,Hop Zij Met Ons,Jopen,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+236,Chimay Cinq Cents (White),Bières de Chimay,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+237,Val-Dieu Bière de Noël,Brasserie de l'Abbaye du Val-Dieu,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+238,Rosenheimer Helles,Auerbräu Rosenheimer Spezialitätenbrauerei,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+239,Indian Pale Ale,SinghBräu,Pale Ale,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+240,Aechtes Dunkel,Brauhaus Riegele,Dark/Dubbel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+241,Shore Leave,BrewDog,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+242,Kriek,Brouwerij Lindemans,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+243,British Golden Ale,Hopfen+Malz,Blonde/Golden,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+244,Grisette Triple / Tripel Bio,Brasserie St-Feuillien,Tripel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+245,Tennent's Stout,Tennent's Caledonian Brewery,Stout/Porter,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-27,2025,12,2025-12,Saturday
+246,"Bitburger 0,0% Pineapple Alkoholfrei",Bitburger Brauerei,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-26,2025,12,2025-12,Friday
+247,"Bitburger 0,0% Peach Alkoholfrei",Bitburger Brauerei,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-26,2025,12,2025-12,Friday
+248,Cerdos Voladores Brown Ale,Barcelona Beer Company,Other,,,,,,,2025-12-26,2025,12,2025-12,Friday
+249,IPA,Brouwerij 't IJ,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-26,2025,12,2025-12,Friday
+250,'t Gouden IJ,Brouwerij 't IJ,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-26,2025,12,2025-12,Friday
+251,Leffe Bière d'Hiver / Winterbier,Abbaye de Leffe,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-26,2025,12,2025-12,Friday
+252,Heart & Soul,Vocation Brewery,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-25,2025,12,2025-12,Thursday
+253,La Corne du Bois des Pendus Triple,Brasserie des Légendes,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-25,2025,12,2025-12,Thursday
+254,Marie Hausbrendel Weissbier,Schwarzbräu,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-25,2025,12,2025-12,Thursday
+255,Erdinger Alkoholfrei,Erdinger Weissbräu,Non-Alcoholic,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-25,2025,12,2025-12,Thursday
+256,Cerdos Voladores Pale Ale,Barcelona Beer Company,Pale Ale,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-24,2025,12,2025-12,Wednesday
+257,Aubel Pomme Cerise,Brasserie Grain d'Orge,Other,Domkeller,Aachen,DE,50.7745,6.084,,2025-12-24,2025,12,2025-12,Wednesday
+258,Paix Dieu Triple,Brasserie Caulier,Tripel,Domkeller,Aachen,DE,50.7745,6.084,,2025-12-24,2025,12,2025-12,Wednesday
+259,Cerdos Voladores Session IPA,Barcelona Beer Company,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-23,2025,12,2025-12,Tuesday
+260,IPA,Lagunitas Brewing Company,IPA,Dadawan Kerkrade,Kerkrade,NL,50.8665,6.0598,,2025-12-23,2025,12,2025-12,Tuesday
+261,Thai Thai,Oedipus Brewing,Other,Dadawan Kerkrade,Kerkrade,NL,50.8665,6.0598,,2025-12-23,2025,12,2025-12,Tuesday
+262,Kasteel Cuvée,Kasteel Brouwerij Vanhonsebrouck,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+263,Duvel,Duvel Moortgat,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+264,Cuvée Clarisse Wild Weasel Whisky Infused,Brouwerij Wilderen,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+265,Vleteren Bruin 12°,Deca Brouwerij,Dark/Dubbel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+266,Straffe Hendrik Brugs Tripel Bier 9°,Brouwerij De Halve Maan,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+267,Bush de Noël,Brasserie Dubuisson,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+268,Motor Oil / Motorolie,Moersleutel Craft Brewery,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-22,2025,12,2025-12,Monday
+269,Haka Ultra Red Fruit 11%,Haka,Amber/Red,,,,,,,2025-12-21,2025,12,2025-12,Sunday
+270,Leeve Waldi,Lieber Waldi,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-21,2025,12,2025-12,Sunday
+271,Lemon,Bundaberg Brewed Drinks,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-21,2025,12,2025-12,Sunday
+272,Blood Orange,Bundaberg Brewed Drinks,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-21,2025,12,2025-12,Sunday
+273,Westmalle Trappist Dubbel,Brouwerij der Trappisten van Westmalle,Dark/Dubbel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-21,2025,12,2025-12,Sunday
+274,Noël,Brasserie Grain d'Orge,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-21,2025,12,2025-12,Sunday
+275,Berg Original Hell,Berg Brauerei Ulrich Zimmermann,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+276,Grünhopfen Pils,Brauerei Kundmüller,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+277,Black Fuel,Enigma Belgian Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+278,Leeve Waldi,Lieber Waldi,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+279,Alman's Wies'n Märzen,Yankee & Kraut,Bock/Märzen,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+280,FREE FALLING | Tattoo Series 2/4,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+281,KITTY REAPER | Tattoo Series 1/4,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+282,Fronk Weihnachtsbier 2025,Biermanufaktur Langguth,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+283,Light Waves,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+284,Öcherprinte,Drunken Monkey,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+285,Weiherer Schwärzla,Brauerei Kundmüller,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+286,Hopfen+malz Wheat Ipa,Hopfen+Malz,IPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-20,2025,12,2025-12,Saturday
+287,Bio Pils,Bahkauv Brew,Lager/Pils,,,,,,,2025-12-20,2025,12,2025-12,Saturday
+288,Curtius Classic,Brasserie {C},Other,,,,,,,2025-12-20,2025,12,2025-12,Saturday
+289,Pecheresse,Brouwerij Lindemans,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-19,2025,12,2025-12,Friday
+290,Piraat,Brouwerij Van Steenberge,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+291,Framboise Boon,Brouwerij Boon,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+292,DEVILS MASK | Tattoo Series 3/4,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+293,Berliner Kindl Weisse Himbeere,Berliner-Kindl-Schultheiss-Brauerei,Wheat Beer,Egmont,Aachen,DE,50.7758,6.0842,,2025-12-18,2025,12,2025-12,Thursday
+294,Toast Hawaii,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+295,Cocada,Totenhopfen Brauhaus,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+296,JUNGLE BITE | Tattoo Series 4/4,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+297,Vanilla Blackout,Schwarze Rose,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-12-18,2025,12,2025-12,Thursday
+298,Gulden Draak 9000 Quadruple,Brouwerij Van Steenberge,Quadrupel,,,,,,,2025-12-18,2025,12,2025-12,Thursday
+299,Mönchshof Landbier,Kulmbacher Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-18,2025,12,2025-12,Thursday
+300,Stravius Tripel,De Straviusbrouwers,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-17,2025,12,2025-12,Wednesday
+301,Zatte,Brouwerij 't IJ,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-17,2025,12,2025-12,Wednesday
+302,Weiherer Kräusen Hell,Brauerei Kundmüller,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-17,2025,12,2025-12,Wednesday
+303,Biologisch IPA,Gulpener Bierbrouwerij,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-16,2025,12,2025-12,Tuesday
+304,Scuba,BrewFist,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-16,2025,12,2025-12,Tuesday
+305,Gouden Carolus Whisky Infused,Brouwerij Het Anker,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-16,2025,12,2025-12,Tuesday
+306,Krachtig Kanon,Koninklijke Grolsch,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-14,2025,12,2025-12,Sunday
+307,Mooie Nel IPA / Northsea IPA,Jopen,IPA,Al Mercato - Osteria,,,,,,2025-12-14,2025,12,2025-12,Sunday
+308,De Eigenzinnige Elisabeth,Stadsbrouwerij Maastricht,Other,De Lanteern,,,,,,2025-12-14,2025,12,2025-12,Sunday
+309,Gouden Carolus Christmas / Noël,Brouwerij Het Anker,Other,Brasserie Amadeus,,,,,,2025-12-14,2025,12,2025-12,Sunday
+310,Erdinger Dunkel,Erdinger Weissbräu,Dark/Dubbel,Papillon,Aachen,DE,50.7752,6.083,,2025-12-13,2025,12,2025-12,Saturday
+311,Erdinger Weißbier / Hefe-Weizen,Erdinger Weissbräu,Wheat Beer,Papillon,Aachen,DE,50.7752,6.083,,2025-12-13,2025,12,2025-12,Saturday
+312,Elderberry (Holunder),Bionade,Other,Papillon,Aachen,DE,50.7752,6.083,,2025-12-13,2025,12,2025-12,Saturday
+313,Maisel & Friends IPA,Brauerei Gebr. Maisel,IPA,Papillon,Aachen,DE,50.7752,6.083,,2025-12-13,2025,12,2025-12,Saturday
+314,Baltik-Lager,Störtebeker Braumanufaktur,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-13,2025,12,2025-12,Saturday
+315,Meckatzer Hefeweizen,Meckatzer Löwenbräu,Wheat Beer,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-13,2025,12,2025-12,Saturday
+316,Queue de Charrue Ambrée / Ploegsteert Amber,Brasserie / Brouwerij Vanuxeem,Amber/Red,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-13,2025,12,2025-12,Saturday
+317,Maisel's Weisse Kristall,Brauerei Gebr. Maisel,Wheat Beer,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-12,2025,12,2025-12,Friday
+318,God's Juice,Totenhopfen Brauhaus,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-12,2025,12,2025-12,Friday
+319,Kasteel Xtra,Kasteel Brouwerij Vanhonsebrouck,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-10,2025,12,2025-12,Wednesday
+320,Pulp Art,Brooklyn Brewery,Other,5 Points Pub,Aachen,DE,50.7748,6.0828,,2025-12-05,2025,12,2025-12,Friday
+321,Tourtel Twist Citron,Brasseries Kronenbourg,Other,5 Points Pub,Aachen,DE,50.7748,6.0828,,2025-12-05,2025,12,2025-12,Friday
+322,Grimbergen Blanche,Brouwerij Alken-Maes,Blonde/Golden,5 Points Pub,Aachen,DE,50.7748,6.0828,,2025-12-05,2025,12,2025-12,Friday
+323,JOHNNY SABRO,Savoy Craft,Other,5 Points Pub,Aachen,DE,50.7748,6.0828,,2025-12-05,2025,12,2025-12,Friday
+324,Weihenstephaner Vitus,Bayerische Staatsbrauerei Weihenstephan,Other,5 Points Pub,Aachen,DE,50.7748,6.0828,,2025-12-05,2025,12,2025-12,Friday
+325,CH’TI Triple Signature,Brasserie Castelain,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+326,La Verte,Brasserie du Mont Blanc,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+327,La Goudale - Blonde à l'Ancienne,Brasserie Goudale,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+328,St. Stefanus Blonde,Brouwerij Van Steenberge,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+329,La Charnue Blonde,Brasserie Castelain,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+330,Blanche - Biera Bianca,Brasserie Pietra,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+331,Vézelay Blonde Bio,Brasserie de Vezelay,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-05,2025,12,2025-12,Friday
+332,Cristal Glace,Brasserie du Mont Blanc,Other,Le Beaufort des Montagnes,,,,,,2025-12-05,2025,12,2025-12,Friday
+333,Chouffe Lite,Brasserie d'Achouffe,Other,,,,,,,2025-12-05,2025,12,2025-12,Friday
+334,LBF - Blonde,L.B.F. - La Brasserie Fondamentale,Blonde/Golden,,,,,,,2025-12-05,2025,12,2025-12,Friday
+335,Pietra,Brasserie Pietra,Other,,,,,,,2025-12-05,2025,12,2025-12,Friday
+336,Vedett Extra IPA,Duvel Moortgat,IPA,,,,,,,2025-12-05,2025,12,2025-12,Friday
+337,Maes Pils,Brouwerij Alken-Maes,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-03,2025,12,2025-12,Wednesday
+338,Affligem Blonde,Affligem Brouwerij,Blonde/Golden,,,,,,,2025-12-03,2025,12,2025-12,Wednesday
+339,Haka Strong Blond 10%,Haka,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-03,2025,12,2025-12,Wednesday
+340,Rince Cochon Triple,Brouwerij Haacht Brasserie,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-02,2025,12,2025-12,Tuesday
+341,Vedett Extra IPA,Duvel Moortgat,IPA,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-01,2025,12,2025-12,Monday
+342,Blanche de Namur,Brasserie du Bocq,Blonde/Golden,,,,,,,2025-12-01,2025,12,2025-12,Monday
+343,Filou,Kasteel Brouwerij Vanhonsebrouck,Other,,,,,,,2025-12-01,2025,12,2025-12,Monday
+344,3 MONTS Biere De Flandre,Brasserie 3 MONTS,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-12-01,2025,12,2025-12,Monday
+345,Aventinus Eisbock (TAP09),Schneider Weisse G. Schneider & Sohn,Bock/Märzen,,,,,,,2025-12-01,2025,12,2025-12,Monday
+346,Haka Ultra Red Fruit 11%,Haka,Amber/Red,,,,,,,2025-11-30,2025,11,2025-11,Sunday
+347,Bon Secours de Noël,Brasserie Caulier,Other,Le Jean Michel,Valmeinier,FR,45.1836,6.497,,2025-11-30,2025,11,2025-11,Sunday
+348,Haka Strong Blond 12%,Haka,Blonde/Golden,,,,,,,2025-11-30,2025,11,2025-11,Sunday
+349,Leffe Blonde / Blond,Abbaye de Leffe,Blonde/Golden,,,,,,,2025-11-30,2025,11,2025-11,Sunday
+350,Leffe Blonde / Blond,Abbaye de Leffe,Blonde/Golden,,,,,,,2025-11-30,2025,11,2025-11,Sunday
+351,Bush Blonde Triple,Brasserie Dubuisson,Tripel,,,,,,,2025-11-29,2025,11,2025-11,Saturday
+352,Grimbergen Blonde,Brouwerij Alken-Maes,Blonde/Golden,,,,,,,2025-11-29,2025,11,2025-11,Saturday
+353,Benediktiner Hell,Benediktiner Weissbräu,Lager/Pils,,,,,,,2025-11-29,2025,11,2025-11,Saturday
+354,Gaffel Kölsch,Privatbrauerei Gaffel Becker,Kölsch,,,,,,,2025-11-29,2025,11,2025-11,Saturday
+355,Hop House 13 Lager,Guinness,Lager/Pils,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-11-29,2025,11,2025-11,Saturday
+356,Salitos Original,MBG International Premium Brands,Other,Live Music Hall,Köln,DE,50.9368,6.9563,,2025-11-25,2025,11,2025-11,Tuesday
+357,Gaffel Wiess,Privatbrauerei Gaffel Becker,Other,Live Music Hall,Köln,DE,50.9368,6.9563,,2025-11-25,2025,11,2025-11,Tuesday
+358,Gaffels Fassbrause Orange,Privatbrauerei Gaffel Becker,Radler/Malt,Live Music Hall,Köln,DE,50.9368,6.9563,,2025-11-25,2025,11,2025-11,Tuesday
+359,Astra Kleine Freiheit Helles,Holsten-Brauerei AG,Lager/Pils,Live Music Hall,Köln,DE,50.9368,6.9563,,2025-11-25,2025,11,2025-11,Tuesday
+360,Zappes Hell,Zappes Broi,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-25,2025,11,2025-11,Tuesday
+361,Straffe Hendrik Brugs Quadrupel Bier 11°,Brouwerij De Halve Maan,Quadrupel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-25,2025,11,2025-11,Tuesday
+362,St-Louis Kriek Lambic,Kasteel Brouwerij Vanhonsebrouck,Sour/Wild,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-25,2025,11,2025-11,Tuesday
+363,Queue de Charrue Triple / Ploegsteert Tripel,Brasserie / Brouwerij Vanuxeem,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-25,2025,11,2025-11,Tuesday
+364,Waterloo Triple Blond,Waterloo Brewery Mont-St-Jean,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-25,2025,11,2025-11,Tuesday
+365,Ichiban (Ichiban Shibori) (一番搾り),Kirin Brewery Company,Other,Takumi Aachen Chicken & Vegan,Aachen,DE,50.7758,6.0843,,2025-11-24,2025,11,2025-11,Monday
+366,Öcher Best Bitter,Hopfen+Malz,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-24,2025,11,2025-11,Monday
+367,Öcherprinte,Drunken Monkey,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-24,2025,11,2025-11,Monday
+368,Weiherer Festbier,Brauerei Kundmüller,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-24,2025,11,2025-11,Monday
+369,La Guillotine,Delirium - Huyghe Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-24,2025,11,2025-11,Monday
+370,Dark Angels of Death,Totenhopfen Brauhaus,Dark/Dubbel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-24,2025,11,2025-11,Monday
+371,Traugott Simon Pilsener,Trinkgut,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-22,2025,11,2025-11,Saturday
+372,Corona Extra,Grupo Modelo,Other,Tijuana Aachen,Aachen,DE,50.776,6.085,,2025-11-21,2025,11,2025-11,Friday
+373,Kandi Malz,Bitburger Brauerei,Other,Tijuana Aachen,Aachen,DE,50.776,6.085,,2025-11-21,2025,11,2025-11,Friday
+374,Vergina (Βεργίνα) Lager,Macedonian Thrace Brewery,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-21,2025,11,2025-11,Friday
+375,Meckatzer Weiss-Gold,Meckatzer Löwenbräu,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-21,2025,11,2025-11,Friday
+376,Früh Kölsch,Cölner Hofbräu Früh,Kölsch,Die Kiste,Aachen,DE,50.7748,6.0825,,2025-11-21,2025,11,2025-11,Friday
+377,Mönchshof Bockbier,Kulmbacher Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+378,Helles Pülleken,Brauerei VELTINS,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+379,Barbãr,Brasserie Lefebvre,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+380,St-Louis Premium Framboise,Kasteel Brouwerij Vanhonsebrouck,Sour/Wild,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+381,Original Turmbräu NaturRadler,Brauerei Mönchengladbach,Radler/Malt,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+382,Barista Chocolate Quad,Kasteel Brouwerij Vanhonsebrouck,Quadrupel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+383,Brugse Zot,Brouwerij De Halve Maan,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+384,X² Ice Boost Energy,Bitburger Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+385,X² Cola 2025,Bitburger Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-20,2025,11,2025-11,Thursday
+386,Oesterstout,Scheldebrouwerij,Stout/Porter,,,,,,,2025-11-19,2025,11,2025-11,Wednesday
+387,Chimay Première (Red),Bières de Chimay,Amber/Red,The Wingman,Aachen,DE,50.7755,6.0855,,2025-11-19,2025,11,2025-11,Wednesday
+388,RADICAL RAPTOR,Blech.Brut,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2025-11-19,2025,11,2025-11,Wednesday
+389,Nuit Étoilée,Brasserie de l'Abbaye des Rocs,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2025-11-19,2025,11,2025-11,Wednesday
+390,Kasteel Rouge,Kasteel Brouwerij Vanhonsebrouck,Amber/Red,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-11-19,2025,11,2025-11,Wednesday
+391,Barista Chocolate Quad,Kasteel Brouwerij Vanhonsebrouck,Quadrupel,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-11-19,2025,11,2025-11,Wednesday
+392,La Trappe Tripel,Bierbrouwerij De Koningshoeven,Tripel,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-11-19,2025,11,2025-11,Wednesday
+393,Schwarzwald Zäpfle naturtrüb / Maidle,Badische Staatsbrauerei Rothaus,Dark/Dubbel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-19,2025,11,2025-11,Wednesday
+394,Organic Chocolate Stout,Samuel Smith,Stout/Porter,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-19,2025,11,2025-11,Wednesday
+395,Oesterstout,Scheldebrouwerij,Stout/Porter,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-16,2025,11,2025-11,Sunday
+396,Queue de Charrue Blonde / Ploegsteert Blond,Brasserie / Brouwerij Vanuxeem,Blonde/Golden,,,,,,,2025-11-16,2025,11,2025-11,Sunday
+397,IJndejaars,Brouwerij 't IJ,Other,Gleis 1,Aachen,DE,50.776,6.0838,,2025-11-15,2025,11,2025-11,Saturday
+398,West Indies Porter,Guinness,Stout/Porter,Gleis 1,Aachen,DE,50.776,6.0838,,2025-11-15,2025,11,2025-11,Saturday
+399,Martha Guilty Rouge,The Brew Society,Amber/Red,Bones And Beers,Aachen,DE,50.7752,6.0835,,2025-11-15,2025,11,2025-11,Saturday
+400,Bird of Prey 0.2 IPA,Uiltje Brewing Company,IPA,,,,,,,2025-11-15,2025,11,2025-11,Saturday
+401,CORNET Oaked,Brouwerij De Hoorn,Other,Bones And Beers,Aachen,DE,50.7752,6.0835,,2025-11-15,2025,11,2025-11,Saturday
+402,Black Heart,BrewDog,Other,,,,,,,2025-11-15,2025,11,2025-11,Saturday
+403,Queue de Charrue Ambrée / Ploegsteert Amber,Brasserie / Brouwerij Vanuxeem,Amber/Red,,,,,,,2025-11-15,2025,11,2025-11,Saturday
+404,Non De Jus!,100 Watt Brewery,Other,,,,,,,2025-11-14,2025,11,2025-11,Friday
+405,Hoegaarden Grand Cru,Brouwerij Hoegaarden,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-14,2025,11,2025-11,Friday
+406,OBUZ Special blond,Waterfields Brewery,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-14,2025,11,2025-11,Friday
+407,Knabe Malz,Krombacher Gruppe,Other,,,,,,,2025-11-12,2025,11,2025-11,Wednesday
+408,Beck's,Brauerei Beck,Other,,,,,,,2025-11-11,2025,11,2025-11,Tuesday
+409,Postel Tripel,Affligem Brouwerij,Tripel,,,,,,,2025-11-11,2025,11,2025-11,Tuesday
+410,Trappistes Rochefort Triple Extra,Abbaye Notre-Dame de Saint-Rémy,Tripel,,,,,,,2025-11-11,2025,11,2025-11,Tuesday
+411,No Stars Only Suns (w. Mikerphone),Elmeleven,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+412,"Mango, Maracuja Sour",Straßenbräu,Sour/Wild,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+413,Dual Ascension,Seven Island Brewery,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+414,Sanddorini,KUEHN KUNZ ROSEN,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+415,Rodenbach Evolved Caractère,Brouwerij Rodenbach,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+416,Coffee Stout,MÜCKE,Stout/Porter,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+417,Local Everyday Weekend {Lervig Local},LERVIG,Other,Holy Craft Beer Bar,Nürnberg,DE,49.4551,11.0762,,2025-11-08,2025,11,2025-11,Saturday
+418,Füchschen Alt,Brauerei im Füchschen,Altbier,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+419,Heineken,Heineken,Other,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+420,Füchschen Pils,Brauerei im Füchschen,Lager/Pils,Schlösser Zelt,Düsseldorf,DE,51.2197,6.7928,,2025-11-08,2025,11,2025-11,Saturday
+421,Füchschen Alt,Brauerei im Füchschen,Altbier,Schlösser Zelt,Düsseldorf,DE,51.2197,6.7928,,2025-11-08,2025,11,2025-11,Saturday
+422,Füchschen Alt,Brauerei im Füchschen,Altbier,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+423,Dortmunder Union Export,Dortmunder Actien-Brauerei,Other,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+424,Export,Brauerei Königshof,Other,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+425,Heineken 0.0,Heineken,Non-Alcoholic,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+426,Sester Kölsch,Radeberger Gruppe,Kölsch,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+427,Patrizier Weißbier,Tucher Bräu,Wheat Beer,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+428,Mühlen Kölsch,Mühlen Kölsch,Kölsch,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+429,Gustl - Kellerbier Naturtrüb / Zwickl,Private Alpenbrauerei Bürgerbräu Bad Reichenhall,Other,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+430,Gösser Märzen / Gösser Beer / Gösser Export,Brauerei Göss,Bock/Märzen,,,,,,,2025-11-08,2025,11,2025-11,Saturday
+431,Atlantik-Ale,Störtebeker Braumanufaktur,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-07,2025,11,2025-11,Friday
+432,Kriekbier,Carrefour,Sour/Wild,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-11-07,2025,11,2025-11,Friday
+433,Benediktiner Hell,Benediktiner Weissbräu,Lager/Pils,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-11-07,2025,11,2025-11,Friday
+434,Fruitesse,Brouwerij Liefmans,Other,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-11-07,2025,11,2025-11,Friday
+435,Benediktiner Weissbier,Benediktiner Weissbräu,Other,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-11-07,2025,11,2025-11,Friday
+436,König Ludwig Weissbier Hell / Royal Bavarian Hefe-Weizen,König Ludwig Schlossbrauerei Kaltenberg,Wheat Beer,Pontgarten,Aachen,DE,50.7753,6.0839,,2025-11-07,2025,11,2025-11,Friday
+437,Berliner Kindl Weisse,Berliner-Kindl-Schultheiss-Brauerei,Wheat Beer,Pontgarten,Aachen,DE,50.7753,6.0839,,2025-11-07,2025,11,2025-11,Friday
+438,Mc Chouffe,Brasserie d'Achouffe,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-07,2025,11,2025-11,Friday
+439,Zipfer Märzen,Brauerei Zipf,Bock/Märzen,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-06,2025,11,2025-11,Thursday
+440,Stiegl-Goldbräu / Stiegl Gold,Stieglbrauerei zu Salzburg,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-06,2025,11,2025-11,Thursday
+441,Starkenberger Tirol Hell,Brauerei Schloss Starkenberg,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-06,2025,11,2025-11,Thursday
+442,Unnamed Tripel,First State Brewing Company,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-06,2025,11,2025-11,Thursday
+443,Guinness Draught,Guinness,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-11-06,2025,11,2025-11,Thursday
+444,Barefoot Bigfoot,vandeStreek bier,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+445,St-Louis Premium Gueuze,Kasteel Brouwerij Vanhonsebrouck,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+446,TIKIER TOUR,Yankee & Kraut,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+447,Mash Till You Crash,Dutch Bargain,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+448,SANTAKO,Garage Beer Co.,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+449,Tiramisu Bänger,Põhjala,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+450,Cloudy Lemonade (Citra & Nelson Sauvin),Vault City Brewing,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-11-05,2025,11,2025-11,Wednesday
+451,Ottakringer Pils,Ottakringer Brauerei,Lager/Pils,Plachutta,Wien,AT,48.2082,16.3738,,2025-11-01,2025,11,2025-11,Saturday
+452,Wiener Original,Ottakringer Brauerei,Other,Plachutta,Wien,AT,48.2082,16.3738,,2025-11-01,2025,11,2025-11,Saturday
+453,Extinction Is Forever!: Kākāpō,Bevog Brewery,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+454,Not Forever But For Now,Mad Scientist,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+455,Extinction Is Forever!: Mountain Pygmy Possum,Bevog Brewery,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+456,O'Hara's Leann Folláin,O'Hara's Brewery,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+457,Backtank Boys,Bevog Brewery,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+458,Bitta Von Tresen,Muttermilch Vienna Brewery,Other,Mel's Craft Beer Bar & Diner,Aachen,DE,50.775,6.0835,,2025-11-01,2025,11,2025-11,Saturday
+459,Mongozo Mango,Mongozo,Other,,,,,,,2025-11-01,2025,11,2025-11,Saturday
+460,Stiegl-Radler Grapefruit,Stieglbrauerei zu Salzburg,Radler/Malt,,,,,,,2025-10-31,2025,10,2025-10,Friday
+461,Zwettler Original,Privatbrauerei Zwettl,Other,Neuzeit,Aachen,DE,50.7755,6.0841,,2025-10-31,2025,10,2025-10,Friday
+462,Ottakringer Zwickl,Ottakringer Brauerei,Other,Ponykarussell – Das Café,Aachen,DE,50.7762,6.0845,,2025-10-31,2025,10,2025-10,Friday
+463,Ottakringer Helles,Ottakringer Brauerei,Lager/Pils,Ponykarussell – Das Café,Aachen,DE,50.7762,6.0845,,2025-10-31,2025,10,2025-10,Friday
+464,Hirter Zwickl,Privatbrauerei Hirt,Other,Prater Alm,Salzburg,AT,47.8095,13.055,,2025-10-31,2025,10,2025-10,Friday
+465,Hirter Privat Pils,Privatbrauerei Hirt,Lager/Pils,Prater Alm,Salzburg,AT,47.8095,13.055,,2025-10-31,2025,10,2025-10,Friday
+466,Nastro Azzurro,Birra Peroni,Other,,,,,,,2025-10-30,2025,10,2025-10,Thursday
+467,Astra Spezial,Holsten-Brauerei AG,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-30,2025,10,2025-10,Thursday
+468,Tungri Blond,Amburon Belgian Craftbrewery,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-30,2025,10,2025-10,Thursday
+469,Double Enghien d'Hiver,Brasserie de Silly,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-30,2025,10,2025-10,Thursday
+470,Tongerlo Tripel,Brouwerij Haacht Brasserie,Tripel,,,,,,,2025-10-30,2025,10,2025-10,Thursday
+471,Choco Porter,Rock City Brewing,Stout/Porter,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-30,2025,10,2025-10,Thursday
+472,c'est la vie,orca brau,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-30,2025,10,2025-10,Thursday
+473,Engel Hell,Biermanufaktur ENGEL,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-29,2025,10,2025-10,Wednesday
+474,Speckerla,Freigeist Bierkultur,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-29,2025,10,2025-10,Wednesday
+475,St-Louis Kriek Lambic,Kasteel Brouwerij Vanhonsebrouck,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-29,2025,10,2025-10,Wednesday
+476,Super Ultra Mega Classic,Outer Range Brewing Co.,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-29,2025,10,2025-10,Wednesday
+477,Gustl - Kellerbier Naturtrüb / Zwickl,Private Alpenbrauerei Bürgerbräu Bad Reichenhall,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-29,2025,10,2025-10,Wednesday
+478,Marie Hausbrendel Weissbier,Schwarzbräu,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-29,2025,10,2025-10,Wednesday
+479,Vitamalz Das Leichte,Krombacher Gruppe,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-29,2025,10,2025-10,Wednesday
+480,Franziskaner Weissbier Alkoholfrei,Spaten-Franziskaner-Löwenbräu-Gruppe,Non-Alcoholic,essBar,Aachen,DE,50.7755,6.0838,,2025-10-27,2025,10,2025-10,Monday
+481,Astra Rakete,Holsten-Brauerei AG,Other,,,,,,,2025-10-27,2025,10,2025-10,Monday
+482,Franziskaner Premium Weissbier Naturtrüb,Spaten-Franziskaner-Löwenbräu-Gruppe,Other,,,,,,,2025-10-27,2025,10,2025-10,Monday
+483,Spaten München / Münchner Hell / Premium Lager,Spaten-Franziskaner-Löwenbräu-Gruppe,Lager/Pils,essBar,Aachen,DE,50.7755,6.0838,,2025-10-27,2025,10,2025-10,Monday
+484,Mythos,Olympic Brewery,Other,essBar,Aachen,DE,50.7755,6.0838,,2025-10-27,2025,10,2025-10,Monday
+485,Benediktiner Weissbier Dunkel,Benediktiner Weissbräu,Dark/Dubbel,Chico Mendes,,,,,,2025-10-27,2025,10,2025-10,Monday
+486,Brugse Zot Dubbel,Brouwerij De Halve Maan,Dark/Dubbel,,,,,,,2025-10-27,2025,10,2025-10,Monday
+487,Abt 12,Brouwerij St. Bernardus,Other,Plus,Aachen,DE,50.7753,6.0839,,2025-10-27,2025,10,2025-10,Monday
+488,Mönchshof Hell,Kulmbacher Brauerei,Lager/Pils,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+489,Ginger Beer,Bundaberg Brewed Drinks,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+490,Alpenstoff,Private Alpenbrauerei Bürgerbräu Bad Reichenhall,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+491,Schloss Export,Netto Marken-Discount,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+492,Vicaris Tripel / Gueuze,Brouwerij Dilewyns,Sour/Wild,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+493,Speckerla,Freigeist Bierkultur,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+494,Alman's Helles,Yankee & Kraut,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+495,Vintage (2023),Thatchers,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+496,Trappistes Rochefort 8,Abbaye Notre-Dame de Saint-Rémy,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+497,Fourchette,Brouwerij Van Steenberge,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+498,Lab #1 Raspberry Sour,Gorilla Cervecería Berlin,Sour/Wild,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+499,Mélodie Des Îles,Fauve,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+500,Rodenbach FruitAge,Brouwerij Rodenbach,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+501,Steenbrugge Dubbel Bruin,Brouwerij Palm,Dark/Dubbel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+502,Grand Cru,Brasserie St-Feuillien,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+503,Red Ale,Hopfen+Malz,Amber/Red,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-25,2025,10,2025-10,Saturday
+504,Kasteel Donker,Kasteel Brouwerij Vanhonsebrouck,Other,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+505,Boltens Alt,Privatbrauerei Bolten,Altbier,,,,,,,2025-10-25,2025,10,2025-10,Saturday
+506,St-Barbara Salvatoris,Brouwerij Kompel,Other,The Wingman,Aachen,DE,50.7755,6.0855,,2025-10-24,2025,10,2025-10,Friday
+507,Kompel L'or Noir,Brouwerij Kompel,Dark/Dubbel,The Wingman,Aachen,DE,50.7755,6.0855,,2025-10-24,2025,10,2025-10,Friday
+508,La Trappe Quadrupel,Bierbrouwerij De Koningshoeven,Quadrupel,The Wingman,Aachen,DE,50.7755,6.0855,,2025-10-24,2025,10,2025-10,Friday
+509,Achel Tripel,De Achelse Kluis,Tripel,,,,,,,2025-10-24,2025,10,2025-10,Friday
+510,Vitamalz,Krombacher Gruppe,Other,,,,,,,2025-10-24,2025,10,2025-10,Friday
+511,Budweiser Budvar / Czechvar Original,Budějovický Budvar,Other,,,,,,,2025-10-23,2025,10,2025-10,Thursday
+512,Trappistes Rochefort 6,Abbaye Notre-Dame de Saint-Rémy,Other,,,,,,,2025-10-22,2025,10,2025-10,Wednesday
+513,Singha,Boon Rawd Brewery,Other,,,,,,,2025-10-22,2025,10,2025-10,Wednesday
+514,Tripel,Hertog Jan,Tripel,,,,,,,2025-10-21,2025,10,2025-10,Tuesday
+515,St. Pierre Tripel,Brouwerij Palm,Tripel,,,,,,,2025-10-19,2025,10,2025-10,Sunday
+516,Tripel LeFort,Omer Vander Ghinste,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-19,2025,10,2025-10,Sunday
+517,Cassis,Brouwerij Lindemans,Other,,,,,,,2025-10-19,2025,10,2025-10,Sunday
+518,Corsendonk Pater Dubbel / Abbey Brown Ale,Brouwerij Corsendonk,Dark/Dubbel,,,,,,,2025-10-19,2025,10,2025-10,Sunday
+519,Erdinger Alkoholfrei,Erdinger Weissbräu,Non-Alcoholic,,,,,,,2025-10-18,2025,10,2025-10,Saturday
+520,Erdinger Kristall,Erdinger Weissbräu,Other,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-10-18,2025,10,2025-10,Saturday
+521,Benediktiner Weissbier Alkoholfrei,Benediktiner Weissbräu,Non-Alcoholic,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-10-18,2025,10,2025-10,Saturday
+522,Bitburger Fassbrause Orange,Bitburger Brauerei,Radler/Malt,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-10-18,2025,10,2025-10,Saturday
+523,Hoegaarden Wit / Blanche,Brouwerij Hoegaarden,Wheat Beer,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-10-18,2025,10,2025-10,Saturday
+524,Hert Vijlener Bosbier Donker,Boscafé 't Hijgend Hert,Other,Boscafé 't Hijgend Hert,Maastricht,NL,50.8666,5.7021,,2025-10-18,2025,10,2025-10,Saturday
+525,Hert Vijlener Bosbier Blond,Boscafé 't Hijgend Hert,Blonde/Golden,Boscafé 't Hijgend Hert,Maastricht,NL,50.8666,5.7021,,2025-10-18,2025,10,2025-10,Saturday
+526,Peak Myrtille,Belgium Peak Beer,Other,,,,,,,2025-10-18,2025,10,2025-10,Saturday
+527,3 Schténg Blond,Brasserie Grain d'Orge,Blonde/Golden,Drielandenpunt,,,,,,2025-10-18,2025,10,2025-10,Saturday
+528,Doppelmalz,Privat-Brauerei Hohenfelde,Other,,,,,,,2025-10-17,2025,10,2025-10,Friday
+529,Bio-Pils,Quartiermeister*in,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+530,Zillertal Pils,Zillertal Bier,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+531,Aubel Triple,Brasserie Grain d'Orge,Tripel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+532,Waldhaus Ohne Filter Naturtrüb,Privatbrauerei Waldhaus,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+533,Chimay Cinq Cents (White),Bières de Chimay,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+534,Bloody Vlad,Totenhopfen Brauhaus,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+535,Prenzlauer Berg,Põhjala,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+536,MIAMI GROVE,Kehrwieder Kreativbrauerei,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+537,Duff Beer,Privatbrauerei Eichbaum,Other,Smashup! am Dom,Köln,DE,50.9413,6.9583,,2025-10-17,2025,10,2025-10,Friday
+538,Bière des Amis,Neobulles,Other,,,,,,,2025-10-17,2025,10,2025-10,Friday
+539,Good Old Doggy Days (Motueka),Lieber Waldi,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+540,La Trappe Bockbier,Bierbrouwerij De Koningshoeven,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+541,Leckerschen Öcher Wiess,Biermanufaktur Langguth,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+542,Irish Red Ale,Hopfen & Malz Brew Lab,Amber/Red,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-17,2025,10,2025-10,Friday
+543,O'Hara's Irish Stout,O'Hara's Brewery,Stout/Porter,,,,,,,2025-10-17,2025,10,2025-10,Friday
+544,Gold,Flensburger Brauerei Emil Petersen,Blonde/Golden,,,,,,,2025-10-16,2025,10,2025-10,Thursday
+545,Kölsch,Schreckenskammer,Kölsch,,,,,,,2025-10-15,2025,10,2025-10,Wednesday
+546,Finesse,Brouwerij De Dochter van de Korenaar,Other,,,,,,,2025-10-15,2025,10,2025-10,Wednesday
+547,Andechser Doppelbock Dunkel,Klosterbrauerei Andechs,Dark/Dubbel,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+548,Hövels Original,Hövels Hausbrauerei,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+549,Chimay Grande Réserve (Blue),Bières de Chimay,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+550,Grolsch Premium Lager,Koninklijke Grolsch,Lager/Pils,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+551,Delirium Argentum,Delirium - Huyghe Brewery,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2025-10-11,2025,10,2025-10,Saturday
+552,La Trappe Witte Trappist,Bierbrouwerij De Koningshoeven,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+553,Crazy Daisy,Two Chefs Brewing,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+554,Virmalised,Põhjala,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+555,La Trappe Dubbel,Bierbrouwerij De Koningshoeven,Dark/Dubbel,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2025-10-11,2025,10,2025-10,Saturday
+556,Cherry Chouffe,Brasserie d'Achouffe,Other,Delirium Café Köln,Köln,DE,50.9394,6.9592,,2025-10-11,2025,10,2025-10,Saturday
+557,White Rabbit,CRAK Brewery,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+558,Zappes Pils,Zappes Broi,Lager/Pils,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+559,Zappes Radler,Zappes Broi,Radler/Malt,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+560,Sünner Kölsch,Sünner Brauerei und Brennerei,Kölsch,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+561,La Corne du Bois des Pendus Triple,Brasserie des Légendes,Tripel,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+562,Waterloo Triple Blond,Waterloo Brewery Mont-St-Jean,Tripel,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+563,Mongozo Banana,Mongozo,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+564,La Trappe Blond,Bierbrouwerij De Koningshoeven,Blonde/Golden,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+565,La Chouffe Blonde,Brasserie d'Achouffe,Blonde/Golden,Tankstelle,Aachen,DE,50.7752,6.0835,,2025-10-11,2025,10,2025-10,Saturday
+566,Floris Chocolat,Delirium - Huyghe Brewery,Other,Tankstelle,Aachen,DE,50.7752,6.0835,,2025-10-11,2025,10,2025-10,Saturday
+567,Mixery Bier + Cola + X,Karlsberg Brauerei,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+568,Edelstoff,Augustiner-Bräu München,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+569,Peters Kölsch,Radeberger Gruppe,Kölsch,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+570,Veltins Pilsener,Brauerei VELTINS,Lager/Pils,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+571,Żubr,Kompania Piwowarska,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+572,Schloss Hefeweizen,Netto Marken-Discount,Wheat Beer,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+573,"Turmbräu 0,0% Alkoholfrei",REWE,Non-Alcoholic,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+574,Schloss Edel,Netto Marken-Discount,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+575,Turmbräu Weißbier / Weizen,REWE,Wheat Beer,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+576,Radler Naturtrüb,Schloss Eggenberg,Radler/Malt,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+577,Hansa Pils,Dortmunder Actien-Brauerei,Lager/Pils,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+578,Turmbräu Export,Brauerei Mönchengladbach,Other,,,,,,,2025-10-11,2025,10,2025-10,Saturday
+579,Elephant,Carlsberg Group,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-11,2025,10,2025-10,Saturday
+580,Schloss Malzgetränk,Netto Marken-Discount,Other,,,,,,,2025-10-10,2025,10,2025-10,Friday
+581,Gaffel Wiess,Privatbrauerei Gaffel Becker,Other,,,,,,,2025-10-08,2025,10,2025-10,Wednesday
+582,Diôle Triple,Brasserie des Carrières,Tripel,,,,,,,2025-10-08,2025,10,2025-10,Wednesday
+583,Hellers Kölsch,Hellers Brauhaus,Kölsch,,,,,,,2025-10-07,2025,10,2025-10,Tuesday
+584,Trappistes Rochefort Triple Extra (2024),Abbaye Notre-Dame de Saint-Rémy,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-10-04,2025,10,2025-10,Saturday
+585,Münchner Weisse,Staatliches Hofbräuhaus München,Wheat Beer,,,,,,,2025-10-03,2025,10,2025-10,Friday
+586,Hofbräu Original,Staatliches Hofbräuhaus München,Other,,,,,,,2025-10-03,2025,10,2025-10,Friday
+587,Hofbräu Oktoberfestbier,Staatliches Hofbräuhaus München,Bock/Märzen,,,,,,,2025-10-03,2025,10,2025-10,Friday
+588,Gouden Carolus Classic,Brouwerij Het Anker,Other,,,,,,,2025-10-03,2025,10,2025-10,Friday
+589,Pornstar & Martini,Brouwerij de Molen,Other,,,,,,,2025-10-03,2025,10,2025-10,Friday
+590,Montagnarde 1979,Brasserie de l'Abbaye des Rocs,Other,Egmont,Aachen,DE,50.7758,6.0842,,2025-10-02,2025,10,2025-10,Thursday
+591,Abbaye des Rocs Brune 1979,Brasserie de l'Abbaye des Rocs,Dark/Dubbel,Egmont,Aachen,DE,50.7758,6.0842,,2025-10-02,2025,10,2025-10,Thursday
+592,Beck's Non-Alcoholic / Alkoholfrei / Blue,Brauerei Beck,Non-Alcoholic,,,,,,,2025-10-02,2025,10,2025-10,Thursday
+593,Goliath Triple,Brasserie des Légendes,Tripel,,,,,,,2025-10-01,2025,10,2025-10,Wednesday
+594,La Trappe Isid'or,Bierbrouwerij De Koningshoeven,Other,,,,,,,2025-10-01,2025,10,2025-10,Wednesday
+595,Delirium Nocturnum,Delirium - Huyghe Brewery,Other,,,,,,,2025-10-01,2025,10,2025-10,Wednesday
+596,G de Goudale Grand Cru,Brasserie Goudale,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-10-01,2025,10,2025-10,Wednesday
+597,Postel Tripel,Affligem Brouwerij,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-30,2025,09,2025-09,Tuesday
+598,Alm Radler,Krombacher Gruppe,Radler/Malt,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-30,2025,09,2025-09,Tuesday
+599,Trappistes Rochefort Triple Extra,Abbaye Notre-Dame de Saint-Rémy,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-29,2025,09,2025-09,Monday
+600,Tears In the Rain,Birrificio Wild Raccoon,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-29,2025,09,2025-09,Monday
+601,Weiherer Lager Hell,Brauerei Kundmüller,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+602,Burst,Mikkeller,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+603,Delirium Red,Delirium - Huyghe Brewery,Amber/Red,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+604,Kräusen Naturtrüb,Brauhaus Faust - Miltenberg,Other,,,,,,,2025-09-27,2025,09,2025-09,Saturday
+605,Wuide Rosi,Hopfenhäcker,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+606,Wild Tree Hoppy Cider,BlakStoc,Cider,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+607,Cocobänger,Põhjala,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+608,Delirium Tremens,Delirium - Huyghe Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+609,Fronk Bier Alsdorf East Coast IPA,Biermanufaktur Langguth,IPA,,,,,,,2025-09-27,2025,09,2025-09,Saturday
+610,Lennet,Lennet Bier Aachen,Other,,,,,,,2025-09-27,2025,09,2025-09,Saturday
+611,Backyard Heist,Totenhopfen Brauhaus,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-27,2025,09,2025-09,Saturday
+612,Pauwel Kwak,Brouwerij Bosteels,Other,Egmont,Aachen,DE,50.7758,6.0842,,2025-09-27,2025,09,2025-09,Saturday
+613,Aventinus (TAP06),Schneider Weisse G. Schneider & Sohn,Other,,,,,,,2025-09-27,2025,09,2025-09,Saturday
+614,Lagerbier Hell,Augustiner-Bräu München,Lager/Pils,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-09-27,2025,09,2025-09,Saturday
+615,Eifelbräu Helles Landbier,Bitburger Brauerei,Lager/Pils,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-09-27,2025,09,2025-09,Saturday
+616,Kilkenny,Guinness,Other,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-09-27,2025,09,2025-09,Saturday
+617,Strongbow,Bulmers Cider,Other,Sowiso & Ocean,Aachen,DE,50.7755,6.0845,,2025-09-27,2025,09,2025-09,Saturday
+618,Dors Tripel,Jumbo Supermarkten / Dors,Tripel,,,,,,,2025-09-27,2025,09,2025-09,Saturday
+619,Mahou Cinco Estrellas,Grupo Mahou-San Miguel,Other,Las Lomas,Aachen,DE,50.7752,6.0832,,2025-09-24,2025,09,2025-09,Wednesday
+620,Krombacher Pils,Krombacher Gruppe,Lager/Pils,Las Lomas,Aachen,DE,50.7752,6.0832,,2025-09-24,2025,09,2025-09,Wednesday
+621,Premium Pilsener / German Pilsener,Warsteiner,Lager/Pils,Cloud 9,,,,,,2025-09-23,2025,09,2025-09,Tuesday
+622,Steinburg Clásica,Font Salem,Other,Hotel Oleander,,,,,,2025-09-23,2025,09,2025-09,Tuesday
+623,Estrella Damm,Damm,Other,L'artista Pizzeria Napoletana,,,,,,2025-09-22,2025,09,2025-09,Monday
+624,El Águila Sin Filtrar,Heineken España,Other,Balneario B11,Madrid,ES,40.4168,-3.7038,,2025-09-22,2025,09,2025-09,Monday
+625,San Miguel (5.0%),AB InBev UK,Other,Balneario B11,Madrid,ES,40.4168,-3.7038,,2025-09-22,2025,09,2025-09,Monday
+626,Gemünder Pilsener,Gemünder Brauerei,Lager/Pils,BierMuseum,Köln,DE,50.9383,6.9616,,2025-09-21,2025,09,2025-09,Sunday
+627,Hofbräu Oktoberfestbier,Staatliches Hofbräuhaus München,Bock/Märzen,BierMuseum,Köln,DE,50.9383,6.9616,,2025-09-21,2025,09,2025-09,Sunday
+628,Weihenstephaner Vitus,Bayerische Staatsbrauerei Weihenstephan,Other,,,,,,,2025-09-21,2025,09,2025-09,Sunday
+629,Nemus Mariae,Abtei Mariawald,Other,BierMuseum,Köln,DE,50.9383,6.9616,,2025-09-21,2025,09,2025-09,Sunday
+630,Lambic Kriek,Brouwerij Mort Subite,Sour/Wild,BierMuseum,Köln,DE,50.9383,6.9616,,2025-09-21,2025,09,2025-09,Sunday
+631,Oktoberfest Bier,Augustiner-Bräu München,Bock/Märzen,Augustiner Bräu,,,,,,2025-09-21,2025,09,2025-09,Sunday
+632,Bitburger Premium Pils,Bitburger Brauerei,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-21,2025,09,2025-09,Sunday
+633,Dinkel / Bio Dinkel,Neumarkter Lammsbräu,Other,,,,,,,2025-09-19,2025,09,2025-09,Friday
+634,Krombacher NaturRadler,Krombacher Gruppe,Radler/Malt,,,,,,,2025-09-19,2025,09,2025-09,Friday
+635,150 Watt,100 Watt Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-19,2025,09,2025-09,Friday
+636,Supersonic,LERVIG,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-18,2025,09,2025-09,Thursday
+637,Bitter Trail,Les Intenables - Craft Beer,Other,,,,,,,2025-09-18,2025,09,2025-09,Thursday
+638,Slow Sun,Les Intenables - Craft Beer,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-18,2025,09,2025-09,Thursday
+639,Framboise,Brouwerij Lindemans,Sour/Wild,,,,,,,2025-09-18,2025,09,2025-09,Thursday
+640,Samuel Smiths Organic Apricot Fruit Beer,Melbourn Bros’ All Saints Brewery,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-18,2025,09,2025-09,Thursday
+641,Risalamande Gose,Mikkeller,Sour/Wild,,,,,,,2025-09-18,2025,09,2025-09,Thursday
+642,St. Olberg Heimat Bock Hell,Freigeist Bierkultur,Bock/Märzen,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-18,2025,09,2025-09,Thursday
+643,Schmackes Hell,REWE,Lager/Pils,,,,,,,2025-09-18,2025,09,2025-09,Thursday
+644,Kasteel Tripel,Kasteel Brouwerij Vanhonsebrouck,Tripel,,,,,,,2025-09-17,2025,09,2025-09,Wednesday
+645,Gouden Carolus Tripel,Brouwerij Het Anker,Tripel,,,,,,,2025-09-17,2025,09,2025-09,Wednesday
+646,EdelPils / Zzzisch / Bio Pils,Neumarkter Lammsbräu,Lager/Pils,,,,,,,2025-09-16,2025,09,2025-09,Tuesday
+647,Boudelo Tripel,Brouwerij Boelens,Tripel,,,,,,,2025-09-16,2025,09,2025-09,Tuesday
+648,Bersalis Tripel,Oud Beersel,Tripel,,,,,,,2025-09-16,2025,09,2025-09,Tuesday
+649,Curtius Triple,Brasserie {C},Tripel,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-16,2025,09,2025-09,Tuesday
+650,Bush Caractère,Brasserie Dubuisson,Other,,,,,,,2025-09-14,2025,09,2025-09,Sunday
+651,Val-Dieu Fruitée,Brasserie de l'Abbaye du Val-Dieu,Other,,,,,,,2025-09-14,2025,09,2025-09,Sunday
+652,Must Kuld,Põhjala,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+653,Öö,Põhjala,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+654,HANSbräu Original,Vulkan Brauerei,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+655,Jura 8,Zuyd Craft,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+656,Saga 10,Zuyd Craft,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+657,Saga Barrel Aged 2022,Zuyd Craft,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+658,Kiwi Kevin,Braumanufaktur Hertl,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+659,3 Tage Wach Mutti,Braumanufaktur Hertl,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+660,Good Old Doggy Days (Motueka),Lieber Waldi,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+661,Somersby Blackberry,Carlsberg Group,Other,,,,,,,2025-09-13,2025,09,2025-09,Saturday
+662,Salitos Ice,MBG International Premium Brands,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-13,2025,09,2025-09,Saturday
+663,Salitos Original,MBG International Premium Brands,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-13,2025,09,2025-09,Saturday
+664,Peak Scotch,Belgium Peak Beer,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-12,2025,09,2025-09,Friday
+665,Sanctus,Cornelius-Bräu,Other,,,,,,,2025-09-12,2025,09,2025-09,Friday
+666,Mixery Flavour Iced Blue,Karlsberg Brauerei,Other,,,,,,,2025-09-12,2025,09,2025-09,Friday
+667,Mixery Iced Yellow,Karlsberg Brauerei,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-12,2025,09,2025-09,Friday
+668,Somersby Orange Spritz,Carlsberg Group,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-12,2025,09,2025-09,Friday
+669,Oberbräu Hell,König Ludwig Schlossbrauerei Kaltenberg,Lager/Pils,Sturmfrei,Aachen,DE,50.776,6.084,,2025-09-11,2025,09,2025-09,Thursday
+670,Astra Rakete,Holsten-Brauerei AG,Other,Sturmfrei,Aachen,DE,50.776,6.084,,2025-09-11,2025,09,2025-09,Thursday
+671,Mühlen Kölsch,Mühlen Kölsch,Kölsch,Sturmfrei,Aachen,DE,50.776,6.084,,2025-09-11,2025,09,2025-09,Thursday
+672,Carlsberg,Carlsberg Group,Other,Sturmfrei,Aachen,DE,50.776,6.084,,2025-09-11,2025,09,2025-09,Thursday
+673,Paix Dieu Triple,Brasserie Caulier,Tripel,Cafe D'r Klinge,,,,,,2025-09-06,2025,09,2025-09,Saturday
+674,Dors Tripel,Jumbo Supermarkten / Dors,Tripel,,,,,,,2025-09-06,2025,09,2025-09,Saturday
+675,Orval,Brasserie d'Orval,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-09-05,2025,09,2025-09,Friday
+676,Smash Crush,Brasserie {C},Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-05,2025,09,2025-09,Friday
+677,HEATHEN // HAZY IPA,Northern Monk,NEIPA/Hazy IPA,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-05,2025,09,2025-09,Friday
+678,Rothaus Pils / Tannen Zäpfle,Badische Staatsbrauerei Rothaus,Lager/Pils,Lichthof,Aachen,DE,50.7758,6.084,,2025-09-05,2025,09,2025-09,Friday
+679,Original (TAP07),Schneider Weisse G. Schneider & Sohn,Other,Lichthof,Aachen,DE,50.7758,6.084,,2025-09-05,2025,09,2025-09,Friday
+680,Septante-Sept 77,Brasserie Grain d'Orge,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-09-05,2025,09,2025-09,Friday
+681,Hopf Helle Weiße,Weißbierbrauerei Hopf,Other,,,,,,,2025-09-04,2025,09,2025-09,Thursday
+682,Meckatzer Hell,Meckatzer Löwenbräu,Lager/Pils,,,,,,,2025-09-04,2025,09,2025-09,Thursday
+683,Briller Comme Un Noir Diamant,Fauve,Dark/Dubbel,,,,,,,2025-09-04,2025,09,2025-09,Thursday
+684,Himbärchen,Hopfen+Malz,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-31,2025,08,2025-08,Sunday
+685,Curtius Classic,Brasserie {C},Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-31,2025,08,2025-08,Sunday
+686,Bayreuther Hell,Bayreuther Bierbrauerei,Lager/Pils,,,,,,,2025-08-31,2025,08,2025-08,Sunday
+687,Astra Rotlicht,Holsten-Brauerei AG,Other,Adventure Golf,Aachen,DE,50.775,6.084,,2025-08-31,2025,08,2025-08,Sunday
+688,Tegernseer Hell,Herzoglich Bayerisches Brauhaus Tegernsee,Lager/Pils,Adventure Golf,Aachen,DE,50.775,6.084,,2025-08-31,2025,08,2025-08,Sunday
+689,Leffe Rituel 9°,Abbaye de Leffe,Other,Gleis 2/3,,,,,,2025-08-30,2025,08,2025-08,Saturday
+690,Starnberger Hell,Starnberger Brauhaus,Lager/Pils,,,,,,,2025-08-30,2025,08,2025-08,Saturday
+691,Reissdorf Kölsch,Privat-Brauerei Heinrich Reissdorf,Kölsch,,,,,,,2025-08-30,2025,08,2025-08,Saturday
+692,Tiger,Heineken Asia Pacific,Other,Mi Restaurant - Mi Nudeln Aachen- Asiatische & Nudelspezialitäten,Aachen,DE,50.7762,6.0866,,2025-08-28,2025,08,2025-08,Thursday
+693,Spaten München / Münchner Hell / Premium Lager,Spaten-Franziskaner-Löwenbräu-Gruppe,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-28,2025,08,2025-08,Thursday
+694,Triple Moines,Brasserie du Bocq,Tripel,,,,,,,2025-08-27,2025,08,2025-08,Wednesday
+695,Troubadour Magma,Brouwerij The Musketeers,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-27,2025,08,2025-08,Wednesday
+696,Bon Secours Prestige,Brasserie Caulier,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-27,2025,08,2025-08,Wednesday
+697,Maredsous Triple / Tripel,Abbaye de Maredsous,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-27,2025,08,2025-08,Wednesday
+698,Brugge Tripel,Brouwerij Palm,Tripel,,,,,,,2025-08-24,2025,08,2025-08,Sunday
+699,Tripel Kanunnik,Brouwerij Wilderen,Tripel,,,,,,,2025-08-24,2025,08,2025-08,Sunday
+700,Maredsous Triple / Tripel,Abbaye de Maredsous,Tripel,Belgisch Bier Cafe Belvedere,Liège,BE,50.8503,5.6886,,2025-08-24,2025,08,2025-08,Sunday
+701,Bush Blonde Triple,Brasserie Dubuisson,Tripel,Belgisch Bier Cafe Belvedere,Liège,BE,50.8503,5.6886,,2025-08-24,2025,08,2025-08,Sunday
+702,St-Louis Premium Pêche,Kasteel Brouwerij Vanhonsebrouck,Other,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-08-20,2025,08,2025-08,Wednesday
+703,Grimbergen Tripel / Triple,Brouwerij Alken-Maes,Tripel,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-08-20,2025,08,2025-08,Wednesday
+704,Barista Chocolate Quad,Kasteel Brouwerij Vanhonsebrouck,Quadrupel,Café Einstein,Aachen,DE,50.7751,6.0838,,2025-08-20,2025,08,2025-08,Wednesday
+705,Leffe Blonde / Blond,Abbaye de Leffe,Blonde/Golden,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-20,2025,08,2025-08,Wednesday
+706,Cass Fresh,Oriental Brewery,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-18,2025,08,2025-08,Monday
+707,Asahi Super Dry Shunrei Karakuchi (瞬冷辛口),Asahi Breweries,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-18,2025,08,2025-08,Monday
+708,Kirsiraks,Põhjala,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+709,Lennet,Lennet Bier Aachen,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+710,3 Bean Stout,LERVIG,Stout/Porter,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+711,Starnberger Hell,Starnberger Brauhaus,Lager/Pils,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+712,"Fruit, Car, Sight, Exhibition",Verdant Brewing Co,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+713,"You Are A Woman, I Am A Machine",Black Rebel Brewing Company,Other,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+714,Peak Blonde,Belgium Peak Beer,Blonde/Golden,Hopfen+Malz,Aachen,DE,50.7766,6.0834,,2025-08-16,2025,08,2025-08,Saturday
+715,Pilsener,Flensburger Brauerei Emil Petersen,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-16,2025,08,2025-08,Saturday
+716,Tyskie Gronie,Tyskie Browary Książęce,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-14,2025,08,2025-08,Thursday
+717,Heineken,Heineken,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-14,2025,08,2025-08,Thursday
+718,Grafensteiner Pils,Netto Marken-Discount,Lager/Pils,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-08-14,2025,08,2025-08,Thursday
+719,Berliner Kindl Weisse Waldmeister,Berliner-Kindl-Schultheiss-Brauerei,Wheat Beer,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+720,Big Wave,Kona Brewing Hawaii,Other,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+721,Mutti's Sonnenschein,Braumanufaktur Hertl,Other,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+722,Krönes' Eifeler Landbier,Gemünder Brauerei,Other,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+723,Brice,Brasserie Grain d'Orge,Other,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+724,Tajes,Brewski,Other,Café & Bar zuhause,Aachen,DE,50.7753,6.0839,,2025-08-12,2025,08,2025-08,Tuesday
+725,Westmalle Trappist Tripel,Brouwerij der Trappisten van Westmalle,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-30,2025,07,2025-07,Wednesday
+726,La Trappe Tripel,Bierbrouwerij De Koningshoeven,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-30,2025,07,2025-07,Wednesday
+727,Organicus,Brasserie Lupulus,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-30,2025,07,2025-07,Wednesday
+728,Deugniet,Brasserie du Bocq,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-30,2025,07,2025-07,Wednesday
+729,Val-Dieu Triple,Brasserie de l'Abbaye du Val-Dieu,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-30,2025,07,2025-07,Wednesday
+730,Leffe Rituel 9°,Abbaye de Leffe,Other,,,,,,,2025-07-30,2025,07,2025-07,Wednesday
+731,Peak Triple,Belgium Peak Beer,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-28,2025,07,2025-07,Monday
+732,Delirium Tremens,Delirium - Huyghe Brewery,Other,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-18,2025,07,2025-07,Friday
+733,Tripel Karmeliet,Brouwerij Bosteels,Tripel,Untappd at Home,Aachen,DE,50.7753,6.0839,,2025-07-18,2025,07,2025-07,Friday
+734,Tripel Karmeliet,Brouwerij Bosteels,Tripel,,,,,,,2025-07-13,2025,07,2025-07,Sunday
+735,Corsendonk Agnus Tripel / Abbey Pale Ale,Brouwerij Corsendonk,Tripel,,,,,,,2025-07-13,2025,07,2025-07,Sunday
+736,Tripel,Brouwerij St. Bernardus,Tripel,,,,,,,2025-07-13,2025,07,2025-07,Sunday
+737,Paix Dieu Triple,Brasserie Caulier,Tripel,,,,,,,2025-07-13,2025,07,2025-07,Sunday
+738,Alfa Edel Pils,Alfa Bierbrouwerij,Lager/Pils,,,,,,,2025-07-12,2025,07,2025-07,Saturday

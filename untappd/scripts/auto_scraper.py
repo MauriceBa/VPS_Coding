@@ -237,10 +237,48 @@ def update_stats_with_new_beers():
                 
                 for link in links:
                     href = link.get("href", "")
+                    text = link.text.strip()
+                    # Skip user and venue links
+                    if "/user/" in href or href.startswith("/user/"):
+                        continue
+                    if "/v/" in href or href.startswith("/v/"):
+                        continue
+                    if "/at-home" in href:
+                        continue
+                    # Beer links contain /b/ or /beer/
                     if "/beer/" in href or "/b/" in href:
-                        beer_name = link.text.strip()
-                    elif "/brewery/" in href:
-                        brewery_name = link.text.strip()
+                        beer_name = text
+                    # Brewery links - anything else that's not user/venue (or has specific patterns)
+                    elif "/brewery/" in href or href.startswith("/brewery"):
+                        brewery_name = text
+                    # Some brewery links are just /breweryname (e.g., /WicklowWolf, /brewdogbrewery)
+                    elif href.startswith("/") and "/" not in href[1:] and not beer_name:
+                        # This might be a brewery short link
+                        pass  # We'll detect brewery from text pattern instead
+                    
+                # Better brewery detection: Look for "by" or "von" pattern in full text
+                if brewery_name == "Unknown" and beer_name:
+                    parent = item.find("p", class_="text")
+                    if parent:
+                        full_text = parent.get_text(separator=" ", strip=True)
+                        # Pattern: "drinking a Beer by Brewery at Venue" or "trinkt ein Bier von Brauerei"
+                        if " by " in full_text:
+                            # Extract text between beer name and " at " or end
+                            try:
+                                after_beer = full_text.split(beer_name, 1)[1]
+                                if " by " in after_beer:
+                                    after_by = after_beer.split(" by ", 1)[1]
+                                    # Stop at " at " or " @ " if present
+                                    if " at " in after_by:
+                                        brewery_name = after_by.split(" at ")[0].strip()
+                                    elif " @ " in after_by:
+                                        brewery_name = after_by.split(" @ ")[0].strip()
+                                    else:
+                                        brewery_name = after_by.strip()
+                                    # Clean up - remove trailing words like "at", "in"
+                                    brewery_name = brewery_name.replace(" at ", "").replace(" in ", "").strip()
+                            except:
+                                pass
                 
                 if not beer_name:
                     continue
@@ -277,6 +315,10 @@ def update_stats_with_new_beers():
                         new_avg = ((old_avg * old_count) + rating) / (old_count + 1)
                         b["avg_rating"] = round(new_avg * 4) / 4
                         b["rated_count"] = old_count + 1
+                        # Update brewery if it was Unknown and we found a real one
+                        if b.get("brewery") == "Unknown" and brewery_name != "Unknown":
+                            b["brewery"] = brewery_name
+                            print(f"  -> Brauerei aktualisiert: {beer_name} ist von {brewery_name}")
                         break
                 
                 if not found_beer:
