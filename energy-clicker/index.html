@@ -489,6 +489,7 @@
             <div class="controls">
                 <button class="control-btn" onclick="saveGame()">💾 Speichern</button>
                 <button class="control-btn" onclick="showStats()">📊 Stats</button>
+                <button class="control-btn" onclick="showEcoShop()" style="background:rgba(16,185,129,0.1); border-color:#10b981; color:#10b981;">🌟 Eco-Shop</button>
                 <button class="control-btn" onclick="showExportImport()">📋 Export/Import</button>
                 <button class="control-btn danger" onclick="wipeSave()">🗑️ Reset</button>
                 <button class="control-btn prestige" onclick="ascend()">✨ Aufsteigen</button>
@@ -504,6 +505,21 @@
             <div id="buildings-container">
                 <!-- Buildings injected via JS -->
             </div>
+        </div>
+    </div>
+
+    <!-- Eco-Shop Modal -->
+    <div id="eco-modal" class="modal-overlay" onclick="if(event.target===this)closeEcoShop()">
+        <div class="modal">
+            <h2>🌟 Eco-Shop</h2>
+            <p style="color:var(--text-muted); margin-bottom:1rem;">Nutze deine Eco-Points für permanente Upgrades!</p>
+            <div id="eco-points-display" style="color:#10b981; font-size:1.2rem; font-weight:bold; margin-bottom:1rem;">🌟 0 Eco-Points</div>
+            
+            <div id="eco-shop-grid" style="display:grid; gap:0.5rem; max-height:300px; overflow-y:auto;">
+                <!-- Shop items injected via JS -->
+            </div>
+            
+            <button class="close-modal" onclick="closeEcoShop()">Schließen</button>
         </div>
     </div>
 
@@ -635,6 +651,8 @@
             joules: 0,
             totalJoules: 0,
             prestige: 0,
+            ecoPoints: 0,
+            totalEcoPoints: 0,
             clickMult: 1,
             startTime: Date.now(),
             totalClicks: 0,
@@ -672,7 +690,22 @@
             { id: 'a21', name: 'Klick-Gott', desc: 'Erreiche einen 50x Combo', icon: '👑', check: () => state.maxCombo >= 50 },
             { id: 'a22', name: 'Faulpelz', desc: 'Kaufe den Auto-Klicker', icon: '🤖', check: () => state.upgrades['u_auto1'] },
             { id: 'a23', name: 'Effizienz-Experte', desc: 'Kaufe den Turbo-Klicker', icon: '⚡', check: () => state.upgrades['u_auto2'] },
-            { id: 'a24', name: 'Maschinen-Herr', desc: 'Kaufe den Hyper-Klicker', icon: '🚀', check: () => state.upgrades['u_auto3'] }
+            { id: 'a24', name: 'Maschinen-Herr', desc: 'Kaufe den Hyper-Klicker', icon: '🚀', check: () => state.upgrades['u_auto3'] },
+            { id: 'a25', name: 'Eco-Anfänger', desc: 'Verdiene deinen ersten Eco-Point', icon: '🌱', check: () => state.totalEcoPoints >= 1 },
+            { id: 'a26', name: 'Eco-Sammler', desc: 'Sammle 100 Eco-Points', icon: '🌿', check: () => state.totalEcoPoints >= 100 },
+            { id: 'a27', name: 'Eco-Millionär', desc: 'Sammle 1.000 Eco-Points', icon: '💎', check: () => state.totalEcoPoints >= 1000 }
+        ];
+
+        // Eco-Shop (Prestige Upgrades)
+        const ecoShopItems = [
+            { id: 'eco1', name: 'Permanenter Klick-Boost', desc: '+1 Joule pro Klick (permanent)', cost: 1, type: 'click', value: 1, icon: '👆' },
+            { id: 'eco2', name: 'Start-Kapital', desc: 'Starte mit +100 Joule nach Prestige', cost: 3, type: 'start', value: 100, icon: '💰' },
+            { id: 'eco3', name: 'Schneller Start', desc: 'Starte mit +1.000 Joule nach Prestige', cost: 10, type: 'start', value: 1000, icon: '🚀' },
+            { id: 'eco4', name: 'Klick-Meister', desc: '+10 Joule pro Klick (permanent)', cost: 25, type: 'click', value: 10, icon: '💪' },
+            { id: 'eco5', name: 'Gebäude-Boost I', desc: '+5% Gebäude-Effizienz (permanent)', cost: 50, type: 'building', value: 0.05, icon: '🏭' },
+            { id: 'eco6', name: 'Gebäude-Boost II', desc: '+10% Gebäude-Effizienz (permanent)', cost: 100, type: 'building', value: 0.10, icon: '🏗️' },
+            { id: 'eco7', name: 'Offline-Boost', desc: '+50% Offline-Einkommen', cost: 30, type: 'offline', value: 0.5, icon: '⏱️' },
+            { id: 'eco8', name: 'Event-Boost', desc: 'Positive Events dauern 50% länger', cost: 40, type: 'event', value: 0.5, icon: '🎉' }
         ];
 
         // Building Synergies
@@ -882,10 +915,15 @@
             let eps = 0;
             let activeSynergies = [];
             
+            // Eco-upgrades building boost
+            let ecoBuildingMult = 1;
+            if (state.ecoUpgrades?.['eco5']) ecoBuildingMult += state.ecoUpgrades['eco5'] * 0.05;
+            if (state.ecoUpgrades?.['eco6']) ecoBuildingMult += state.ecoUpgrades['eco6'] * 0.10;
+            
             initBuildings.forEach(b => {
                 let count = state.buildings[b.id];
                 if (count > 0) {
-                    let mult = 1;
+                    let mult = 1 * ecoBuildingMult;
                     if(state.upgrades[`u_${b.id}_1`]) mult *= 2;
                     if(state.upgrades[`u_${b.id}_2`]) mult *= 2;
                     if(state.upgrades[`u_${b.id}_3`]) mult *= 2;
@@ -945,6 +983,11 @@
 
         function calculateClickPower() {
             let power = 1;
+            
+            // Eco-upgrades
+            if (state.ecoUpgrades?.['eco1']) power += state.ecoUpgrades['eco1'] * 1;
+            if (state.ecoUpgrades?.['eco4']) power += state.ecoUpgrades['eco4'] * 10;
+            
             if(state.upgrades['u_c1']) power *= 2;
             if(state.upgrades['u_c2']) power *= 2;
             if(state.upgrades['u_c3']) power *= 2;
@@ -1076,6 +1119,56 @@
             }, 5000);
         }
 
+        // --- ECO-SHOP ---
+        function showEcoShop() {
+            document.getElementById('eco-modal').classList.add('show');
+            updateEcoShopDisplay();
+        }
+        function closeEcoShop() {
+            document.getElementById('eco-modal').classList.remove('show');
+        }
+        function updateEcoShopDisplay() {
+            document.getElementById('eco-points-display').innerText = `🌟 ${format(state.ecoPoints)} Eco-Points`;
+            
+            let grid = document.getElementById('eco-shop-grid');
+            grid.innerHTML = '';
+            
+            ecoShopItems.forEach(item => {
+                let owned = state.ecoUpgrades?.[item.id] || 0;
+                let max = item.type === 'click' || item.type === 'start' ? 999 : 1;
+                let canBuy = state.ecoPoints >= item.cost && owned < max;
+                
+                let div = document.createElement('div');
+                div.className = 'building-btn' + (canBuy ? '' : ' disabled');
+                div.style.padding = '0.6rem';
+                div.onclick = () => buyEcoUpgrade(item.id);
+                div.innerHTML = `
+                    <div class="b-icon" style="font-size:1.8rem;">${item.icon}</div>
+                    <div class="b-info">
+                        <div class="b-name" style="font-size:0.95rem;">${item.name}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${item.desc}</div>
+                        <div class="b-cost" style="font-size:0.85rem;">🌟 ${format(item.cost)}${owned > 0 ? ` (${owned})` : ''}</div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+        }
+        function buyEcoUpgrade(id) {
+            let item = ecoShopItems.find(x => x.id === id);
+            let owned = state.ecoUpgrades?.[id] || 0;
+            let max = item.type === 'click' || item.type === 'start' ? 999 : 1;
+            
+            if (state.ecoPoints >= item.cost && owned < max) {
+                state.ecoPoints -= item.cost;
+                if (!state.ecoUpgrades) state.ecoUpgrades = {};
+                state.ecoUpgrades[id] = (state.ecoUpgrades[id] || 0) + 1;
+                
+                playSound('buy');
+                saveGame();
+                updateEcoShopDisplay();
+            }
+        }
+
         // --- EXPORT/IMPORT ---
         function showExportImport() {
             let saveData = btoa(JSON.stringify(state));
@@ -1151,7 +1244,7 @@
             
             if(state.prestige > 0) {
                 document.getElementById('prestige-display').style.display = 'block';
-                document.getElementById('prestige-display').innerText = `+${format(state.prestige)}% Prestige Bonus`;
+                document.getElementById('prestige-display').innerText = `+${format(state.prestige)}% Prestige | 🌟 ${format(state.ecoPoints)}`;
             }
 
             // Update Buildings
@@ -1352,29 +1445,56 @@
 
         // --- PRESTIGE ---
         function ascend() {
-            // 1 Prestige point per 1 Million Total Joules (cube root scale roughly)
             let pendingPrestige = Math.floor(Math.cbrt(state.totalJoules / 1000000));
-            if (pendingPrestige <= 0) {
-                alert("Du brauchst mehr Energie um aufzusteigen! (min. 1 Mio Total Joules für 1 Token)");
+            let pendingEcoPoints = Math.floor(state.totalJoules / 100000000); // 1 Eco-Point per 100M Joule
+            
+            if (pendingPrestige <= 0 && pendingEcoPoints <= 0) {
+                alert("Du brauchst mehr Energie um aufzusteigen! (min. 1 Mio Total Joules)");
                 return;
             }
-            if (confirm(`Möchtest du das Spiel zurücksetzen und aufsteigen?\nDu erhältst ${format(pendingPrestige)} Prestige Token!\nJeder Token bringt permanent +1% EPS.`)) {
+            
+            let msg = `Möchtest du das Spiel zurücksetzen und aufsteigen?\n`;
+            if (pendingPrestige > 0) msg += `+${format(pendingPrestige)}% Prestige Bonus\n`;
+            if (pendingEcoPoints > 0) msg += `+${format(pendingEcoPoints)} 🌟 Eco-Points\n`;
+            msg += `\nEco-Points bleiben für immer erhalten!`;
+            
+            if (confirm(msg)) {
                 let newPrestige = state.prestige + pendingPrestige;
+                let newEcoPoints = state.ecoPoints + pendingEcoPoints;
+                let newTotalEco = state.totalEcoPoints + pendingEcoPoints;
+                
+                // Calculate start bonus from eco-upgrades
+                let startJoules = 0;
+                if (state.ecoUpgrades?.['eco3']) startJoules += state.ecoUpgrades['eco3'] * 1000;
+                else if (state.ecoUpgrades?.['eco2']) startJoules += state.ecoUpgrades['eco2'] * 100;
+                
                 state = {
-                    joules: 0,
+                    joules: startJoules,
                     totalJoules: 0,
                     prestige: newPrestige,
+                    ecoPoints: newEcoPoints,
+                    totalEcoPoints: newTotalEco,
                     clickMult: 1,
                     startTime: Date.now(),
                     buildings: {},
-                    upgrades: {}
+                    upgrades: {},
+                    achievements: state.achievements, // Keep achievements!
+                    ecoUpgrades: state.ecoUpgrades || {},
+                    treesPlanted: 0,
+                    combo: 0,
+                    maxCombo: state.maxCombo,
+                    lastClickTime: 0
                 };
+                
                 initBuildings.forEach(b => { state.buildings[b.id] = 0; });
                 initUpgrades.forEach(u => { state.upgrades[u.id] = false; });
+                
                 document.getElementById('upgrades-grid').innerHTML = '';
                 saveGame();
                 calculateEPS();
                 updateUI();
+                
+                alert(`Aufgestiegen! Du hast jetzt ${format(newPrestige)}% Prestige und ${format(newEcoPoints)} Eco-Points!`);
             }
         }
 
@@ -1443,6 +1563,9 @@
             if(typeof state.combo === 'undefined') state.combo = 0;
             if(typeof state.maxCombo === 'undefined') state.maxCombo = 0;
             if(typeof state.lastClickTime === 'undefined') state.lastClickTime = 0;
+            if(typeof state.ecoPoints === 'undefined') state.ecoPoints = 0;
+            if(typeof state.totalEcoPoints === 'undefined') state.totalEcoPoints = 0;
+            if(typeof state.ecoUpgrades === 'undefined') state.ecoUpgrades = {};
         }
 
         function wipeSave() {
