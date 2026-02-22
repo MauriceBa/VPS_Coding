@@ -663,7 +663,15 @@
             { id: 'a18', name: 'Retter der Erde', desc: 'Pflanze 1.000 Bäume', icon: '🌍', check: () => state.treesPlanted >= 1000 }
         ];
 
-        // Random Events
+        // Building Synergies
+        const synergies = [
+            { name: 'Sonnen-Kombi', desc: 'Solarpanels boosten sich gegenseitig', building1: 'b1', building2: 'b1', mult: 1.5, minCount: 5 },
+            { name: 'Wind & Sonne', desc: 'Windräder + Solarpanels = stark', building1: 'b2', building2: 'b1', mult: 2.0, minCount: 3 },
+            { name: 'Wasser & Wind', desc: 'Wasserkraft + Wind = effizient', building1: 'b3', building2: 'b2', mult: 1.8, minCount: 3 },
+            { name: 'Geothermie-Bonus', desc: 'Geothermie boostet Atomkraft', building1: 'b4', building2: 'b6', mult: 2.5, minCount: 2 },
+            { name: 'Biomasse-Kreislauf', desc: 'Biomasse + Geothermie = Synergie', building1: 'b5', building2: 'b4', mult: 2.0, minCount: 2 },
+            { name: 'Fusion-Dyson', desc: 'Fusion + Dyson = galaktisch', building1: 'b7', building2: 'b8', mult: 3.0, minCount: 1 }
+        ];
         const randomEvents = [
             { id: 'e1', name: 'Starker Wind', desc: 'Die Windkrafträder drehen sich schneller! (+50% EPS für 30s)', type: 'positive', duration: 30000, effect: () => { state.eventMultiplier = 1.5; }, icon: '🌬️' },
             { id: 'e2', name: 'Sonnensturm', desc: 'Massive Solarenergie! (+100% EPS für 20s)', type: 'positive', duration: 20000, effect: () => { state.eventMultiplier = 2.0; }, icon: '☀️' },
@@ -860,6 +868,8 @@
         // --- CORE LOGIC ---
         function calculateEPS() {
             let eps = 0;
+            let activeSynergies = [];
+            
             initBuildings.forEach(b => {
                 let count = state.buildings[b.id];
                 if (count > 0) {
@@ -867,9 +877,33 @@
                     if(state.upgrades[`u_${b.id}_1`]) mult *= 2;
                     if(state.upgrades[`u_${b.id}_2`]) mult *= 2;
                     if(state.upgrades[`u_${b.id}_3`]) mult *= 2;
+                    
+                    // Check synergies
+                    synergies.forEach(syn => {
+                        if ((syn.building1 === b.id || syn.building2 === b.id) &&
+                            state.buildings[syn.building1] >= syn.minCount &&
+                            state.buildings[syn.building2] >= syn.minCount) {
+                            // Only count each synergy once
+                            if (!activeSynergies.find(s => s.name === syn.name)) {
+                                activeSynergies.push(syn);
+                            }
+                            // Apply partial multiplier based on which building
+                            if (syn.building1 === syn.building2) {
+                                // Self-synergy (like solar)
+                                mult *= Math.pow(syn.mult, Math.floor(state.buildings[syn.building1] / syn.minCount));
+                            } else {
+                                mult *= syn.mult;
+                            }
+                        }
+                    });
+                    
                     eps += b.baseGen * count * mult;
                 }
             });
+            
+            // Display active synergies
+            updateSynergyDisplay(activeSynergies);
+            
             // Prestige Bonus
             if (state.prestige > 0) {
                 eps *= (1 + (state.prestige * 0.01));
@@ -878,6 +912,23 @@
             eps *= (state.eventMultiplier || 1);
             currentEps = eps;
             document.getElementById('eps-display').innerText = format(currentEps) + " Watt (J/s)";
+        }
+
+        function updateSynergyDisplay(activeSynergies) {
+            let existing = document.getElementById('synergy-display');
+            if (!existing) {
+                existing = document.createElement('div');
+                existing.id = 'synergy-display';
+                existing.style.cssText = 'color:#f59e0b; font-size:0.8rem; margin-top:0.3rem;';
+                document.getElementById('score-box').appendChild(existing);
+            }
+            
+            if (activeSynergies.length > 0) {
+                existing.innerHTML = '🔗 ' + activeSynergies.length + ' Synergie' + (activeSynergies.length > 1 ? 'n' : '') + ' aktiv';
+                existing.title = activeSynergies.map(s => s.name + ': ' + s.desc).join('\n');
+            } else {
+                existing.innerHTML = '';
+            }
         }
 
         function calculateClickPower() {
