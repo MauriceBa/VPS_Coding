@@ -1001,7 +1001,11 @@
                 div.className = 'building-btn';
                 div.id = `btn-${b.id}`;
                 div.onclick = () => buyBuilding(b.id);
-                div.onmouseover = (e) => showTooltip(e, b.name, getBuildingCost(b.id), `${b.desc}<br><br>Gibt <b>${format(b.baseGen)} W</b> Basis.`);
+                div.onmouseover = (e) => {
+                    let count = state.buildings[b.id];
+                    let totalGen = count * b.baseGen;
+                    showTooltip(e, b.name, getBuildingCost(b.id), `${b.desc}<br><br>Gibt <b>${format(b.baseGen)} W</b> Basis<br>Du hast: ${count} → ${format(totalGen)} W/s<br><br><span style="color:#94a3b8; font-size:0.8rem;">Taste ${initBuildings.indexOf(b) + 1} zum kaufen</span>`);
+                };
                 div.onmouseout = hideTooltip;
                 
                 div.innerHTML = `
