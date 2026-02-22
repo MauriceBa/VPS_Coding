@@ -434,6 +434,7 @@
         <div id="right-panel" class="panel">
             <div class="panel-header">
                 <span>Anlagen</span>
+                <button onclick="buyMaxAll()" class="control-btn" style="padding:0.3rem 0.8rem; font-size:0.8rem;">💰 Max kaufen</button>
             </div>
             <div id="buildings-container">
                 <!-- Buildings injected via JS -->
@@ -805,6 +806,39 @@
                 calculateEPS();
                 updateUI();
             }
+        }
+
+        function buyMaxBuilding(id) {
+            let b = initBuildings.find(x => x.id === id);
+            let count = state.buildings[id];
+            let totalCost = 0;
+            let canBuy = 0;
+            
+            // Calculate how many we can buy
+            while (true) {
+                let cost = b.baseCost * Math.pow(1.15, count + canBuy);
+                if (state.joules >= totalCost + cost) {
+                    totalCost += cost;
+                    canBuy++;
+                } else {
+                    break;
+                }
+            }
+            
+            if (canBuy > 0) {
+                state.joules -= totalCost;
+                state.buildings[id] += canBuy;
+                calculateEPS();
+                updateUI();
+            }
+        }
+
+        function buyMaxAll() {
+            // Buy max of each building, starting from most expensive
+            let sortedBuildings = [...initBuildings].reverse();
+            sortedBuildings.forEach(b => {
+                buyMaxBuilding(b.id);
+            });
         }
 
         function buyUpgrade(id) {
