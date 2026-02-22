@@ -55,76 +55,79 @@ def update_venues_from_web(stats):
         
         # Untappd Listen-Elemente durchsuchen
         for item in soup.select(".item"):
-            name_el = item.select_one(".name a") or item.select_one(".venue-details h2 a")
-            if not name_el:
-                # Fallback: Suche ersten Link der zu einem Venue zeigt
-                for a in item.find_all("a"):
-                    if "/v/" in a.get("href", "") or "/venue/" in a.get("href", ""):
-                        name_el = a
-                        break
-                        
-            if not name_el:
-                continue
-                
-            venue_name = name_el.text.strip()
-            
-            # Checkins (Visits) extrahieren
-            visits = 1
-            m = re.search(r'(\d+)\s+Check-in', item.text, re.IGNORECASE)
-            if m:
-                visits = int(m.group(1))
-                
-            # Prüfen ob Venue bekannt und up-to-date ist
-            if venue_name in existing_venues_map:
-                if existing_venues_map[venue_name].get("visits", 0) >= visits:
-                    continue # Schon aktuell
-                else:
-                    existing_venues_map[venue_name]["visits"] = visits
-                    changed = True
-                    print(f"Update Venue: {venue_name} (jetzt {visits} Besuche)")
+            try:
+                name_el = item.select_one(".name a") or item.select_one(".venue-details h2 a")
+                if not name_el:
+                    # Fallback: Suche ersten Link der zu einem Venue zeigt
+                    for a in item.find_all("a"):
+                        if "/v/" in a.get("href", "") or "/venue/" in a.get("href", ""):
+                            name_el = a
+                            break
+                            
+                if not name_el:
                     continue
                     
-            # Neues Venue entdeckt!
-            print(f"-> NEUES VENUE ENTDECKT: {venue_name}")
-            changed = True
-            
-            # Adresse extrahieren (falls vorhanden, sonst Name als Fallback)
-            addr_el = item.select_one(".address")
-            address = addr_el.text.strip() if addr_el else venue_name
-            
-            lat, lon, city, country = None, None, "Unknown", "Unknown"
-            
-            # Geocoding mit Nominatim API ausführen
-            if geocode_address:
-                cache_key = f"{venue_name}::{address}"
-                if cache_key not in cache:
-                    print(f"Geocoding neues Venue: {address}")
-                    geo = geocode_address(address)
-                    if not geo and "," in address:
-                        # Fallback: Nur die Stadt probieren
-                        geo = geocode_address(address.split(",")[-1].strip())
+                venue_name = name_el.text.strip()
+                
+                # Checkins (Visits) extrahieren
+                visits = 1
+                m = re.search(r'(\d+)\s+Check-in', item.text, re.IGNORECASE)
+                if m:
+                    visits = int(m.group(1))
                     
-                    if geo:
-                        cache[cache_key] = geo
+                # Prüfen ob Venue bekannt und up-to-date ist
+                if venue_name in existing_venues_map:
+                    if existing_venues_map[venue_name].get("visits", 0) >= visits:
+                        continue # Schon aktuell
                     else:
-                        cache[cache_key] = {"lat": None, "lon": None, "city": address.split(",")[0], "country": "Unknown"}
+                        existing_venues_map[venue_name]["visits"] = visits
+                        changed = True
+                        print(f"Update Venue: {venue_name} (jetzt {visits} Besuche)")
+                        continue
                         
-                geo_data = cache.get(cache_key, {})
-                lat = geo_data.get("lat")
-                lon = geo_data.get("lon")
-                city = geo_data.get("city", "Unknown")
-                country = geo_data.get("country", "Unknown")
-            
-            new_v = {
-                "venue": venue_name,
-                "city": city,
-                "country": country,
-                "visits": visits,
-                "lat": lat,
-                "lon": lon
-            }
-            existing_heatmap.append(new_v)
-            existing_venues_map[venue_name] = new_v
+                # Neues Venue entdeckt!
+                print(f"-> NEUES VENUE ENTDECKT: {venue_name}")
+                changed = True
+                
+                # Adresse extrahieren (falls vorhanden, sonst Name als Fallback)
+                addr_el = item.select_one(".address")
+                address = addr_el.text.strip() if addr_el else venue_name
+                
+                lat, lon, city, country = None, None, "Unknown", "Unknown"
+                
+                # Geocoding mit Nominatim API ausführen
+                if geocode_address:
+                    cache_key = f"{venue_name}::{address}"
+                    if cache_key not in cache:
+                        print(f"Geocoding neues Venue: {address}")
+                        geo = geocode_address(address)
+                        if not geo and "," in address:
+                            # Fallback: Nur die Stadt probieren
+                            geo = geocode_address(address.split(",")[-1].strip())
+                        
+                        if geo:
+                            cache[cache_key] = geo
+                        else:
+                            cache[cache_key] = {"lat": None, "lon": None, "city": address.split(",")[0], "country": "Unknown"}
+                            
+                    geo_data = cache.get(cache_key, {})
+                    lat = geo_data.get("lat")
+                    lon = geo_data.get("lon")
+                    city = geo_data.get("city", "Unknown")
+                    country = geo_data.get("country", "Unknown")
+                
+                new_v = {
+                    "venue": venue_name,
+                    "city": city,
+                    "country": country,
+                    "visits": visits,
+                    "lat": lat,
+                    "lon": lon
+                }
+                existing_heatmap.append(new_v)
+                existing_venues_map[venue_name] = new_v
+            except Exception as e:
+                print(f"Fehler beim Verarbeiten eines Venues: {e}")
             
         if changed:
             if geocode_address:
@@ -184,12 +187,22 @@ def update_stats_with_new_beers():
         unique_beers_web = None
         
         for stat in stats_blocks:
-            title = stat.select_one(".title").text.strip().lower()
-            val = stat.select_one(".stat-val").text.strip().replace(",", "")
-            if "total" in title:
-                total_checkins_web = int(val)
-            elif "unique" in title:
-                unique_beers_web = int(val)
+            try:
+                title_el = stat.select_one(".title")
+                val_el = stat.select_one(".stat-val")
+                
+                if not title_el or not val_el:
+                    continue
+                    
+                title = title_el.text.strip().lower()
+                val = val_el.text.strip().replace(",", "")
+                
+                if "total" in title:
+                    total_checkins_web = int(val)
+                elif "unique" in title:
+                    unique_beers_web = int(val)
+            except Exception as e:
+                print(f"Fehler beim Parsen der Profil-Statistik: {e}")
             
         current_total = stats.get("overview", {}).get("total_checkins", 0)
         last_checkin_id = stats.get("overview", {}).get("last_checkin_id", 0)

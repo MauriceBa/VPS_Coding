@@ -132,6 +132,8 @@
                     <a href="/game_bridle/">🧱 Bridle</a>
                 </div>
             </div>
+            <!-- REFRESH BUTTON ADDED -->
+            <button onclick="refreshData(this)" class="nav-link" style="background:rgba(245,158,11,0.1); border:1px solid var(--primary); cursor:pointer; font-family:inherit; font-size:inherit; color:var(--primary);" title="Daten vom Server live-neu laden (Scraper läuft im Hintergrund)">🔄 Aktualisieren</button>
         </div>
     </header>
     <main>
@@ -274,9 +276,22 @@
             }
         });
         
-        async function loadUntappdData() {
+        // Refresh Feature
+        async function refreshData(btn) {
+            btn.innerHTML = "⏳ Lädt...";
+            btn.style.pointerEvents = "none";
+            await loadUntappdData(true);
+            btn.innerHTML = "✅ Aktuell!";
+            setTimeout(() => {
+                btn.innerHTML = "🔄 Aktualisieren";
+                btn.style.pointerEvents = "auto";
+            }, 3000);
+        }
+        
+        async function loadUntappdData(forceRefresh = false) {
             try {
-                const res=await fetch('./data/stats.json'); const data=await res.json(); const total=data.overview.total_checkins||0;
+                const urlExt = forceRefresh ? `?t=${new Date().getTime()}` : '';
+                const res=await fetch('./data/stats.json' + urlExt); const data=await res.json(); const total=data.overview.total_checkins||0;
                 document.getElementById('stat-checkins').textContent=total; document.getElementById('stat-unique').textContent=data.overview.unique_beers||0; document.getElementById('stat-breweries').textContent=data.overview.unique_breweries||0;
                 let topStyle=data.styles&&data.styles.length>0?data.styles[0].style:'N/A'; if(topStyle==='Other'&&data.styles.length>1)topStyle=data.styles[1].style;
                 document.getElementById('top-style').textContent=topStyle; document.getElementById('top-brewery').textContent=data.top_breweries&&data.top_breweries.length>0?data.top_breweries[0].brewery:'N/A'; document.getElementById('best-beer').textContent=data.top_beers&&data.top_beers.length>0?data.top_beers[0].beer:'N/A'; document.getElementById('best-beer-sub').textContent=data.top_beers&&data.top_beers.length>0?data.top_beers[0].brewery:'N/A';
@@ -307,7 +322,8 @@
                 }
             } catch(e) { console.error('Stats JSON error', e); }
             try {
-                const mlRes=await fetch('./data/ml_data.json'); const mlData=await mlRes.json();
+                const urlExt = forceRefresh ? `?t=${new Date().getTime()}` : '';
+                const mlRes=await fetch('./data/ml_data.json' + urlExt); const mlData=await mlRes.json();
                 
                 // Store beers for the search functionality
                 if(mlData.top_rated && mlData.lowest_rated) {
