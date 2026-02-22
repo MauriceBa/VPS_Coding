@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-solar: #fbbf24;
+            --accent-grid: #ef4444;
+            --accent-battery: #10b981;
+            --accent-load: #3b82f6;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Login Screen */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            animation: fadeIn 0.5s ease-out;
+        }
+        #login-screen h1 { margin-top: 0; color: var(--accent-solar); }
+        #password {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            outline: none;
+        }
+        #password:focus { border-color: var(--accent-solar); }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-solar);
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+        }
+
+        /* Dashboard */
+        #dashboard {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            animation: slideUp 0.6s ease-out;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            background: linear-gradient(to right, var(--accent-solar), #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+        }
+        .card.solar::before { background: var(--accent-solar); }
+        .card.grid-power::before { background: var(--accent-grid); }
+        .card.battery::before { background: var(--accent-battery); }
+        .card.load::before { background: var(--accent-load); }
+
+        .card h2 { margin: 0 0 10px 0; font-size: 1.1rem; color: #94a3b8; }
+        .card .value { font-size: 2.5rem; font-weight: bold; margin: 0; }
+        .card .unit { font-size: 1rem; color: #64748b; }
+
+        /* Status Dot Animation */
+        .status-dot {
+            height: 10px; width: 10px;
+            background-color: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulse 1.5s infinite;
+        }
+
+        .update-time {
+            text-align: center;
+            margin-top: 30px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <!-- Login -->
+    <div id="login-screen">
+        <h1>☀️ Solar Access</h1>
+        <input type="password" id="password" placeholder="Passwort eingeben" onkeypress="if(event.key==='Enter') checkPassword()">
+        <button onclick="checkPassword()">Login</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <div class="header">
+            <h1>FoxESS Anlage Live</h1>
+            <p><span class="status-dot"></span>Live-Daten</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card solar">
+                <h2>PV Erzeugung</h2>
+                <div class="value" id="val-solar">--</div>
+                <div class="unit">kW</div>
+            </div>
+            
+            <div class="card load">
+                <h2>Hausverbrauch</h2>
+                <div class="value" id="val-load">--</div>
+                <div class="unit">kW</div>
+            </div>
+
+            <div class="card grid-power">
+                <h2>Netz (Bezug/Einspeisung)</h2>
+                <div class="value" id="val-grid">--</div>
+                <div class="unit">kW</div>
+            </div>
+
+            <div class="card battery">
+                <h2>Batterie (SoC)</h2>
+                <div class="value" id="val-bat-soc">--</div>
+                <div class="unit">%</div>
+            </div>
+        </div>
+
+        <div class="update-time" id="last-update">Zuletzt aktualisiert: Lädt...</div>
+    </div>
+
+    <script>
+        function checkPassword() {
+            if (document.getElementById('password').value === 'solar') {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                fetchData();
+                setInterval(fetchData, 60000); // Alle 60 Sekunden updaten
+            } else {
+                alert('Falsches Passwort!');
+            }
+        }
+
+        async function fetchData() {
+            try {
+                // Cache-Busting durch Timestamp
+                const response = await fetch('data.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Daten konnten nicht geladen werden');
+                
+                const json = await response.json();
+                
+                if (json.result && json.result.length > 0) {
+                    const data = json.result[0].datas;
+                    let pvPower = 0, loadPower = 0, gridPower = 0, batSoC = 0;
+
+                    // Werte extrahieren
+                    data.forEach(item => {
+                        if (item.variable === 'generationPower') pvPower = item.value;
+                        if (item.variable === 'loadsPower') loadPower = item.value;
+                        if (item.variable === 'feedinPower') gridPower = -item.value; // Einspeisung negativ
+                        if (item.variable === 'gridConsumptionPower' && item.value > 0) gridPower = item.value; // Bezug positiv
+                        if (item.variable === 'SoC') batSoC = item.value;
+                    });
+
+                    // UI Updaten
+                    document.getElementById('val-solar').innerText = pvPower.toFixed(2);
+                    document.getElementById('val-load').innerText = loadPower.toFixed(2);
+                    document.getElementById('val-grid').innerText = gridPower.toFixed(2);
+                    document.getElementById('val-bat-soc').innerText = batSoC.toFixed(0);
+                    
+                    const now = new Date();
+                    document.getElementById('last-update').innerText = `Zuletzt aktualisiert: ${now.toLocaleTimeString()}`;
+                }
+            } catch (error) {
+                console.error('Fehler beim Abrufen der Solar-Daten:', error);
+                document.getElementById('last-update').innerText = 'Fehler beim Laden der Daten! (Lief das Python-Skript?)';
+            }
+        }
+    </script>
+</body>
+</html>

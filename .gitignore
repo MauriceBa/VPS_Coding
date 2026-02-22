@@ -1,12 +1,10 @@
-# Generierte/automatische Dateien
-untappd/data/
-*.db
-*.csv
+# Node modules
+node_modules/
+
+# Python
 __pycache__/
 *.pyc
+.env
 
-# IDE/OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+# Solar Data Cache
+solar/data.json
