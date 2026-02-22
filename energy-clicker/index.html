@@ -610,7 +610,42 @@
             return power;
         }
 
-        // --- RANDOM EVENTS ---
+        // --- OFFLINE PROGRESS ---
+        function calculateOfflineProgress() {
+            if (!state.lastSaveTime) return;
+            
+            let now = Date.now();
+            let offlineTime = (now - state.lastSaveTime) / 1000; // in seconds
+            
+            if (offlineTime > 60) { // Only show if offline for more than 1 minute
+                let offlineEps = currentEps * (state.eventMultiplier || 1) * (1 + (state.prestige * 0.01));
+                let maxOfflineTime = Math.min(offlineTime, 8 * 60 * 60); // Cap at 8 hours
+                let earned = offlineEps * maxOfflineTime;
+                
+                state.joules += earned;
+                state.totalJoules += earned;
+                
+                // Show notification
+                let hours = Math.floor(maxOfflineTime / 3600);
+                let mins = Math.floor((maxOfflineTime % 3600) / 60);
+                
+                let popup = document.createElement('div');
+                popup.className = 'achievement-popup show';
+                popup.style.background = 'linear-gradient(135deg, #3b82f6, #8b5cf6)';
+                popup.innerHTML = `
+                    <div class="icon">⏱️</div>
+                    <div class="text">
+                        <div class="title">Offline-Fortschritt</div>
+                        <div class="desc">Du warst ${hours}h ${mins}m offline und hast ${format(earned)} Joule verdient!</div>
+                    </div>
+                `;
+                document.body.appendChild(popup);
+                setTimeout(() => {
+                    popup.classList.remove('show');
+                    setTimeout(() => popup.remove(), 500);
+                }, 6000);
+            }
+        }
         function triggerRandomEvent() {
             if (currentEvent) return; // Don't stack events
             
@@ -954,6 +989,7 @@
 
         // --- SAVE/LOAD ---
         function saveGame() {
+            state.lastSaveTime = Date.now();
             localStorage.setItem('wattClickerSave', JSON.stringify(state));
             let floater = document.createElement('div');
             floater.className = 'floating-text';
@@ -981,6 +1017,7 @@
             if(typeof state.eventMultiplier === 'undefined') state.eventMultiplier = 1;
             if(typeof state.clickEventMult === 'undefined') state.clickEventMult = 1;
             if(typeof state.treesPlanted === 'undefined') state.treesPlanted = 0;
+            if(typeof state.lastSaveTime === 'undefined') state.lastSaveTime = Date.now();
         }
 
         function wipeSave() {
@@ -1021,6 +1058,9 @@
 
             calculateEPS();
             updateUI();
+            
+            // Calculate offline progress after EPS is calculated
+            setTimeout(calculateOfflineProgress, 500);
 
             // Game Loop (10 ticks per second)
             setInterval(() => {
