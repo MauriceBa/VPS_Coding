@@ -210,17 +210,24 @@ def update_stats_with_new_beers():
         # 2. Neue Biere aus dem Activity Feed (Recent Check-ins) auslesen
         highest_id_seen = last_checkin_id
         new_checkins_processed = 0
+        recent_checkins = []
         
-        for item in soup.select(".item[data-checkin-id]"):
+        items = soup.find_all("div", class_="item")
+        if not items:
+            print("WARNUNG: Keine HTML-Elemente mit class='item' gefunden. (Untappd Layout geändert?)")
+            
+        for item in items:
             try:
-                cid = int(item["data-checkin-id"])
-                if cid <= last_checkin_id:
+                cid_str = item.get("data-checkin-id")
+                if not cid_str:
                     continue
                     
+                cid = int(cid_str)
+                
                 if cid > highest_id_seen:
                     highest_id_seen = cid
                     
-                text_p = item.select_one("p.text")
+                text_p = item.find(class_="text")
                 if not text_p:
                     continue
                     
@@ -239,12 +246,26 @@ def update_stats_with_new_beers():
                     continue
                     
                 rating = 3.0
-                caps = item.select_one(".caps")
+                caps = item.find(class_="caps")
                 if caps and caps.has_attr("data-rating"):
                     try:
                         rating = float(caps["data-rating"])
                     except ValueError:
                         pass
+                        
+                time_el = item.find("a", class_="time")
+                checkin_time = time_el.text.strip() if time_el else "Kürzlich"
+                
+                recent_checkins.append({
+                    "checkin_id": cid,
+                    "beer": beer_name,
+                    "brewery": brewery_name,
+                    "rating": rating,
+                    "time": checkin_time
+                })
+                
+                if cid <= last_checkin_id:
+                    continue
                 
                 rated_beers = stats.get("rated_beers", [])
                 found_beer = False
@@ -286,15 +307,18 @@ def update_stats_with_new_beers():
             except Exception as e:
                 print(f"Fehler beim Verarbeiten eines Checkins: {e}")
 
-        # Update JSON wenn es neue Biere oder Venues gab
-        if new_checkins_processed > 0 or venues_changed or (total_checkins_web and total_checkins_web > current_total):
-            print(f"Speichere Updates: {new_checkins_processed} neue Biere/Checkins, Venues changed: {venues_changed}")
+        # Update JSON wenn es neue Biere oder Venues gab ODER recent_checkins gefunden wurden
+        if new_checkins_processed > 0 or venues_changed or (total_checkins_web and total_checkins_web > current_total) or len(recent_checkins) > 0:
+            print(f"Speichere Updates: {new_checkins_processed} neue Biere, {len(recent_checkins)} Letzte Checkins gefunden. Venues changed: {venues_changed}")
             
             stats.setdefault("overview", {})
             if total_checkins_web:
                 stats["overview"]["total_checkins"] = total_checkins_web
             if unique_beers_web:
                 stats["overview"]["unique_beers"] = unique_beers_web
+                
+            if recent_checkins:
+                stats["recent_checkins"] = recent_checkins[:10]  # Top 10 speichern
                 
             stats["overview"]["date_to"] = datetime.now().strftime("%Y-%m-%d")
             if highest_id_seen > last_checkin_id:
@@ -309,7 +333,7 @@ def update_stats_with_new_beers():
             
             print("Successfully updated stats.json!")
             
-            if ml_recommender:
+            if new_checkins_processed > 0 and ml_recommender:
                 print("Running Data Science / ML Recommendation pipeline...")
                 ml_recommender.run_ml_pipeline()
         else:

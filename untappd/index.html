@@ -165,6 +165,12 @@
             <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
             <div class="progress-meta"><span id="progress-label">... / 100 Biere</span><span id="progress-target">Ziel: 100 🍺</span></div>
         </div>
+        
+        <div class="section-title">⏱️ Letzte Check-ins</div>
+        <div class="grid-4" id="recent-checkins-grid" style="margin-bottom: 2.5rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Lade...</div>
+        </div>
+        
         <div class="split-layout" style="margin-bottom:2.5rem;">
             <div class="left-col">
                 <div class="section-title">⭐ Bewertungs-Verteilung</div>
@@ -303,6 +309,22 @@
                 if(data.abv_distribution){new Chart(document.getElementById('abvChart').getContext('2d'),{type:'bar',data:{labels:data.abv_distribution.map(d=>d.label),datasets:[{label:'Biere',data:data.abv_distribution.map(d=>d.count),backgroundColor:'rgba(239,68,68,0.7)',borderColor:'#ef4444',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});}
                 if(data.brewery_countries){const bLabels=data.brewery_countries.slice(0,7).map(c=>c.country); const bData=data.brewery_countries.slice(0,7).map(c=>c.count); const bOther=data.brewery_countries.slice(7).reduce((acc,c)=>acc+c.count,0); if(bOther>0){bLabels.push('Sonstige');bData.push(bOther);} createPieChart('breweryCountryChart',bLabels,bData);}
                 if(data.checkin_countries){const cLabels=data.checkin_countries.slice(0,7).map(c=>c.country); const cData=data.checkin_countries.slice(0,7).map(c=>c.count); const cOther=data.checkin_countries.slice(7).reduce((acc,c)=>acc+c.count,0); if(cOther>0){cLabels.push('Sonstige');cData.push(cOther);} createPieChart('checkinCountryChart',cLabels,cData);}
+                
+                if(data.recent_checkins && data.recent_checkins.length > 0){
+                    const rcGrid = document.getElementById('recent-checkins-grid');
+                    rcGrid.innerHTML = data.recent_checkins.slice(0, 5).map(c => `
+                        <div class="stat-card">
+                            <div class="card-header-row"><span class="card-emoji">⏱️</span><span class="card-label" style="text-transform:none;">${c.time}</span></div>
+                            <div class="card-value" style="font-size:1.15rem; line-height:1.2; margin-bottom:.3rem; color:var(--primary);">${c.beer}</div>
+                            <div class="card-sub" style="margin-bottom:.8rem;">${c.brewery}</div>
+                            <div>${starsHtml(c.rating)} <span style="font-size:.8rem;color:var(--text-muted);">${c.rating.toFixed(2)}</span></div>
+                        </div>
+                    `).join('');
+                } else {
+                    const rcGrid = document.getElementById('recent-checkins-grid');
+                    if(rcGrid) rcGrid.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">Keine aktuellen Check-ins gefunden.</div>';
+                }
+
                 if(data.top_venues){
                     const vg=document.getElementById('venues-grid'); 
                     vg.innerHTML=''; 
