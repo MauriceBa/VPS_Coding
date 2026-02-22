@@ -638,7 +638,10 @@
             buildings: {}, // id: count
             upgrades: {}, // id: boolean (bought)
             achievements: {}, // id: boolean (unlocked)
-            treesPlanted: 0
+            treesPlanted: 0,
+            combo: 0,
+            maxCombo: 0,
+            lastClickTime: 0
         };
 
         // Achievements Definition
@@ -660,7 +663,10 @@
             { id: 'a15', name: 'Energie-Gott', desc: 'Erreiche Prestige-Level 100', icon: '👑', check: () => state.prestige >= 100 },
             { id: 'a16', name: 'Umweltschützer', desc: 'Pflanze deinen ersten Baum', icon: '🌳', check: () => state.treesPlanted >= 1 },
             { id: 'a17', name: 'Waldläufer', desc: 'Pflanze 100 Bäume', icon: '🌲', check: () => state.treesPlanted >= 100 },
-            { id: 'a18', name: 'Retter der Erde', desc: 'Pflanze 1.000 Bäume', icon: '🌍', check: () => state.treesPlanted >= 1000 }
+            { id: 'a18', name: 'Retter der Erde', desc: 'Pflanze 1.000 Bäume', icon: '🌍', check: () => state.treesPlanted >= 1000 },
+            { id: 'a19', name: 'Combo-Anfänger', desc: 'Erreiche einen 10x Combo', icon: '⚡', check: () => state.maxCombo >= 10 },
+            { id: 'a20', name: 'Combo-Meister', desc: 'Erreiche einen 25x Combo', icon: '🔥', check: () => state.maxCombo >= 25 },
+            { id: 'a21', name: 'Klick-Gott', desc: 'Erreiche einen 50x Combo', icon: '👑', check: () => state.maxCombo >= 50 }
         ];
 
         // Building Synergies
@@ -1189,12 +1195,32 @@
 
         // --- ACTIONS ---
         function clickEarth(e) {
-            let clickPower = calculateClickPower();
+            let now = Date.now();
+            let timeDiff = now - state.lastClickTime;
+            
+            // Combo system: clicks within 500ms increase combo
+            if (timeDiff < 500) {
+                state.combo++;
+                if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+            } else {
+                state.combo = 1;
+            }
+            state.lastClickTime = now;
+            
+            // Combo multiplier: up to 10x at 50 combo
+            let comboMult = 1 + Math.min(state.combo / 10, 9);
+            
+            let clickPower = calculateClickPower() * comboMult;
             state.joules += clickPower;
             state.totalJoules += clickPower;
             state.totalClicks++;
             
             playSound('click');
+            
+            // Show combo text if combo > 1
+            if (state.combo > 1) {
+                showComboText(state.combo, comboMult, e);
+            }
             checkAchievements();
             
             // Floating text
@@ -1207,6 +1233,18 @@
             setTimeout(() => floater.remove(), 1000);
             
             updateUI();
+        }
+
+        function showComboText(combo, mult, e) {
+            let floater = document.createElement('div');
+            floater.className = 'floating-text';
+            floater.style.color = combo >= 20 ? '#f59e0b' : (combo >= 10 ? '#a855f7' : '#3b82f6');
+            floater.style.fontSize = '1.2rem';
+            floater.innerText = `${combo}x COMBO! ${mult.toFixed(1)}x`;
+            floater.style.left = (e.clientX - 50) + 'px';
+            floater.style.top = (e.clientY - 60) + 'px';
+            document.body.appendChild(floater);
+            setTimeout(() => floater.remove(), 800);
         }
 
         function buyBuilding(id) {
@@ -1396,6 +1434,9 @@
             if(typeof state.clickEventMult === 'undefined') state.clickEventMult = 1;
             if(typeof state.treesPlanted === 'undefined') state.treesPlanted = 0;
             if(typeof state.lastSaveTime === 'undefined') state.lastSaveTime = Date.now();
+            if(typeof state.combo === 'undefined') state.combo = 0;
+            if(typeof state.maxCombo === 'undefined') state.maxCombo = 0;
+            if(typeof state.lastClickTime === 'undefined') state.lastClickTime = 0;
         }
 
         function wipeSave() {
