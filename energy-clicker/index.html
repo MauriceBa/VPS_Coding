@@ -617,7 +617,10 @@
             { id: 'u_c1', name: 'Kupferkabel', desc: 'Klicks sind doppelt so effektiv.', cost: 500, target: 'click', reqType: 'total', req: 100, icon: '🖱️' },
             { id: 'u_c2', name: 'Silberkabel', desc: 'Klicks sind doppelt so effektiv.', cost: 5000, target: 'click', reqType: 'total', req: 10000, icon: '🖱️' },
             { id: 'u_c3', name: 'Supraleiter', desc: 'Klicks sind doppelt so effektiv.', cost: 50000, target: 'click', reqType: 'total', req: 1000000, icon: '🖱️' },
-            { id: 'u_c4', name: 'Quanten-Maus', desc: 'Klicks sind doppelt so effektiv.', cost: 5000000, target: 'click', reqType: 'total', req: 100000000, icon: '🖱️' }
+            { id: 'u_c4', name: 'Quanten-Maus', desc: 'Klicks sind doppelt so effektiv.', cost: 5000000, target: 'click', reqType: 'total', req: 100000000, icon: '🖱️' },
+            { id: 'u_auto1', name: 'Auto-Klicker', desc: 'Klickt automatisch alle 5 Sekunden.', cost: 10000, target: 'autoclick', reqType: 'total', req: 50000, icon: '🤖' },
+            { id: 'u_auto2', name: 'Turbo-Klicker', desc: 'Klickt automatisch jede Sekunde.', cost: 1000000, target: 'autoclick', reqType: 'total', req: 5000000, icon: '⚡' },
+            { id: 'u_auto3', name: 'Hyper-Klicker', desc: 'Klickt automatisch 10x pro Sekunde.', cost: 100000000, target: 'autoclick', reqType: 'total', req: 500000000, icon: '🚀' }
         ];
 
         // Procedurally generate 3 upgrades per building
@@ -666,7 +669,10 @@
             { id: 'a18', name: 'Retter der Erde', desc: 'Pflanze 1.000 Bäume', icon: '🌍', check: () => state.treesPlanted >= 1000 },
             { id: 'a19', name: 'Combo-Anfänger', desc: 'Erreiche einen 10x Combo', icon: '⚡', check: () => state.maxCombo >= 10 },
             { id: 'a20', name: 'Combo-Meister', desc: 'Erreiche einen 25x Combo', icon: '🔥', check: () => state.maxCombo >= 25 },
-            { id: 'a21', name: 'Klick-Gott', desc: 'Erreiche einen 50x Combo', icon: '👑', check: () => state.maxCombo >= 50 }
+            { id: 'a21', name: 'Klick-Gott', desc: 'Erreiche einen 50x Combo', icon: '👑', check: () => state.maxCombo >= 50 },
+            { id: 'a22', name: 'Faulpelz', desc: 'Kaufe den Auto-Klicker', icon: '🤖', check: () => state.upgrades['u_auto1'] },
+            { id: 'a23', name: 'Effizienz-Experte', desc: 'Kaufe den Turbo-Klicker', icon: '⚡', check: () => state.upgrades['u_auto2'] },
+            { id: 'a24', name: 'Maschinen-Herr', desc: 'Kaufe den Hyper-Klicker', icon: '🚀', check: () => state.upgrades['u_auto3'] }
         ];
 
         // Building Synergies
@@ -1502,6 +1508,24 @@
             
             // Start Random Events (2-5 minutes interval)
             setTimeout(triggerRandomEvent, Math.random() * 180000 + 120000);
+            
+            // Auto-Clicker Loop
+            setInterval(() => {
+                let autoClickRate = 0;
+                if (state.upgrades['u_auto3']) autoClickRate = 10;
+                else if (state.upgrades['u_auto2']) autoClickRate = 1;
+                else if (state.upgrades['u_auto1']) autoClickRate = 0.2; // 1 per 5 seconds
+                
+                if (autoClickRate > 0) {
+                    let earth = document.getElementById('earth-btn');
+                    let rect = earth.getBoundingClientRect();
+                    let fakeEvent = {
+                        clientX: rect.left + rect.width / 2 + (Math.random() * 40 - 20),
+                        clientY: rect.top + rect.height / 2 + (Math.random() * 40 - 20)
+                    };
+                    clickEarth(fakeEvent);
+                }
+            }, 100);
             
             // Keyboard Shortcuts
             document.addEventListener('keydown', (e) => {
