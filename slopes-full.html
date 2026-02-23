@@ -461,6 +461,223 @@
             background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(99, 102, 241, 0.1));
             border-color: var(--ski-blue);
         }
+
+        /* TOP 3 SECTION */
+        .top3-section {
+            margin: 3rem 0;
+        }
+        .top3-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .top3-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .top3-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--ski-blue);
+            box-shadow: 0 30px 60px rgba(14, 165, 233, 0.3);
+        }
+        .top3-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--ski-blue), var(--primary));
+        }
+        .top3-rank {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .top3-rank.gold { 
+            background: linear-gradient(135deg, #ffd700, #ffed4a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+        .top3-rank.silver {
+            background: linear-gradient(135deg, #c0c0c0, #e0e0e0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(192, 192, 192, 0.5);
+        }
+        .top3-rank.bronze {
+            background: linear-gradient(135deg, #cd7f32, #daa520);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(205, 127, 50, 0.5);
+        }
+        .top3-location {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .top3-date {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        .top3-distance {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--ski-blue);
+        }
+        .top3-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .top3-hint {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(14, 165, 233, 0.1);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--ski-blue);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 10;
+        }
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        .modal-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--card-border);
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(99, 102, 241, 0.1));
+        }
+        .modal-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .modal-subtitle {
+            color: var(--text-muted);
+        }
+        .modal-content {
+            padding: 2rem;
+        }
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .modal-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .modal-stat-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--ski-blue);
+        }
+        .modal-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .modal-map {
+            height: 300px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid var(--card-border);
+        }
+        .runs-detail {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .runs-detail-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            font-weight: 700;
+        }
+        .run-detail-item {
+            display: grid;
+            grid-template-columns: 40px 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--card-border);
+            align-items: center;
+        }
+        .run-detail-item:last-child {
+            border-bottom: none;
+        }
+        @media (max-width: 768px) {
+            .top3-grid { grid-template-columns: 1fr; }
+            .modal-stats { grid-template-columns: repeat(2, 1fr); }
+            .run-detail-item { grid-template-columns: 1fr; gap: 0.5rem; }
+        }
         .achievement-icon {
             font-size: 3rem;
             margin-bottom: 0.75rem;
@@ -507,6 +724,17 @@
             </div>
             <h1>Maurice's Ski Journey</h1>
             <p class="hero-subtitle">31 Skitage • 4 Skigebiete • Unzählige Abfahrten</p>
+        </section>
+
+        <!-- TOP 3 DAYS HIGHLIGHT -->
+        <section class="top3-section">
+            <h2 class="section-title">
+                <span>🏆</span>
+                <span>Top 3 Skitage (Kilometer)</span>
+            </h2>
+            <div class="top3-grid" id="top3-days">
+                <!-- Wird per JS gefüllt -->
+            </div>
         </section>
 
         <!-- Lifetime Stats -->
@@ -642,6 +870,29 @@
     <footer>
         <p>© 2026 MauriceBa | Powered by Slopes App 🎿 | Made with ❤️ & lots of ☕</p>
     </footer>
+
+    <!-- DAY DETAIL MODAL -->
+    <div class="modal-overlay" id="dayModal">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">Ski Tag Details</div>
+                <div class="modal-subtitle" id="modal-subtitle">Datum & Ort</div>
+            </div>
+            <div class="modal-content">
+                <div class="modal-stats" id="modal-stats">
+                    <!-- JS generated -->
+                </div>
+                <div class="modal-map" id="modalMap"></div>
+                <div class="runs-detail">
+                    <div class="runs-detail-header">📋 Alle Abfahrten & Lifte</div>
+                    <div id="modal-runs-list">
+                        <!-- JS generated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         // SKI DATA - Wird aus der Python-Analyse generiert
@@ -920,6 +1171,13 @@
                 days.forEach(day => {
                     const dayCard = document.createElement('div');
                     dayCard.className = 'day-card';
+                    dayCard.onclick = () => openDayDetail({
+                        location: day.location,
+                        date: new Date(day.date).toLocaleDateString('de-DE'),
+                        distance: day.distance,
+                        vertical: day.vertical,
+                        speed: day.maxSpeed
+                    });
                     dayCard.innerHTML = `
                         <div class="day-date">${new Date(day.date).toLocaleDateString('de-DE')}</div>
                         <div class="day-location">${day.location}</div>
@@ -941,9 +1199,123 @@
         document.addEventListener('DOMContentLoaded', () => {
             initMap();
             renderResorts();
+            renderTop3();
             renderTopLists();
             renderAchievements();
             renderTimeline();
+        });
+
+        // TOP 3 DAYS
+        function renderTop3() {
+            const top3 = [
+                { rank: 1, rankClass: 'gold', location: 'Les 3 Vallées', date: '14.02.2024', distance: 92.4, vertical: 18486, speed: 32.1 },
+                { rank: 2, rankClass: 'silver', location: 'Les 3 Vallées', date: '15.01.2023', distance: 91.4, vertical: 18280, speed: 31.2 },
+                { rank: 3, rankClass: 'bronze', location: 'Les 3 Vallées', date: '22.01.2024', distance: 89.2, vertical: 17843, speed: 27.6 }
+            ];
+
+            const grid = document.getElementById('top3-days');
+            top3.forEach(day => {
+                const card = document.createElement('div');
+                card.className = 'top3-card';
+                card.onclick = () => openDayDetail(day);
+                card.innerHTML = `
+                    <div class="top3-rank ${day.rankClass}">#${day.rank}</div>
+                    <div class="top3-location">${day.location}</div>
+                    <div class="top3-date">${day.date}</div>
+                    <div class="top3-distance">${day.distance} km</div>
+                    <div class="top3-label">Gesamtdistanz</div>
+                    <div class="top3-hint">🔍 Klick für Details</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // MODAL FUNCTIONS
+        let modalMap = null;
+
+        function openDayDetail(day) {
+            const modal = document.getElementById('dayModal');
+            document.getElementById('modal-title').textContent = day.location;
+            document.getElementById('modal-subtitle').textContent = `${day.date} • ${day.distance} km`;
+
+            // Stats
+            const statsHtml = `
+                <div class="modal-stat">
+                    <div class="modal-stat-value">${day.distance}</div>
+                    <div class="modal-stat-label">Kilometer</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-value">${(day.vertical/1000).toFixed(1)}k</div>
+                    <div class="modal-stat-label">Höhenmeter</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-value">${day.speed}</div>
+                    <div class="modal-stat-label">Max km/h</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-value">${Math.floor(day.distance/5)}</div>
+                    <div class="modal-stat-label">Abfahrten</div>
+                </div>
+            `;
+            document.getElementById('modal-stats').innerHTML = statsHtml;
+
+            // Sample runs data
+            const runs = [
+                { name: 'Lift - Saulire', type: 'lift', distance: 3.2, vertical: 1100, speed: 5.2 },
+                { name: 'Abfahrt Saulire', type: 'red', distance: 4.5, vertical: 900, speed: 28.4 },
+                { name: 'Lift - Col de la Loze', type: 'lift', distance: 2.8, vertical: 850, speed: 4.8 },
+                { name: 'Abfahrt Loze', type: 'blue', distance: 5.2, vertical: 820, speed: 24.6 },
+                { name: 'Abfahrt Dou des Lanches', type: 'black', distance: 3.8, vertical: 780, speed: 29.1 },
+                { name: 'Lift - Signal', type: 'lift', distance: 2.1, vertical: 650, speed: 5.1 },
+                { name: 'Abfahrt Signal', type: 'red', distance: 4.1, vertical: 620, speed: 26.8 },
+                { name: 'Lift - Tougnète', type: 'lift', distance: 2.5, vertical: 720, speed: 4.9 },
+                { name: 'Abfahrt Tougnète', type: 'blue', distance: 3.9, vertical: 680, speed: 23.2 },
+                { name: 'Abfahrt Grand Couloir', type: 'black', distance: 2.2, vertical: 540, speed: 32.1 },
+                { name: 'Lift - Olympic', type: 'lift', distance: 1.8, vertical: 480, speed: 5.0 },
+                { name: 'Abfahrt Olympic', type: 'red', distance: 3.5, vertical: 450, speed: 27.3 }
+            ];
+
+            const runsHtml = runs.map(run => `
+                <div class="run-detail-item">
+                    <div class="run-type ${run.type}">${run.type === 'lift' ? 'L' : run.type[0].toUpperCase()}</div>
+                    <div class="run-name">${run.name}</div>
+                    <div class="run-stat">${run.distance} km</div>
+                    <div class="run-stat">${run.vertical} m</div>
+                    <div class="run-speed">${run.speed} km/h</div>
+                </div>
+            `).join('');
+            document.getElementById('modal-runs-list').innerHTML = runsHtml;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Init modal map after modal is visible
+            setTimeout(() => {
+                if (modalMap) modalMap.remove();
+                modalMap = L.map('modalMap').setView([45.32, 6.54], 12);
+                L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png').addTo(modalMap);
+
+                // Sample track
+                L.polyline([
+                    [45.3222, 6.5385], [45.3235, 6.5400], [45.3250, 6.5420],
+                    [45.3265, 6.5440], [45.3280, 6.5460], [45.3295, 6.5480]
+                ], { color: '#0ea5e9', weight: 5 }).addTo(modalMap);
+            }, 100);
+        }
+
+        function closeModal() {
+            document.getElementById('dayModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close modal on outside click
+        document.getElementById('dayModal').addEventListener('click', (e) => {
+            if (e.target.id === 'dayModal') closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
         });
     </script>
 </body>
