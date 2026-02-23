@@ -1,0 +1,545 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Experimental | Maurice</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="experimental.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="experimental-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">Maurice</div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="projects.html">Projekte</a></li>
+            <li><a href="about.html">Über mich</a></li>
+            <li><a href="experimental.html" class="experimental-btn active">🔥 Experimental</a></li>
+            <li><a href="contact.html">Kontakt</a></li>
+        </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <!-- Hero Experimental -->
+    <header class="experimental-hero">
+        <div class="experimental-badge">🔥 EXPERIMENTAL ZONE 🔥</div>
+        <h1>Willkommen im Chaos</h1>
+        <p class="experimental-subtitle">Hier experimentiere ich mit dem Web. Vorsicht: Kann Spuren von Genialität enthalten.</p>
+        <div class="section-nav">
+            <a href="#interactive-room" class="section-link">🏠 3D Raum</a>
+            <a href="#dashboard" class="section-link">📊 Dashboard</a>
+            <a href="#secrets" class="section-link">🔐 Secrets</a>
+            <a href="#journey" class="section-link">🚀 Meine Reise</a>
+            <a href="#ai-chat" class="section-link">🤖 KI-Chat</a>
+        </div>
+    </header>
+
+    <!-- 1. INTERAKTIVER 3D RAUM -->
+    <section id="interactive-room" class="feature-section">
+        <div class="section-header">
+            <span class="section-number">01</span>
+            <h2>🎮 Interaktiver 3D Raum</h2>
+            <p>Erkunde meinen virtuellen Schreibtisch. Klicke auf Objekte, um mehr zu erfahren!</p>
+        </div>
+        
+        <div id="three-container" class="three-container">
+            <canvas id="three-canvas"></canvas>
+            <div class="room-overlay">
+                <div class="room-hint">🖱️ Ziehe zum Drehen • 👆 Klicke Objekte</div>
+            </div>
+        </div>
+        
+        <div class="room-objects-info">
+            <div class="object-card" data-object="laptop">
+                <div class="object-icon">💻</div>
+                <h4>Laptop</h4>
+                <p>Mein Code-Lebensmittelpunkt. Hier entstehen Projekte.</p>
+            </div>
+            <div class="object-card" data-object="coffee">
+                <div class="object-icon">☕</div>
+                <h4>Kaffee</h4>
+                <p>Treibstoff für kreative Sessions. Immer frisch aufgebrüht.</p>
+            </div>
+            <div class="object-card" data-object="plant">
+                <div class="object-icon">🌱</div>
+                <h4>Pflanze</h4>
+                <p>Grüne Oase. Überlebt trotz sporadischer Gießerei.</p>
+            </div>
+            <div class="object-card" data-object="books">
+                <div class="object-icon">📚</div>
+                <h4>Bücher</h4>
+                <p>Tech, Sci-Fi und Philosophie. Ständig wachsende Sammlung.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. LIVE DASHBOARD -->
+    <section id="dashboard" class="feature-section dashboard-section">
+        <div class="section-header">
+            <span class="section-number">02</span>
+            <h2>📊 Live Dashboard</h2>
+            <p>Echtzeit-Einblicke in mein digitales Leben</p>
+        </div>
+        
+        <div class="dashboard-grid">
+            <!-- Coding Stats -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">⌨️</span>
+                    <h3>Coding Stats</h3>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Heute programmiert</span>
+                    <span class="stat-value" id="coding-hours">0h 0m</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Diese Woche</span>
+                    <span class="stat-value">28.5 Stunden</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Aktueller Streak</span>
+                    <span class="stat-value streak">🔥 12 Tage</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 65%"></div>
+                </div>
+                <p class="progress-label">Wochenziel: 65% erreicht</p>
+            </div>
+
+            <!-- Aktuelle Projekte -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">🚀</span>
+                    <h3>Aktuelle Projekte</h3>
+                </div>
+                <div class="project-item">
+                    <div class="project-dot active"></div>
+                    <div class="project-info">
+                        <span class="project-name">Personal Website 3.0</span>
+                        <span class="project-status">75% fertig</span>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-dot active"></div>
+                    <div class="project-info">
+                        <span class="project-name">AI Chat Bot</span>
+                        <span class="project-status">In Entwicklung</span>
+                    </div>
+                </div>
+                <div class="project-item">
+                    <div class="project-dot paused"></div>
+                    <div class="project-info">
+                        <span class="project-name">Mobile App</span>
+                        <span class="project-status">Pausiert</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bücher -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">📖</span>
+                    <h3>Gerade am Lesen</h3>
+                </div>
+                <div class="book-item">
+                    <div class="book-cover">📘</div>
+                    <div class="book-info">
+                        <span class="book-title">Clean Code</span>
+                        <span class="book-author">Robert C. Martin</span>
+                        <div class="book-progress">
+                            <div class="book-progress-bar"><div style="width: 60%"></div></div>
+                            <span>60%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="book-item">
+                    <div class="book-cover">📗</div>
+                    <div class="book-info">
+                        <span class="book-title">Atomic Habits</span>
+                        <span class="book-author">James Clear</span>
+                        <div class="book-progress">
+                            <div class="book-progress-bar"><div style="width: 30%"></div></div>
+                            <span>30%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wetter & Standort -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <span class="card-icon">🌤️</span>
+                    <h3>Standort</h3>
+                </div>
+                <div class="weather-main">
+                    <span class="weather-icon">⛅</span>
+                    <span class="weather-temp">8°C</span>
+                </div>
+                <div class="weather-location">
+                    <span>📍 Berlin, Deutschland</span>
+                </div>
+                <div class="weather-details">
+                    <div class="weather-detail">
+                        <span>💧 72% Feuchtigkeit</span>
+                    </div>
+                    <div class="weather-detail">
+                        <span>💨 12 km/h Wind</span>
+                    </div㸮
+                </div>
+            </div>
+
+            <!-- Heute gelernt -->
+            <div class="dashboard-card wide">
+                <div class="card-header">
+                    <span class="card-icon">🧠</span>
+                    <h3>Heute gelernt</h3>
+                    <span class="date-badge" id="today-date">Heute</span>
+                </div>
+                <div class="learned-list">
+                    <div class="learned-item">
+                        <span class="learned-check">✅</span>
+                        <span>Three.js Grundlagen für 3D-Web-Animationen</span>
+                    </div>
+                    <div class="learned-item">
+                        <span class="learned-check">✅</span>
+                        <span>Parallax-Scrolling mit CSS & JS</span>
+                    </div>
+                    <div class="learned-item">
+                        <span class="learned-check">✅</span>
+                        <span>Gamification-Elemente in Webseiten integrieren</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. UNLOCKABLE SECRETS -->
+    <section id="secrets" class="feature-section secrets-section">
+        <div class="section-header">
+            <span class="section-number">03</span>
+            <h2>🔐 Secret Content</h2>
+            <p>Löse Rätsel, finde Easter Eggs, schalte versteckte Inhalte frei!</p>
+        </div>
+
+        <div class="secrets-container">
+            <!-- Konami Code -->
+            <div class="secret-box" id="konami-box">
+                <div class="secret-locked">
+                    <span class="secret-icon">🔒</span>
+                    <h4>Geheime Seite</h4>
+                    <p>Drücke die richtige Tastenkombination...</p>
+                    <span class="secret-hint">🎮 ↑↑↓↓←→←→BA</span>
+                </div>
+                <div class="secret-unlocked hidden">
+                    <span class="secret-icon">🎮</span>
+                    <h4>Retro Mode freigeschaltet!</h4>
+                    <p>Du hast den Konami Code gefunden! Hier ist meine Website im 90er-Jahre-Stil:</p>
+                    <a href="#retro" class="btn btn-primary" onclick="activateRetroMode()">Retro Mode aktivieren</a>
+                </div>
+            </div>
+
+            <!-- Passwort-Rätsel -->
+            <div class="secret-box" id="riddle-box">
+                <div class="secret-locked">
+                    <span class="secret-icon">🧩</span>
+                    <h4>Das Rätsel</h4>
+                    <p class="riddle-text">"Ich habe Städte, aber keine Häuser. Ich habe Berge, aber keine Bäume. Ich habe Wasser, aber keine Fische. Was bin ich?"</p>
+                    <div class="riddle-input-group">
+                        <input type="text" id="riddle-answer" placeholder="Deine Antwort...">
+                        <button onclick="checkRiddle()">Prüfen</button>
+                    </div>
+                </div>
+                <div class="secret-unlocked hidden">
+                    <span class="secret-icon">🗺️</span>
+                    <h4>Geheimes Projekt freigeschaltet!</h4>
+                    <p>Du bist schlau! Hier ist mein bisher unveröffentlichtes Karten-Projekt:</p>
+                    <div class="secret-preview">
+                        <div class="preview-card">
+                            <span class="preview-emoji">🗺️</span>
+                            <h5>World Explorer</h5>
+                            <p>Interaktive 3D-Weltkarte mit Live-Daten</p>
+                        </div>
+                    </div>
+                </div㸮
+            </div>
+
+            <!-- Easter Egg Hunt -->
+            <div class="secret-box" id="easter-box">
+                <div class="secret-locked">
+                    <span class="secret-icon">🥚</span>
+                    <h4>Easter Egg Hunt</h4>
+                    <p>Finde alle 5 versteckten Easter Eggs auf dieser Seite!</p>
+                    <div class="egg-progress">
+                        <span id="eggs-found">0</span> / 5 🥚 gefunden
+                    </div>
+                    <div class="egg-indicators">
+                        <span class="egg" id="egg-1">🥚</span>
+                        <span class="egg" id="egg-2">🥚</span>
+                        <span class="egg" id="egg-3">🥚</span>
+                        <span class="egg" id="egg-4">🥚</span>
+                        <span class="egg" id="egg-5">🥚</span>
+                    </div>
+                </div>
+                <div class="secret-unlocked hidden">
+                    <span class="secret-icon">🏆</span>
+                    <h4>Meister-Entdecker!</h4>
+                    <p>Du hast alle Easter Eggs gefunden! Als Belohnung hier ein Special Dark Mode:</p>
+                    <button class="btn btn-primary" onclick="toggleMatrixMode()">Matrix Mode aktivieren</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Versteckte Easter Eggs (für das Hunt-Feature) -->
+        <button class="hidden-egg" id="hidden-egg-1" onclick="findEgg(1)">🥚</button>
+        <button class="hidden-egg" id="hidden-egg-2" onclick="findEgg(2)">🥚</button>
+        <button class="hidden-egg" id="hidden-egg-3" onclick="findEgg(3)">🥚</button>
+        <button class="hidden-egg" id="hidden-egg-4" onclick="findEgg(4)">🥚</button>
+        <button class="hidden-egg" id="hidden-egg-5" onclick="findEgg(5)">🥚</button>
+    </section>
+
+    <!-- 4. STORYTELLING SCROLL -->
+    <section id="journey" class="feature-section journey-section">
+        <div class="section-header">
+            <span class="section-number">04</span>
+            <h2>🚀 Meine Reise</h2>
+            <p>Eine interaktive Geschichte meiner Entwicklung</p>
+        </div>
+
+        <div class="journey-timeline">
+            <!-- Kapitel 1 -->
+            <div class="journey-chapter" data-chapter="1">
+                <div class="chapter-visual">
+                    <div class="chapter-parallax layer-1">💻</div>
+                    <div class="chapter-parallax layer-2">✨</div>
+                </div>
+                <div class="chapter-content">
+                    <span class="chapter-year">2018</span>
+                    <h3>Die ersten Schritte</h3>
+                    <p>Alles begann mit einem einfachen "Hello World". Ich schrieb meine ersten Zeilen HTML & CSS und war sofort hooked. Die Magie, etwas aus dem Nichts zu erschaffen, faszinierte mich.</p>
+                    <div class="chapter-tags">
+                        <span class="tag">HTML</span>
+                        <span class="tag">CSS</span>
+                        <span class="tag">Neugier</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kapitel 2 -->
+            <div class="journey-chapter" data-chapter="2">
+                <div class="chapter-visual">
+                    <div class="chapter-parallax layer-1">🎨</div>
+                    <div class="chapter-parallax layer-2">🚀</div>
+                </div>
+                <div class="chapter-content">
+                    <span class="chapter-year">2019-2020</span>
+                    <h3>Tief einsteigen</h3>
+                    <p>JavaScript wurde meine zweite Muttersprache. Ich baute erste Projekte, scheiterte oft, lernte dabei aber unglaublich viel. Jedes Bug war eine Lektion.</p>
+                    <div class="chapter-tags">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">React</span>
+                        <span class="tag">Debugging</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kapitel 3 -->
+            <div class="journey-chapter" data-chapter="3">
+                <div class="chapter-visual">
+                    <div class="chapter-parallax layer-1">⚡</div>
+                    <div class="chapter-parallax layer-2">🏗️</div>
+                </div>
+                <div class="chapter-content">
+                    <span class="chapter-year">2021-2022</span>
+                    <h3>Real-World Projects</h3>
+                    <p>Erste Freelance-Aufträge, echte Kunden, echte Deadlines. Ich lernte, wie wichtig Kommunikation und Planung sind. Technisch wuchs ich in Backend und APIs.</p>
+                    <div class="chapter-tags">
+                        <span class="tag">Node.js</span>
+                        <span class="tag">APIs</span>
+                        <span class="tag">Freelance</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kapitel 4 -->
+            <div class="journey-chapter" data-chapter="4">
+                <div class="chapter-visual">
+                    <div class="chapter-parallax layer-1">🤖</div>
+                    <div class="chapter-parallax layer-2">🔮</div>
+                </div>
+                <div class="chapter-content">
+                    <span class="chapter-year">2023-2024</span>
+                    <h3>KI & die Zukunft</h3>
+                    <p>Die KI-Revolution erreichte mich. Ich experimentiere mit LLMs, baue intelligente Tools und frage mich: Wie können wir KI nutzen, ohne unsere Menschlichkeit zu verlieren?</p>
+                    <div class="chapter-tags">
+                        <span class="tag">AI/ML</span>
+                        <span class="tag">Automation</span>
+                        <span class="tag">Zukunft</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kapitel 5 -->
+            <div class="journey-chapter" data-chapter="5">
+                <div class="chapter-visual">
+                    <div class="chapter-parallax layer-1">🌟</div>
+                    <div class="chapter-parallax layer-2">🚀</div>
+                </div>
+                <div class="chapter-content">
+                    <span class="chapter-year">Jetzt</span>
+                    <h3>Das Abenteuer geht weiter</h3>
+                    <p>Jeder Tag bringt neue Technologien, neue Herausforderungen, neue Möglichkeiten. Ich bin bereit für das, was kommt – und freue mich auf die Reise!</p>
+                    <div class="chapter-tags">
+                        <span class="tag tag-highlight">Open Source</span>
+                        <span class="tag tag-highlight">Community</span>
+                        <span class="tag tag-highlight">Innovation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="journey-progress">
+            <div class="progress-line"></div>
+            <div class="progress-fill" id="journey-progress"></div>
+        </div>
+    </section>
+
+    <!-- 5. KI-CHAT -->
+    <section id="ai-chat" class="feature-section ai-section">
+        <div class="section-header">
+            <span class="section-number">05</span>
+            <h2>🤖 Sprich mit meinem digitalen Zwilling</h2>
+            <p>Stelle Fragen über meine Projekte, Skills oder Interessen!</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="ai-avatar">
+                    <span>🤖</span>
+                    <div class="ai-status"></div>
+                </div>
+                <div class="ai-info">
+                    <h4>Maurice AI</h4>
+                    <span>Online • Antwortet als Maurice</span>
+                </div>
+            </div>
+
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai-message">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <p>Hey! 👋 Ich bin die KI-Version von Maurice. Frag mich ruhig was über meine Projekte, Tech-Stack oder was ich gerade lerne!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-suggestions">
+                <button class="suggestion-btn" onclick="sendSuggestion('Was sind deine Lieblingstechnologien?')">
+                    ⚡ Lieblingstechnologien?
+                </button>
+                <button class="suggestion-btn" onclick="sendSuggestion('Erzähl mir von deinen Projekten!')">
+                    🚀 Aktuelle Projekte?
+                </button>
+                <button class="suggestion-btn" onclick="sendSuggestion('Womit programmierst du am liebsten?')">
+                    💻 Tech Stack?
+                </button>
+                <button class="suggestion-btn" onclick="sendSuggestion('Was lernst du gerade?')">
+                    🧠 Aktuelles Lernziel?
+                </button>
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" placeholder="Schreib eine Nachricht..." onkeypress="handleChatKeypress(event)">
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="ai-capabilities">
+            <h4>Was ich weiß:</h4>
+            <div class="capability-tags">
+                <span class="capability">💻 Tech Stack</span>
+                <span class="capability">🚀 Projekte</span>
+                <span class="capability">📚 Bücher</span>
+                <span class="capability">🎯 Ziele</span>
+                <span class="capability">🎮 Interessen</span>
+                <span class="capability">🧠 Lernfortschritt</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- RETRO MODE OVERLAY -->
+    <div id="retro-overlay" class="retro-overlay hidden">
+        <div class="retro-content">
+            <div class="retro-header">
+                <h1>🌐 Willkommen im World Wide Web!</h1>
+                <marquee>🎉 Du hast den Retro Mode freigeschaltet! 🎉 Best viewed in Netscape Navigator! 🎉</marquee>
+            </div>
+            
+            <div class="retro-body">
+                <div class="retro-sidebar">
+                    <h3>🔗 Links</h3>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Über mich</a></li>
+                        <li><a href="#">Meine Linksammlung</a></li>
+                        <li><a href="#">Gästebuch</a></li>
+                    </ul>
+                    
+                    <h3>👤 Profil</h3>
+                    <p>Name: Maurice</p>
+                    <p>Alter: Classified 😎</p>
+                    <p>Lieblingsfarbe: #00FF00</p>
+                </div>
+                
+                <div class="retro-main">
+                    <div class="retro-construction">
+                        <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚧</text></svg>" alt="Under Construction">
+                        <h2>Under Construction!</h2>
+                        <p>Diese Seite wird ständig verbessert!</p>
+                    </div>
+                    
+                    <div class="retro-counter">
+                        <p>Du bist Besucher Nummer:</p>
+                        <div class="hit-counter">
+                            <span>0</span>
+                            <span>0</span>
+                            <span>4</span>
+                            <span>2</span>
+                            <span>0</span>
+                            <span>6</span>
+                            <span>9</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="retro-close" onclick="deactivateRetroMode()">✕ Zurück zur Zukunft</button>
+        </div>
+    </div>
+
+    <!-- MATRIX MODE OVERLAY -->
+    <canvas id="matrix-canvas" class="matrix-canvas hidden"></canvas>
+    <button id="matrix-close" class="matrix-close hidden" onclick="toggleMatrixMode()">✕ Matrix beenden</button>
+
+    <footer>
+        <p>© 2026 Maurice | 🔥 Experimental Zone 🔥</p>
+        <div class="footer-easter-egg" onclick="findEgg(5)">🥚</div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="experimental.js"></script>
+</body>
+</html>

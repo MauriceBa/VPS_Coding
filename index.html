@@ -294,6 +294,14 @@
         .card.eco-card::before { background: linear-gradient(to right, #10b981, #3b82f6); }
         .card.eco-card:hover { border-color: #10b981; box-shadow: 0 20px 40px -10px rgba(16, 185, 129, 0.35); }
 
+        .card.experimental-card::before { background: linear-gradient(to right, #f59e0b, #ef4444); }
+        .card.experimental-card:hover { border-color: #f59e0b; box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.5); animation: pulse-glow 2s infinite; }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 20px 40px -10px rgba(245, 158, 11, 0.35); }
+            50% { box-shadow: 0 20px 40px -5px rgba(245, 158, 11, 0.7); }
+        }
+
         .card-icon {
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
@@ -518,6 +526,12 @@
                 <div class="card-icon">💻</div>
                 <h3>GitHub Profil</h3>
                 <p>Schau dir den Source-Code meiner Projekte an und entdecke, woran ich sonst noch arbeite.</p>
+            </a>
+
+            <a href="/experimental.html" class="card experimental-card">
+                <div class="card-icon">🔥</div>
+                <h3>Experimental <span class="badge" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">Verrückt</span></h3>
+                <p>3D-Raum, KI-Chat, Live-Dashboard, Easter Eggs und mehr verrückte Web-Experimente!</p>
             </a>
         </section>
 
