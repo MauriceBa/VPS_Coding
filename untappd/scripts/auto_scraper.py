@@ -22,7 +22,7 @@ except ImportError:
 UNTAPPD_URL = "https://untappd.com/user/MauriceDE"
 VENUES_URL = "https://untappd.com/user/MauriceDE/venues?sort=recent"
 
-STATS_JSON_PATH = "/var/www/mauricefun.lol/html/untappd/data/stats.json"
+STATS_JSON_PATH = "/home/ubuntu/projects/mauricefun.lol/html/untappd/data/stats.json"
 
 if not os.path.exists(STATS_JSON_PATH):
     # Fallback für lokale Ausführung

@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_INPUT = os.path.join(BASE_DIR, "../data/untapped_locations.txt")
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_INPUT
 
-VPS_STATS = "/var/www/mauricefun.lol/html/untappd/data/stats.json"
+VPS_STATS = "/home/ubuntu/projects/mauricefun.lol/html/untappd/data/stats.json"
 STATS_PATH = VPS_STATS if os.path.exists(VPS_STATS) else os.path.join(BASE_DIR, "../data/stats.json")
 
 CACHE_FILE = os.path.join(BASE_DIR, "../data/location_cache.json")

@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 
 # VPS hat Vorrang, sonst relativer Repo-Pfad
-VPS_STATS  = "/var/www/mauricefun.lol/html/untappd/data/stats.json"
-VPS_ML_OUT = "/var/www/mauricefun.lol/html/untappd/data/ml_data.json"
+VPS_STATS  = "/home/ubuntu/projects/mauricefun.lol/html/untappd/data/stats.json"
+VPS_ML_OUT = "/home/ubuntu/projects/mauricefun.lol/html/untappd/data/ml_data.json"
 
 if os.path.exists(VPS_STATS):
     STATS_FILE  = VPS_STATS

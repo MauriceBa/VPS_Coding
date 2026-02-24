@@ -11,7 +11,7 @@ DEFAULT_INPUT = os.path.join(BASE_DIR, "../data/untapped_maurice.txt")
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_INPUT
 
 # Pfade -- VPS hat Vorrang, sonst lokal
-VPS_STATS = "/var/www/mauricefun.lol/html/untappd/data/stats.json"
+VPS_STATS = "/home/ubuntu/projects/mauricefun.lol/html/untappd/data/stats.json"
 STATS_PATH = VPS_STATS if os.path.exists(VPS_STATS) else os.path.join(BASE_DIR, "../data/stats.json")
 
 REF_DATE = datetime.today()
