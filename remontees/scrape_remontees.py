@@ -40,6 +40,24 @@ def parse_french_date(date_str):
             return yesterday.replace(hour=hour, minute=minute, second=0, microsecond=0)
         return yesterday
     
+    # "il y a X minutes/heures" (vor X Minuten/Stunden)
+    if "il y a" in date_str:
+        # Minuten
+        min_match = re.search(r'(\d+)\s*minute', date_str)
+        if min_match:
+            minutes = int(min_match.group(1))
+            return now - timedelta(minutes=minutes)
+        
+        # Stunden
+        hour_match = re.search(r'(\d+)\s*heure', date_str)
+        if hour_match:
+            hours = int(hour_match.group(1))
+            return now - timedelta(hours=hours)
+        
+        # Sekunden (falls "il y a quelques secondes")
+        if "seconde" in date_str:
+            return now
+    
     return None
 
 def get_session():
