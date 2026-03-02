@@ -223,8 +223,11 @@ def translate_french_to_german(text):
     
     return text
 
-def extract_summaries(posts):
-    """Extrahiert Stichpunkte aus Posts"""
+def extract_summaries(posts, max_summaries=5):
+    """
+    Extrahiert Stichpunkte aus Posts.
+    Nimmt die ersten Sätze jedes Posts, übersetzt sie und gibt sie als Stichpunkte zurück.
+    """
     summaries = []
     
     for post in posts:
@@ -235,33 +238,41 @@ def extract_summaries(posts):
         
         for sentence in sentences:
             sentence = sentence.strip()
-            if len(sentence) < 30 or len(sentence) > 250:
+            # Längere Sätze nehmen (40-200 Zeichen)
+            if len(sentence) < 40 or len(sentence) > 200:
                 continue
             
-            # Prüfe ob Satz relevante Infos enthält
-            keywords = ['bau', 'projekt', 'neu', 'renovierung', 'ersatz', 'eröffnung', 
-                       'station', 'pylon', 'kabine', 'gondelbahn', 'sessellift', 'piste',
-                       'genehmigung', 'arbeiten', 'fortschritt', 'verschoben', 'geplant']
+            # Übersetzen
+            translated = translate_french_to_german(sentence)
+            # Bereinigen
+            translated = clean_text(translated)
             
-            if any(kw in sentence.lower() for kw in keywords):
-                # Übersetzen
-                translated = translate_french_to_german(sentence)
-                # Bereinigen
-                translated = clean_text(translated)
+            # Entferne französische Füllwörter am Anfang
+            translated = re.sub(r'^(le|la|les|un|une|des|et|en|de|du|au|aux|ce|cette|ces|pour|par|sur|dans|avec)\s+', '', translated, flags=re.IGNORECASE)
+            
+            if translated and len(translated) > 30:
+                # Großschreibung am Anfang
+                translated = translated[0].upper() + translated[1:]
+                summaries.append(translated)
                 
-                if translated and len(translated) > 20:
-                    summaries.append(translated)
+                # Max X Summaries pro Post
+                if len([s for s in summaries if s]) >= max_summaries:
+                    break
+        
+        # Max X Summaries insgesamt
+        if len(summaries) >= max_summaries * 2:
+            break
     
     # Duplikate entfernen
     unique = []
     seen = set()
     for s in summaries:
-        key = s.lower()
+        key = s.lower()[:50]  # Vergleiche nur ersten 50 Zeichen
         if key not in seen:
             seen.add(key)
             unique.append(s)
     
-    return unique[:5]  # Max 5 Stichpunkte
+    return unique[:max_summaries]
 
 def scrape_forum_list(url):
     """Scraped die Thread-Liste aus einem Forum"""
@@ -344,10 +355,10 @@ def scrape_forum_list(url):
                         if last_post_time:
                             break
             
-            # Nur Threads der letzten 24h
+            # Nur Threads der letzten 7 Tage (werden dann client-seitig gefiltert)
             if last_post_time:
                 time_diff = datetime.now() - last_post_time
-                if time_diff <= timedelta(days=1):
+                if time_diff <= timedelta(days=7):
                     threads.append({
                         'id': topic_id,
                         'title': title,
@@ -365,111 +376,171 @@ def scrape_forum_list(url):
         return []
 
 def scrape_thread_posts(url, days_back=1):
-    """Scraped die Posts und Bilder aus einem Thread"""
+    """Scraped die Posts und Bilder aus einem Thread mit Pagination"""
     try:
-        # Füge view=getlastpost hinzu um die neuesten Posts zu sehen
-        if '?' in url:
-            url_with_view = url + '&view=getlastpost'
-        else:
-            url_with_view = url + '?view=getlastpost'
-        
-        html_content = get_page_content(url_with_view)
-        soup = BeautifulSoup(html_content, 'html.parser')
-        
         posts = []
         images = []
         cutoff_time = datetime.now() - timedelta(days=days_back)
         
-        # IP.Board Post-Container finden
-        post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower() if x else False)
+        # Starte mit der letzten Seite (view=getlastpost)
+        if '?' in url:
+            current_url = url + '&view=getlastpost'
+        else:
+            current_url = url + '?view=getlastpost'
         
-        for post in post_containers:
-            # Zeit finden - IP.Board nutzt <abbr class="published">
-            time_found = None
+        page_count = 0
+        max_pages = 10  # Max 10 Seiten zurück um Endlosschleifen zu vermeiden
+        oldest_post_time = datetime.now()
+        
+        while page_count < max_pages:
+            page_count += 1
+            print(f"    Seite {page_count}: {current_url[-60:]}...")
             
-            # Versuche <abbr class="published">
-            abbr = post.find('abbr', class_='published')
-            if abbr:
-                title = abbr.get('title', '')
-                if title:
-                    try:
-                        time_found = datetime.fromisoformat(title.replace('Z', '+00:00').replace('+00:00', ''))
-                    except:
-                        pass
+            html_content = get_page_content(current_url)
+            soup = BeautifulSoup(html_content, 'html.parser')
             
-            # Fallback: <time> Element
-            if not time_found:
-                time_el = post.find('time')
-                if time_el:
-                    datetime_attr = time_el.get('datetime')
-                    if datetime_attr:
+            # IP.Board Post-Container finden
+            post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower() if x else False)
+            print(f"    Posts auf Seite: {len(post_containers)}")
+            
+            page_has_recent_posts = False
+            
+            for post in post_containers:
+                # Zeit finden - IP.Board nutzt <abbr class="published">
+                time_found = None
+                
+                abbr = post.find('abbr', class_='published')
+                if abbr:
+                    title = abbr.get('title', '')
+                    if title:
                         try:
-                            time_found = datetime.fromisoformat(datetime_attr.replace('Z', '+00:00').replace('+00:00', ''))
+                            time_found = datetime.fromisoformat(title.replace('Z', '+00:00').replace('+00:00', ''))
                         except:
                             pass
-            
-            # Wenn keine Zeit gefunden, überspringen
-            if not time_found:
-                continue
-            
-            # Inhalt finden
-            content_div = post.find('div', class_=lambda x: x and 'content' in str(x).lower())
-            if not content_div:
-                continue
-            
-            # Bilder extrahieren (auch aus älteren Posts im Thread)
-            for img in content_div.find_all('img'):
-                img_src = img.get('src', '')
-                if img_src and not img_src.startswith('data:'):
-                    # Relativen URLs zu absoluten machen
-                    if img_src.startswith('/'):
-                        img_src = BASE_URL + img_src
-                    elif not img_src.startswith('http'):
-                        img_src = BASE_URL + '/' + img_src
+                
+                if not time_found:
+                    continue
+                
+                # Track ältester Post auf dieser Seite
+                if time_found < oldest_post_time:
+                    oldest_post_time = time_found
+                
+                # Inhalt finden
+                content_div = post.find('div', class_=lambda x: x and 'content' in str(x).lower() if x else False)
+                if not content_div:
+                    continue
+                
+                # Bilder extrahieren (aus allen Posts)
+                for img in content_div.find_all('img'):
+                    img_src = img.get('src', '')
+                    if img_src and not img_src.startswith('data:'):
+                        if img_src.startswith('/'):
+                            img_src = BASE_URL + img_src
+                        elif not img_src.startswith('http'):
+                            img_src = BASE_URL + '/' + img_src
+                        
+                        if 'remontees-mecaniques.net' in img_src:
+                            images.append({
+                                'url': img_src,
+                                'alt': img.get('alt', '')
+                            })
+                
+                # Nur Posts im Zeitfenster für Text
+                if time_found >= cutoff_time:
+                    page_has_recent_posts = True
+                    text = content_div.get_text(separator=' ', strip=True)
+                    text = clean_text(text)
+                    text = re.sub(r'Quote[\s\S]*?End Quote', '', text, flags=re.IGNORECASE)
+                    text = clean_text(text)
                     
-                    # Nur Bilder vom Forum-Server
-                    if 'remontees-mecaniques.net' in img_src:
-                        images.append({
-                            'url': img_src,
-                            'alt': img.get('alt', '')
+                    if len(text) > 30:
+                        posts.append({
+                            'time': time_found.isoformat(),
+                            'content': text
                         })
             
-            # Nur Posts der letzten X Tage für Text
-            if time_found >= cutoff_time:
-                # Text extrahieren
-                text = content_div.get_text(separator=' ', strip=True)
-                text = clean_text(text)
+            # Prüfe ob wir weiter zurück müssen
+            # Wenn der älteste Post auf dieser Seite neuer ist als der Cutoff,
+            # müssen wir eine Seite zurück
+            if oldest_post_time >= cutoff_time and page_has_recent_posts:
+                # Suche Pagination-Link für "vorherige Seite"
+                # IP.Board zeigt Links wie "<  Vorherige" oder "<< Erste"
+                prev_link = None
                 
-                # Zitierte Texte entfernen
-                text = re.sub(r'Quote[\s\S]*?End Quote', '', text, flags=re.IGNORECASE)
-                text = clean_text(text)
+                # Suche nach "Préc" (Précédent) oder "<"
+                for link in soup.find_all('a', href=True):
+                    link_text = link.get_text(strip=True).lower()
+                    href = link.get('href', '')
+                    if 'showtopic=' in href and ('st=' in href or 'view=getlastpost' in href):
+                        if any(x in link_text for x in ['préc', 'prev', 'vorher', '<']):
+                            # Extrahiere st= Wert
+                            st_match = re.search(r'st=(\d+)', href)
+                            if st_match:
+                                st_val = int(st_match.group(1))
+                                # Aktueller st-Wert aus URL
+                                current_st = 0
+                                current_st_match = re.search(r'st=(\d+)', current_url)
+                                if current_st_match:
+                                    current_st = int(current_st_match.group(1))
+                                
+                                # Nur wenn der neue st-Wert kleiner ist (weiter zurück)
+                                if st_val < current_st or 'view=getlastpost' in current_url:
+                                    prev_link = href
+                                    break
                 
-                if len(text) > 30:
-                    posts.append({
-                        'time': time_found.isoformat(),
-                        'content': text
-                    })
+                # Wenn kein Prev-Link gefunden, versuche st manuell zu dekrementieren
+                if not prev_link:
+                    # Aus der aktuellen URL den st-Wert extrahieren
+                    st_match = re.search(r'st=(\d+)', current_url)
+                    if st_match:
+                        current_st = int(st_match.group(1))
+                        new_st = max(0, current_st - 20)
+                        prev_link = re.sub(r'st=\d+', f'st={new_st}', current_url)
+                        prev_link = prev_link.replace('&view=getlastpost', '')
+                    elif 'view=getlastpost' in current_url:
+                        # Erste Pagination-Seite hat st=20 (nicht 0!)
+                        prev_link = current_url.replace('&view=getlastpost', '&st=20')
+                
+                if prev_link:
+                    # Bereinige URL
+                    if prev_link.startswith('//'):
+                        prev_link = 'https:' + prev_link
+                    elif prev_link.startswith('/'):
+                        prev_link = BASE_URL + prev_link
+                    elif not prev_link.startswith('http'):
+                        prev_link = BASE_URL + '/' + prev_link
+                    
+                    current_url = prev_link
+                    print(f"    → Gehe zu vorheriger Seite...")
+                    continue
+            
+            # Wenn wir hier sind, haben wir genug oder keine vorherige Seite
+            break
         
-        return {'posts': posts, 'images': list({i['url']: i for i in images}.values())[:10]}  # Max 10 Bilder, unique
+        print(f"    Total Posts: {len(posts)}, Bilder: {len(images)}")
+        return {'posts': posts, 'images': list({i['url']: i for i in images}.values())[:15]}
+        
     except Exception as e:
         print(f"Fehler beim Scrapen Thread {url}: {e}")
+        import traceback
+        traceback.print_exc()
         return {'posts': [], 'images': []}
 
-def process_forum(url, category_name):
+def process_forum(url, category_name, days_back=7):
     """Verarbeitet ein komplettes Forum"""
-    print(f"Scraping {category_name}...")
+    print(f"Scraping {category_name} (letzte {days_back} Tage)...")
     threads = scrape_forum_list(url)
     
     results = []
     for thread in threads[:15]:  # Max 15 Threads pro Kategorie
         print(f"  → Scrape Details: {thread['title'][:40]}...")
-        data = scrape_thread_posts(thread['url'])
+        data = scrape_thread_posts(thread['url'], days_back=days_back)
         
         posts = data['posts']
         images = data['images']
         
         if posts:
-            summaries = extract_summaries(posts)
+            summaries = extract_summaries(posts, max_summaries=5)
         else:
             summaries = []
         
@@ -489,12 +560,15 @@ def main():
     
     print(f"=== Remontées Scraper v2 {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
     
+    # Immer 7 Tage scrapen, die Website filtert dann client-seitig
+    days_back = 7
+    
     # Stationen scrapen
-    stations = process_forum(STATIONS_URL, "Stationen")
+    stations = process_forum(STATIONS_URL, "Stationen", days_back=days_back)
     print()
     
     # Lifte scrapen
-    lifts = process_forum(LIFTS_URL, "Lifte")
+    lifts = process_forum(LIFTS_URL, "Lifte", days_back=days_back)
     print()
     
     # JSON erstellen
