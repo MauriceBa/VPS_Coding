@@ -17,8 +17,19 @@ STATIONS_URL = f"{BASE_URL}/index.php?showforum=129"
 LIFTS_URL = f"{BASE_URL}/index.php?showforum=220"
 OUTPUT_DIR = "/home/ubuntu/projects/mauricefun.lol/html/data"
 
+FRENCH_MONTHS = {
+    'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
+    'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12
+}
+
+# Globale Session für bessere Performance (Connection Pooling)
+GLOBAL_SESSION = requests.Session()
+GLOBAL_SESSION.headers.update({
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+})
+
 def parse_french_date(date_str):
-    """Parst französische Datumsangaben"""
+    """Parst französische Datumsangaben (relativ und absolut)"""
     date_str = html.unescape(date_str).strip().lower()
     now = datetime.now()
     
@@ -51,16 +62,31 @@ def parse_french_date(date_str):
             return now - timedelta(hours=hours)
         if "seconde" in date_str:
             return now
+
+    # Absolutes Datum (z.B. "28 février 2026 - 15:30" oder nur "28 février 2026")
+    date_match = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str)
+    if date_match:
+        day = int(date_match.group(1))
+        month_str = date_match.group(2)
+        year = int(date_match.group(3))
+        
+        month = FRENCH_MONTHS.get(month_str, 1)
+        
+        time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
+        hour, minute = 0, 0
+        if time_match:
+            hour, minute = int(time_match.group(1)), int(time_match.group(2))
+            
+        try:
+            return datetime(year, month, day, hour, minute)
+        except ValueError:
+            pass
     
     return None
 
 def get_session():
-    """Erstellt eine Session mit Headern"""
-    session = requests.Session()
-    session.headers.update({
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-    })
-    return session
+    """Gibt die globale Session zurück"""
+    return GLOBAL_SESSION
 
 def get_page_content(url):
     """Holt Seiteninhalt mit korrekter Kodierung"""
