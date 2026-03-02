@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remontées | mauricefun.lol</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --bg: #0f172a;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --header-height: 70px;
+            --station-color: #0ea5e9;
+            --lift-color: #f97316;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        .logo:hover { transform: scale(1.05); }
+
+        .nav-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            background: rgba(255,255,255,0.03);
+        }
+        .nav-link:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: calc(var(--header-height) + 2rem) auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 0;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .last-updated {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        .last-updated .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .section-icon {
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .section-stations .section-icon {
+            background: linear-gradient(135deg, var(--station-color), #38bdf8);
+        }
+
+        .section-lifts .section-icon {
+            background: linear-gradient(135deg, var(--lift-color), #fbbf24);
+        }
+
+        .section h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .section-stations h2 { color: var(--station-color); }
+        .section-lifts h2 { color: var(--lift-color); }
+
+        .item-count {
+            margin-left: auto;
+            background: rgba(255,255,255,0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .station-list, .lift-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .item-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .item-card:hover {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .item-card.expanded {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .item-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .item-header:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .expand-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+        }
+
+        .item-card.expanded .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text);
+            text-decoration: none;
+            flex: 1;
+            transition: color 0.2s;
+        }
+
+        .section-stations .item-card.expanded .item-name { color: var(--station-color); }
+        .section-lifts .item-card.expanded .item-name { color: var(--lift-color); }
+
+        .item-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .item-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            padding: 0 1rem;
+        }
+
+        .item-card.expanded .item-details {
+            max-height: 2000px;
+            padding: 0 1rem 1rem;
+        }
+
+        .details-content {
+            border-top: 1px solid var(--card-border);
+            padding-top: 1rem;
+        }
+
+        .summaries {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text);
+            padding: 0.5rem 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .section-stations .summary-item { border-left-color: var(--station-color); }
+        .section-lifts .summary-item { border-left-color: var(--lift-color); }
+
+        .summary-item::before {
+            content: '›';
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .section-stations .summary-item::before { color: var(--station-color); }
+        .section-lifts .summary-item::before { color: var(--lift-color); }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .image-gallery img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .image-gallery img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .external-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .external-link:hover {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .source-link {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .source-link:hover { text-decoration: underline; }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="/" class="logo">mauricelol.fun</a>
+        <div class="nav-group">
+            <a href="/" class="nav-link">← Home</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1>🚠 Remontées</h1>
+            <p class="subtitle">
+                Tägliche Updates aus der französischen Skigebiet-Szene.<br>
+                Stationen-Neuigkeiten und Lifte-Projekte aus den letzten 24h.
+            </p>
+            <div class="last-updated">
+                <span class="dot"></span>
+                <span id="update-time">Lade...</span>
+            </div>
+        </section>
+
+        <div class="content-grid">
+            <!-- Stationen -->
+            <section class="section section-stations">
+                <div class="section-header">
+                    <div class="section-icon">🏔️</div>
+                    <h2>Stationen</h2>
+                    <span class="item-count" id="station-count">0</span>
+                </div>
+                <div class="station-list" id="station-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Lade Stationen...
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lifte -->
+            <section class="section section-lifts">
+                <div class="section-header">
+                    <div class="section-icon">🚡</div>
+                    <h2>Lifte</h2>
+                    <span class="item-count" id="lift-count">0</span>
+                </div>
+                <div class="lift-list" id="lift-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Lade Lifte...
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>Daten von <a href="https://www.remontees-mecaniques.net" target="_blank" class="source-link">remontees-mecaniques.net</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem;">Automatisch aktualisiert täglich um 00:00 Uhr</p>
+    </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">×</span>
+        <img src="" alt="" id="lightbox-img">
+    </div>
+
+    <script>
+        // Expand/Collapse
+        function toggleItem(id) {
+            const card = document.getElementById('item-' + id);
+            card.classList.toggle('expanded');
+        }
+
+        // Lightbox
+        function openLightbox(src) {
+            const lightbox = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        // Render Item
+        function renderItem(item, type) {
+            const hasImages = item.images && item.images.length > 0;
+            const imageGallery = hasImages ? `
+                <div class="image-gallery">
+                    ${item.images.map(img => `
+                        <img src="${img.url}" alt="${img.alt || ''}" 
+                             onclick="event.stopPropagation(); openLightbox('${img.url}')" 
+                             loading="lazy">
+                    `).join('')}
+                </div>
+            ` : '';
+
+            const summaries = item.summaries.map(s => `
+                <div class="summary-item">${escapeHtml(s)}</div>
+            `).join('');
+
+            return `
+                <div class="item-card" id="item-${item.id}" onclick="toggleItem('${item.id}')">
+                    <div class="item-header">
+                        <span class="expand-icon">▶</span>
+                        <span class="item-name">${escapeHtml(item.name)}</span>
+                        <span class="item-time">${item.last_update}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="details-content">
+                            <div class="summaries">
+                                ${summaries}
+                            </div>
+                            ${imageGallery}
+                            <a href="${item.url}" target="_blank" class="external-link" 
+                               onclick="event.stopPropagation()">
+                                Zum Forum ↗
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load Data
+        async function loadData() {
+            try {
+                const response = await fetch('/data/remontees_data.json?ts=' + Date.now());
+                if (!response.ok) throw new Error('Daten nicht gefunden');
+                
+                const data = await response.json();
+                
+                // Update-Zeit
+                const updateTime = data.last_updated_display || new Date(data.last_updated).toLocaleString('de-DE');
+                document.getElementById('update-time').textContent = 'Letztes Update: ' + updateTime;
+                
+                // Stationen rendern
+                const stationList = document.getElementById('station-list');
+                const stationCount = document.getElementById('station-count');
+                
+                if (data.stations && data.stations.length > 0) {
+                    stationCount.textContent = data.stations.length;
+                    stationList.innerHTML = data.stations.map(s => renderItem(s, 'station')).join('');
+                } else {
+                    stationCount.textContent = '0';
+                    stationList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">😴</div>
+                            <p>Keine neuen Stationen-Nachrichten in den letzten 24h</p>
+                        </div>
+                    `;
+                }
+                
+                // Lifte rendern
+                const liftList = document.getElementById('lift-list');
+                const liftCount = document.getElementById('lift-count');
+                
+                if (data.lifts && data.lifts.length > 0) {
+                    liftCount.textContent = data.lifts.length;
+                    liftList.innerHTML = data.lifts.map(l => renderItem(l, 'lift')).join('');
+                } else {
+                    liftCount.textContent = '0';
+                    liftList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">😴</div>
+                            <p>Keine neuen Lifte-Nachrichten in den letzten 24h</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Fehler:', error);
+                document.getElementById('station-list').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Fehler beim Laden der Daten</p>
+                    </div>
+                `;
+                document.getElementById('lift-list').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <p>Fehler beim Laden der Daten</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Daten laden
+        loadData();
+    </script>
+</body>
+</html>
