@@ -11,7 +11,6 @@ import os
 import re
 import html
 from datetime import datetime, timedelta
-from urllib.parse import urljoin, urlparse
 
 BASE_URL = "https://www.remontees-mecaniques.net/forums"
 STATIONS_URL = f"{BASE_URL}/index.php?showforum=129"
@@ -77,8 +76,39 @@ def clean_text(text):
 def translate_french_to_german(text):
     """Übersetzt französische Texte ins Deutsche"""
     
-    # Wörterbuch - sortiert nach Länge (längste zuerst für korrekte Ersetzung)
+    # 1. API-basierte Übersetzung für saubere, grammatikalisch korrekte deutsche Sätze
+    try:
+        url = "https://translate.googleapis.com/translate_a/single"
+        params = {
+            "client": "gtx",
+            "sl": "fr",
+            "tl": "de",
+            "dt": "t",
+            "q": text
+        }
+        # Verwende get_session für besseres Handling
+        resp = get_session().get(url, params=params, timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            translated = "".join(item[0] for item in data[0] if item[0])
+            if translated and len(translated) > 0:
+                return translated
+    except Exception as e:
+        print(f"API-Übersetzung fehlgeschlagen, nutze Fallback: {e}")
+    
+    # 2. Fallback Wörterbuch - sortiert nach Länge (längste zuerst für korrekte Ersetzung)
     translations = {
+        # Häufige Phrasen & Fixes für Apostrophe
+        "c'est": "es ist",
+        "n'est": "ist nicht",
+        "qu'ils": "dass sie",
+        "qu'il": "dass er",
+        "d'un": "von einem",
+        "d'une": "von einer",
+        "l'on": "man",
+        "il y a": "vor",
+        "aujourd'hui": "heute",
+        
         # Phrasen (zuerst ersetzen)
         'remise en service': 'Wiederinbetriebnahme',
         'enquête publique': 'öffentliche Anhörung',
@@ -91,8 +121,6 @@ def translate_french_to_german(text):
         'piste bleue': 'blaue Piste',
         'piste rouge': 'rote Piste',
         'piste noire': 'schwarze Piste',
-        'il y a': 'vor',
-        'aujourd\'hui': 'heute',
         
         # Substantive
         'construction': 'Bau',
@@ -140,6 +168,10 @@ def translate_french_to_german(text):
         'altitude': 'Höhe',
         'débit': 'Kapazität',
         'longueur': 'Länge',
+        'chose': 'Sache',
+        'question': 'Frage',
+        'argent': 'Geld',
+        'recherche': 'Suche',
         
         # Verben
         'construit': 'gebaut',
@@ -192,7 +224,7 @@ def translate_french_to_german(text):
         'répondre': 'antworten',
         'répond': 'antwortet',
         
-        # Adjektive
+        # Adjektive & Adverbien
         'nouveau': 'neu',
         'nouvelle': 'neue',
         'ancien': 'alt',
@@ -217,6 +249,10 @@ def translate_french_to_german(text):
         'possible': 'möglich',
         'probable': 'wahrscheinlich',
         'certain': 'gewiss',
+        'très': 'sehr',
+        'bien': 'gut',
+        'plus': 'mehr',
+        'pas': 'nicht',
         
         # Artikel/Präpositionen
         'le': 'der',
@@ -246,6 +282,7 @@ def translate_french_to_german(text):
         'chez': 'bei',
         'contre': 'gegen',
         'entre': 'zwischen',
+        'à': 'an',
         
         # Pronomen
         'qui': 'der/die/das',
@@ -260,14 +297,28 @@ def translate_french_to_german(text):
         'notre': 'unser',
         'votre': 'euer',
         'leur': 'ihr',
+        'on': 'man',
+        'ils': 'sie',
     }
     
-    # Sortiere nach Länge (längste zuerst)
+    # Sortiere nach Länge (längste zuerst), damit z.B. "c'est" vor "est" ersetzt wird
     sorted_keys = sorted(translations.keys(), key=len, reverse=True)
     
     for fr in sorted_keys:
         de = translations[fr]
-        pattern = r'\b' + re.escape(fr) + r'\b'
+        
+        # BUGFIX: Standard-\b scheitert bei französischen Wörtern mit Apostroph (z.B. "c'est", "l'est").
+        # Lösung: Ein negativer Lookbehind/Lookahead, der verhindert, dass das Wort mitten im Satz
+        # nach einem Apostroph ersetzt wird (wie in C'ist statt C'est), außer das gesuchte Wort enthält selbst eins.
+        
+        # Pattern escaped den französischen Suchbegriff
+        fr_esc = re.escape(fr)
+        
+        # Sicherstellen, dass das Wort nicht Teil eines anderen Wortes ist
+        # (?<![a-zA-ZÀ-ÿ']) stellt sicher, dass links kein Buchstabe oder Apostroph ist
+        # (?![a-zA-ZÀ-ÿ]) stellt sicher, dass rechts kein Buchstabe ist
+        pattern = r'(?<![a-zA-ZÀ-ÿ\'])' + fr_esc + r'(?![a-zA-ZÀ-ÿ])'
+        
         text = re.sub(pattern, de, text, flags=re.IGNORECASE)
     
     return text
@@ -316,9 +367,13 @@ def extract_summaries(posts, max_summaries=5):
     for sentence in selected[:max_summaries]:
         translated = translate_french_to_german(sentence)
         translated = clean_text(translated)
-        # Entferne verbleibende Artikel
-        translated = re.sub(r'^(der|die|das|ein|eine|und|oder)\s+', '', translated, flags=re.IGNORECASE)
-        if len(translated) > 40:
+        
+        # Entferne nur noch Satzanfänge, die den Stichpunkt unflüssig machen, 
+        # aber keine Verben oder Pronomen (da die API jetzt echte Sätze liefert)
+        # Bsp: "Der neue Lift" -> "Neuer Lift" (optional, aber für Stichpunkte oft gut)
+        translated = re.sub(r'^(der|die|das|ein|eine)\s+', '', translated, flags=re.IGNORECASE)
+        
+        if len(translated) > 20: # Limit leicht gesenkt, da deutsche Übersetzungen kompakter sein können
             translated = translated[0].upper() + translated[1:]
             summaries.append(translated)
     
