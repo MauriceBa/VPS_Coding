@@ -337,7 +337,7 @@ def scrape_forum_list(url):
             # Filtere unerwünschte Einträge
             if not title or len(title) < 5:
                 continue
-            if title.startswith('[') or title.startswith('Liste des'):
+            if title.startswith('Liste des'):
                 continue
             
             # Extrahiere topic ID
@@ -451,17 +451,51 @@ def scrape_thread_posts(url, days_back=1):
                 # Bilder extrahieren (aus allen Posts)
                 for img in content_div.find_all('img'):
                     img_src = img.get('src', '')
-                    if img_src and not img_src.startswith('data:'):
-                        if img_src.startswith('/'):
-                            img_src = BASE_URL + img_src
-                        elif not img_src.startswith('http'):
-                            img_src = BASE_URL + '/' + img_src
-                        
-                        if 'remontees-mecaniques.net' in img_src:
-                            images.append({
-                                'url': img_src,
-                                'alt': img.get('alt', '')
-                            })
+                    if not img_src or img_src.startswith('data:'):
+                        continue
+                    
+                    # Profilbilder überspringen (showuser in URL)
+                    if 'showuser=' in img_src:
+                        continue
+                    
+                    # Smileys/Icons überspringen (typischerweise klein)
+                    width = img.get('width', '')
+                    height = img.get('height', '')
+                    if width and height:
+                        try:
+                            w, h = int(width), int(height)
+                            if w < 100 or h < 100:
+                                continue
+                        except:
+                            pass
+                    
+                    # Auch anhand des Pfads prüfen (Smileys/Icons)
+                    lower_src = img_src.lower()
+                    if any(x in lower_src for x in ['smile', 'icon', 'emoji', 'emoticon', 'style_images', 'public/style', 'button', 'arrow']):
+                        continue
+                    
+                    # Dateiendung prüfen (nur echte Bilder)
+                    if not any(lower_src.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']):
+                        # Manche Bilder haben Parameter nach der Endung
+                        if '?' in lower_src:
+                            base = lower_src.split('?')[0]
+                            if not any(base.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']):
+                                continue
+                        else:
+                            continue
+                    
+                    # Relativen URLs zu absoluten machen
+                    if img_src.startswith('/'):
+                        img_src = BASE_URL + img_src
+                    elif not img_src.startswith('http'):
+                        img_src = BASE_URL + '/' + img_src
+                    
+                    # Nur Bilder vom Forum-Server
+                    if 'remontees-mecaniques.net' in img_src:
+                        images.append({
+                            'url': img_src,
+                            'alt': img.get('alt', '')
+                        })
                 
                 # Nur Posts im Zeitfenster für Text
                 if time_found >= cutoff_time:
