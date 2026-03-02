@@ -50,6 +50,13 @@ def get_session():
     })
     return session
 
+def get_page_content(url):
+    """Holt Seiteninhalt mit korrekter Kodierung"""
+    session = get_session()
+    resp = session.get(url, timeout=30)
+    # Das Forum nutzt eigentlich Latin-1 (ISO-8859-1)
+    return resp.content.decode('latin-1')
+
 def clean_text(text):
     """Bereinigt Text von überflüssigen Leerzeichen"""
     text = re.sub(r'\s+', ' ', text).strip()
@@ -232,11 +239,9 @@ def extract_summaries(posts):
 
 def scrape_forum_list(url):
     """Scraped die Thread-Liste aus einem Forum"""
-    session = get_session()
     try:
-        resp = session.get(url, timeout=30)
-        resp.encoding = 'utf-8'
-        soup = BeautifulSoup(resp.text, 'html.parser')
+        html_content = get_page_content(url)
+        soup = BeautifulSoup(html_content, 'html.parser')
         
         threads = []
         seen_topics = set()
@@ -273,9 +278,6 @@ def scrape_forum_list(url):
             
             href = topic_link.get('href', '')
             title = best_text
-            
-            # Kodierung fixen
-            title = title.encode('latin-1').decode('utf-8', errors='ignore')
             
             # Filtere unerwünschte Einträge
             if not title or len(title) < 5:
@@ -338,11 +340,9 @@ def scrape_forum_list(url):
 
 def scrape_thread_posts(url):
     """Scraped die Posts und Bilder aus einem Thread"""
-    session = get_session()
     try:
-        resp = session.get(url, timeout=30)
-        resp.encoding = 'utf-8'
-        soup = BeautifulSoup(resp.text, 'html.parser')
+        html_content = get_page_content(url)
+        soup = BeautifulSoup(html_content, 'html.parser')
         
         posts = []
         images = []
@@ -400,8 +400,6 @@ def scrape_thread_posts(url):
                 text = clean_text(text)
                 
                 if len(text) > 30:
-                    # Kodierung fixen
-                    text = text.encode('latin-1').decode('utf-8', errors='ignore')
                     posts.append({
                         'time': time_found.isoformat(),
                         'content': text
