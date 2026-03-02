@@ -149,6 +149,32 @@ def translate_french_to_german(text):
         'montage': 'Aufbau',
         'assemblage': 'Montage',
         
+        # Aus Forum-Posts extrahiert
+        'bâche': 'Abdeckplane',
+        'baches': 'Planen',
+        'autorisation': 'Genehmigung',
+        'autorisations': 'Genehmigungen',
+        'étude': 'Studie',
+        'études': 'Studien',
+        'repositionner': 'verlagern',
+        'remise en service': 'Wiederinbetriebnahme',
+        'supprimer': 'aufheben',
+        'suppression': 'Aufhebung',
+        'débit': 'Kapazität',
+        'fort': 'hoch',
+        'incohérence': 'Unsinn',
+        'folle': 'wahnwitzig',
+        'sûr': 'sicher',
+        'maillon': 'Glied',
+        'essentiel': 'essentiell',
+        'rejoindre': 'erreichen',
+        'injustifié': 'ungerechtfertigt',
+        'curieux': 'Neugierige',
+        'nombreux': 'zahlreiche',
+        'informe': 'informiert',
+        'ajout': 'Hinzufügung',
+        'ajouté': 'hinzugefügt',
+        
         # Firmen/Hersteller
         'poma': 'Poma',
         'leitner': 'Leitner',
@@ -338,30 +364,49 @@ def scrape_forum_list(url):
         traceback.print_exc()
         return []
 
-def scrape_thread_posts(url):
+def scrape_thread_posts(url, days_back=1):
     """Scraped die Posts und Bilder aus einem Thread"""
     try:
-        html_content = get_page_content(url)
+        # Füge view=getlastpost hinzu um die neuesten Posts zu sehen
+        if '?' in url:
+            url_with_view = url + '&view=getlastpost'
+        else:
+            url_with_view = url + '?view=getlastpost'
+        
+        html_content = get_page_content(url_with_view)
         soup = BeautifulSoup(html_content, 'html.parser')
         
         posts = []
         images = []
-        cutoff_time = datetime.now() - timedelta(days=1)
+        cutoff_time = datetime.now() - timedelta(days=days_back)
         
         # IP.Board Post-Container finden
-        post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower())
+        post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower() if x else False)
         
         for post in post_containers:
-            # Zeit finden
+            # Zeit finden - IP.Board nutzt <abbr class="published">
             time_found = None
-            time_el = post.find('time')
-            if time_el:
-                datetime_attr = time_el.get('datetime')
-                if datetime_attr:
+            
+            # Versuche <abbr class="published">
+            abbr = post.find('abbr', class_='published')
+            if abbr:
+                title = abbr.get('title', '')
+                if title:
                     try:
-                        time_found = datetime.fromisoformat(datetime_attr.replace('Z', '+00:00').replace('+00:00', ''))
+                        time_found = datetime.fromisoformat(title.replace('Z', '+00:00').replace('+00:00', ''))
                     except:
                         pass
+            
+            # Fallback: <time> Element
+            if not time_found:
+                time_el = post.find('time')
+                if time_el:
+                    datetime_attr = time_el.get('datetime')
+                    if datetime_attr:
+                        try:
+                            time_found = datetime.fromisoformat(datetime_attr.replace('Z', '+00:00').replace('+00:00', ''))
+                        except:
+                            pass
             
             # Wenn keine Zeit gefunden, überspringen
             if not time_found:
@@ -389,7 +434,7 @@ def scrape_thread_posts(url):
                             'alt': img.get('alt', '')
                         })
             
-            # Nur Posts der letzten 24h für Text
+            # Nur Posts der letzten X Tage für Text
             if time_found >= cutoff_time:
                 # Text extrahieren
                 text = content_div.get_text(separator=' ', strip=True)

@@ -109,6 +109,15 @@
             margin: 0 auto;
         }
 
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
         .last-updated {
             display: inline-flex;
             align-items: center;
@@ -118,7 +127,6 @@
             border-radius: 50px;
             font-size: 0.85rem;
             color: var(--text-muted);
-            margin-top: 1rem;
         }
 
         .last-updated .dot {
@@ -134,6 +142,80 @@
             50% { opacity: 0.5; transform: scale(0.8); }
         }
 
+        .refresh-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .refresh-btn.spinning .refresh-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .time-range {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+        }
+
+        .time-range label {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .time-slider {
+            -webkit-appearance: none;
+            width: 150px;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+        }
+
+        .time-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .time-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .time-value {
+            font-weight: 600;
+            color: var(--text);
+            min-width: 70px;
+            text-align: left;
+        }
+
         .content-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -143,6 +225,7 @@
 
         @media (max-width: 900px) {
             .content-grid { grid-template-columns: 1fr; }
+            .controls { flex-direction: column; }
         }
 
         .section {
@@ -446,11 +529,26 @@
             <h1>🚠 Remontées</h1>
             <p class="subtitle">
                 Tägliche Updates aus der französischen Skigebiet-Szene.<br>
-                Stationen-Neuigkeiten und Lifte-Projekte aus den letzten 24h.
+                Stationen-Neuigkeiten und Lifte-Projekte.
             </p>
-            <div class="last-updated">
-                <span class="dot"></span>
-                <span id="update-time">Lade...</span>
+            
+            <div class="controls">
+                <div class="last-updated">
+                    <span class="dot"></span>
+                    <span id="update-time">Lade...</span>
+                </div>
+                
+                <div class="time-range">
+                    <label>Zeitraum:</label>
+                    <input type="range" class="time-slider" id="time-slider" 
+                           min="1" max="7" value="1" step="1">
+                    <span class="time-value" id="time-value">24 Stunden</span>
+                </div>
+                
+                <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+                    <span class="refresh-icon">🔄</span>
+                    <span>Aktualisieren</span>
+                </button>
             </div>
         </section>
 
@@ -499,6 +597,28 @@
     </div>
 
     <script>
+        let currentData = null;
+        let daysBack = 1;
+
+        // Slider Event
+        const timeSlider = document.getElementById('time-slider');
+        const timeValue = document.getElementById('time-value');
+        
+        const timeLabels = {
+            1: '24 Stunden',
+            2: '2 Tage',
+            3: '3 Tage',
+            4: '4 Tage',
+            5: '5 Tage',
+            6: '6 Tage',
+            7: '1 Woche'
+        };
+
+        timeSlider.addEventListener('input', (e) => {
+            daysBack = parseInt(e.target.value);
+            timeValue.textContent = timeLabels[daysBack];
+        });
+
         // Expand/Collapse
         function toggleItem(id) {
             const card = document.getElementById('item-' + id);
@@ -563,51 +683,77 @@
             return div.innerHTML;
         }
 
-        // Load Data
+        function filterByTime(items) {
+            if (!items) return [];
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - daysBack);
+            
+            return items.filter(item => {
+                // Parse last_update (format: "02.03. 14:38")
+                const parts = item.last_update.split('.');
+                if (parts.length >= 2) {
+                    const day = parseInt(parts[0]);
+                    const month = parseInt(parts[1]) - 1;
+                    const year = new Date().getFullYear();
+                    const itemDate = new Date(year, month, day);
+                    return itemDate >= cutoff;
+                }
+                return true;
+            });
+        }
+
+        function renderData() {
+            if (!currentData) return;
+
+            // Stationen rendern
+            const stationList = document.getElementById('station-list');
+            const stationCount = document.getElementById('station-count');
+            const filteredStations = filterByTime(currentData.stations);
+            
+            if (filteredStations.length > 0) {
+                stationCount.textContent = filteredStations.length;
+                stationList.innerHTML = filteredStations.map(s => renderItem(s, 'station')).join('');
+            } else {
+                stationCount.textContent = '0';
+                stationList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">😴</div>
+                        <p>Keine Stationen-Nachrichten im gewählten Zeitraum</p>
+                    </div>
+                `;
+            }
+            
+            // Lifte rendern
+            const liftList = document.getElementById('lift-list');
+            const liftCount = document.getElementById('lift-count');
+            const filteredLifts = filterByTime(currentData.lifts);
+            
+            if (filteredLifts.length > 0) {
+                liftCount.textContent = filteredLifts.length;
+                liftList.innerHTML = filteredLifts.map(l => renderItem(l, 'lift')).join('');
+            } else {
+                liftCount.textContent = '0';
+                liftList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">😴</div>
+                        <p>Keine Lifte-Nachrichten im gewählten Zeitraum</p>
+                    </div>
+                `;
+            }
+        }
+
         async function loadData() {
             try {
                 const response = await fetch('/data/remontees_data.json?ts=' + Date.now());
                 if (!response.ok) throw new Error('Daten nicht gefunden');
                 
-                const data = await response.json();
+                currentData = await response.json();
                 
                 // Update-Zeit
-                const updateTime = data.last_updated_display || new Date(data.last_updated).toLocaleString('de-DE');
+                const updateTime = currentData.last_updated_display || new Date(currentData.last_updated).toLocaleString('de-DE');
                 document.getElementById('update-time').textContent = 'Letztes Update: ' + updateTime;
                 
-                // Stationen rendern
-                const stationList = document.getElementById('station-list');
-                const stationCount = document.getElementById('station-count');
-                
-                if (data.stations && data.stations.length > 0) {
-                    stationCount.textContent = data.stations.length;
-                    stationList.innerHTML = data.stations.map(s => renderItem(s, 'station')).join('');
-                } else {
-                    stationCount.textContent = '0';
-                    stationList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">😴</div>
-                            <p>Keine neuen Stationen-Nachrichten in den letzten 24h</p>
-                        </div>
-                    `;
-                }
-                
-                // Lifte rendern
-                const liftList = document.getElementById('lift-list');
-                const liftCount = document.getElementById('lift-count');
-                
-                if (data.lifts && data.lifts.length > 0) {
-                    liftCount.textContent = data.lifts.length;
-                    liftList.innerHTML = data.lifts.map(l => renderItem(l, 'lift')).join('');
-                } else {
-                    liftCount.textContent = '0';
-                    liftList.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">😴</div>
-                            <p>Keine neuen Lifte-Nachrichten in den letzten 24h</p>
-                        </div>
-                    `;
-                }
+                renderData();
                 
             } catch (error) {
                 console.error('Fehler:', error);
@@ -626,7 +772,21 @@
             }
         }
 
-        // Daten laden
+        async function refreshData() {
+            const btn = document.getElementById('refresh-btn');
+            btn.classList.add('spinning');
+            btn.disabled = true;
+            
+            await loadData();
+            
+            btn.classList.remove('spinning');
+            btn.disabled = false;
+        }
+
+        // Slider change triggers re-render
+        timeSlider.addEventListener('change', renderData);
+
+        // Initial load
         loadData();
     </script>
 </body>
