@@ -10,6 +10,7 @@ import json
 import os
 import re
 import html
+import time
 from datetime import datetime, timedelta
 
 BASE_URL = "https://www.remontees-mecaniques.net/forums"
@@ -99,258 +100,109 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def translate_french_to_german(text):
-    """Übersetzt französische Texte ins Deutsche"""
+def translate_french_to_german_bulk(texts):
+    """Übersetzt eine Liste von Texten per Batch mit Rate-Limit Schutz."""
+    if not texts:
+        return []
+        
+    # Kombiniere mit seltenem Trennzeichen
+    separator = " ||| "
+    combined_text = separator.join(texts)
     
-    # 1. API-basierte Übersetzung für saubere, grammatikalisch korrekte deutsche Sätze
     try:
+        # Kurzer Delay um Rate-Limits vorzubeugen, wenn Funktion mehrfach aufgerufen wird
+        time.sleep(1)
+        
         url = "https://translate.googleapis.com/translate_a/single"
         params = {
             "client": "gtx",
             "sl": "fr",
             "tl": "de",
             "dt": "t",
-            "q": text
+            "q": combined_text
         }
-        # Verwende get_session für besseres Handling
-        resp = get_session().get(url, params=params, timeout=5)
+        
+        resp = get_session().get(url, params=params, timeout=10)
         if resp.status_code == 200:
             data = resp.json()
-            translated = "".join(item[0] for item in data[0] if item[0])
-            if translated and len(translated) > 0:
-                return translated
+            translated_combined = "".join(item[0] for item in data[0] if item[0])
+            
+            # Wieder aufsplitten und säubern
+            translated_list = translated_combined.split(separator.strip())
+            return [t.strip() for t in translated_list if t.strip()]
+            
     except Exception as e:
-        print(f"API-Übersetzung fehlgeschlagen, nutze Fallback: {e}")
+        print(f"API-Bulk-Übersetzung fehlgeschlagen, nutze Fallback: {e}")
     
-    # 2. Fallback Wörterbuch - sortiert nach Länge (längste zuerst für korrekte Ersetzung)
+    # Fallback: Dictionary (wie vorher, aber iterativ für die Liste)
+    return [translate_french_to_german_fallback(t) for t in texts]
+
+
+def translate_french_to_german_fallback(text):
+    """Lokales Fallback-Wörterbuch für Übersetzungen"""
     translations = {
-        # Häufige Phrasen & Fixes für Apostrophe
-        "c'est": "es ist",
-        "n'est": "ist nicht",
-        "qu'ils": "dass sie",
-        "qu'il": "dass er",
-        "d'un": "von einem",
-        "d'une": "von einer",
-        "l'on": "man",
-        "il y a": "vor",
-        "aujourd'hui": "heute",
-        
-        # Phrasen (zuerst ersetzen)
-        'remise en service': 'Wiederinbetriebnahme',
-        'enquête publique': 'öffentliche Anhörung',
-        'remontée mécanique': 'Aufstiegshilfe',
-        'remontées mécaniques': 'Aufstiegshilfen',
-        'domaine skiable': 'Skigebiet',
-        'gare aval': 'Talstation',
-        'gare amont': 'Bergstation',
-        'piste verte': 'blaue Piste',
-        'piste bleue': 'blaue Piste',
-        'piste rouge': 'rote Piste',
-        'piste noire': 'schwarze Piste',
-        
-        # Substantive
-        'construction': 'Bau',
-        'projet': 'Projekt',
-        'projets': 'Projekte',
-        'rénovation': 'Renovierung',
-        'démolition': 'Abriss',
-        'remplacement': 'Ersatz',
-        'ouverture': 'Eröffnung',
-        'fermeture': 'Schließung',
-        'retard': 'Verzögerung',
-        'avancement': 'Fortschritt',
-        'gare': 'Station',
-        'pylône': 'Pylon',
-        'cabine': 'Kabine',
-        'télécabine': 'Gondelbahn',
-        'télésiège': 'Sessellift',
-        'téléski': 'Schlepplift',
-        'téléphérique': 'Seilbahn',
-        'piste': 'Piste',
-        'pistes': 'Pisten',
-        'neige': 'Schnee',
-        'dameuse': 'Pistenraupe',
-        'été': 'Sommer',
-        'hiver': 'Winter',
-        'saison': 'Saison',
-        'année': 'Jahr',
-        'mois': 'Monat',
-        'semaine': 'Woche',
-        'jour': 'Tag',
-        'hier': 'gestern',
-        'demain': 'morgen',
-        'permis': 'Genehmigung',
-        'autorisation': 'Genehmigung',
-        'étude': 'Studie',
-        'enquête': 'Anhörung',
-        'travaux': 'Arbeiten',
-        'chantier': 'Baustelle',
-        'installation': 'Anlage',
-        'démontage': 'Abbau',
-        'montage': 'Aufbau',
-        'massif': 'Massiv',
-        'vallée': 'Tal',
-        'sommet': 'Gipfel',
-        'altitude': 'Höhe',
-        'débit': 'Kapazität',
-        'longueur': 'Länge',
-        'chose': 'Sache',
-        'question': 'Frage',
-        'argent': 'Geld',
-        'recherche': 'Suche',
-        
-        # Verben
-        'construit': 'gebaut',
-        'construire': 'bauen',
-        'projeté': 'geplant',
-        'remplacé': 'ersetzt',
-        'remplacer': 'ersetzen',
-        'ouvert': 'geöffnet',
-        'ouvrir': 'öffnen',
-        'fermé': 'geschlossen',
-        'fermer': 'schließen',
-        'terminé': 'fertiggestellt',
-        'commencé': 'begonnen',
-        'commencer': 'beginnen',
-        'prévu': 'geplant',
-        'reporté': 'verschoben',
-        'annulé': 'abgesagt',
-        'confirmé': 'bestätigt',
-        'être': 'sein',
-        'est': 'ist',
-        'sont': 'sind',
-        'avoir': 'haben',
-        'a': 'hat',
-        'faire': 'machen',
-        'fait': 'gemacht',
-        'dire': 'sagen',
-        'dit': 'gesagt',
-        'voir': 'sehen',
-        'voit': 'sieht',
-        'savoir': 'wissen',
-        'sait': 'weiß',
-        'pouvoir': 'können',
-        'peut': 'kann',
-        'devoir': 'müssen',
-        'doit': 'muss',
-        'aller': 'gehen',
-        'va': 'geht',
-        'venir': 'kommen',
-        'vient': 'kommt',
-        'prendre': 'nehmen',
-        'prend': 'nimmt',
-        'donner': 'geben',
-        'donne': 'gibt',
-        'trouver': 'finden',
-        'trouve': 'findet',
-        'demander': 'fragen',
-        'demande': 'fragt',
-        'rester': 'bleiben',
-        'reste': 'bleibt',
-        'répondre': 'antworten',
-        'répond': 'antwortet',
-        
-        # Adjektive & Adverbien
-        'nouveau': 'neu',
-        'nouvelle': 'neue',
-        'ancien': 'alt',
-        'ancienne': 'alte',
-        'grand': 'groß',
-        'grande': 'große',
-        'petit': 'klein',
-        'petite': 'kleine',
-        'bon': 'gut',
-        'bonne': 'gute',
-        'mauvais': 'schlecht',
-        'beau': 'schön',
-        'belle': 'schöne',
-        'haut': 'hoch',
-        'haute': 'hohe',
-        'bas': 'niedrig',
-        'basse': 'niedrige',
-        'long': 'lang',
-        'longue': 'lange',
-        'facile': 'einfach',
-        'difficile': 'schwierig',
-        'possible': 'möglich',
-        'probable': 'wahrscheinlich',
-        'certain': 'gewiss',
-        'très': 'sehr',
-        'bien': 'gut',
-        'plus': 'mehr',
-        'pas': 'nicht',
-        
-        # Artikel/Präpositionen
-        'le': 'der',
-        'la': 'die',
-        'les': 'die',
-        'un': 'ein',
-        'une': 'eine',
-        'des': 'einige',
-        'du': 'vom',
-        'de': 'von',
-        'et': 'und',
-        'ou': 'oder',
-        'mais': 'aber',
-        'donc': 'deshalb',
-        'dans': 'in',
-        'sur': 'auf',
-        'avec': 'mit',
-        'pour': 'für',
-        'par': 'durch',
-        'sans': 'ohne',
-        'sous': 'unter',
-        'vers': 'gegen',
-        'avant': 'vor',
-        'après': 'nach',
-        'depuis': 'seit',
-        'pendant': 'während',
-        'chez': 'bei',
-        'contre': 'gegen',
-        'entre': 'zwischen',
-        'à': 'an',
-        
-        # Pronomen
-        'qui': 'der/die/das',
-        'que': 'dass',
-        'quoi': 'was',
-        'ce': 'dies',
-        'cette': 'diese',
-        'ces': 'diese',
-        'mon': 'mein',
-        'ton': 'dein',
-        'son': 'sein',
-        'notre': 'unser',
-        'votre': 'euer',
-        'leur': 'ihr',
-        'on': 'man',
-        'ils': 'sie',
+        "c'est": "es ist", "n'est": "ist nicht", "qu'ils": "dass sie", "qu'il": "dass er",
+        "d'un": "von einem", "d'une": "von einer", "l'on": "man", "il y a": "vor", "aujourd'hui": "heute",
+        'remise en service': 'Wiederinbetriebnahme', 'enquête publique': 'öffentliche Anhörung',
+        'remontée mécanique': 'Aufstiegshilfe', 'remontées mécaniques': 'Aufstiegshilfen',
+        'domaine skiable': 'Skigebiet', 'gare aval': 'Talstation', 'gare amont': 'Bergstation',
+        'piste verte': 'blaue Piste', 'piste bleue': 'blaue Piste', 'piste rouge': 'rote Piste',
+        'piste noire': 'schwarze Piste', 'construction': 'Bau', 'projet': 'Projekt',
+        'projets': 'Projekte', 'rénovation': 'Renovierung', 'démolition': 'Abriss',
+        'remplacement': 'Ersatz', 'ouverture': 'Eröffnung', 'fermeture': 'Schließung',
+        'retard': 'Verzögerung', 'avancement': 'Fortschritt', 'gare': 'Station',
+        'pylône': 'Pylon', 'cabine': 'Kabine', 'télécabine': 'Gondelbahn',
+        'télésiège': 'Sessellift', 'téléski': 'Schlepplift', 'téléphérique': 'Seilbahn',
+        'piste': 'Piste', 'pistes': 'Pisten', 'neige': 'Schnee', 'dameuse': 'Pistenraupe',
+        'été': 'Sommer', 'hiver': 'Winter', 'saison': 'Saison', 'année': 'Jahr',
+        'mois': 'Monat', 'semaine': 'Woche', 'jour': 'Tag', 'hier': 'gestern',
+        'demain': 'morgen', 'permis': 'Genehmigung', 'autorisation': 'Genehmigung',
+        'étude': 'Studie', 'enquête': 'Anhörung', 'travaux': 'Arbeiten',
+        'chantier': 'Baustelle', 'installation': 'Anlage', 'démontage': 'Abbau',
+        'montage': 'Aufbau', 'massif': 'Massiv', 'vallée': 'Tal', 'sommet': 'Gipfel',
+        'altitude': 'Höhe', 'débit': 'Kapazität', 'longueur': 'Länge', 'chose': 'Sache',
+        'question': 'Frage', 'argent': 'Geld', 'recherche': 'Suche', 'construit': 'gebaut',
+        'construire': 'bauen', 'projeté': 'geplant', 'remplacé': 'ersetzt',
+        'remplacer': 'ersetzen', 'ouvert': 'geöffnet', 'ouvrir': 'öffnen',
+        'fermé': 'geschlossen', 'fermer': 'schließen', 'terminé': 'fertiggestellt',
+        'commencé': 'begonnen', 'commencer': 'beginnen', 'prévu': 'geplant',
+        'reporté': 'verschoben', 'annulé': 'abgesagt', 'confirmé': 'bestätigt',
+        'être': 'sein', 'est': 'ist', 'sont': 'sind', 'avoir': 'haben', 'a': 'hat',
+        'faire': 'machen', 'fait': 'gemacht', 'dire': 'sagen', 'dit': 'gesagt',
+        'voir': 'sehen', 'voit': 'sieht', 'savoir': 'wissen', 'sait': 'weiß',
+        'pouvoir': 'können', 'peut': 'kann', 'devoir': 'müssen', 'doit': 'muss',
+        'aller': 'gehen', 'va': 'geht', 'venir': 'kommen', 'vient': 'kommt',
+        'prendre': 'nehmen', 'prend': 'nimmt', 'donner': 'geben', 'donne': 'gibt',
+        'trouver': 'finden', 'trouve': 'findet', 'demander': 'fragen', 'demande': 'fragt',
+        'rester': 'bleiben', 'reste': 'bleibt', 'répondre': 'antworten', 'répond': 'antwortet',
+        'nouveau': 'neu', 'nouvelle': 'neue', 'ancien': 'alt', 'ancienne': 'alte',
+        'grand': 'groß', 'grande': 'große', 'petit': 'klein', 'petite': 'kleine',
+        'bon': 'gut', 'bonne': 'gute', 'mauvais': 'schlecht', 'beau': 'schön',
+        'belle': 'schöne', 'haut': 'hoch', 'haute': 'hohe', 'bas': 'niedrig',
+        'basse': 'niedrige', 'long': 'lang', 'longue': 'lange', 'facile': 'einfach',
+        'difficile': 'schwierig', 'possible': 'möglich', 'probable': 'wahrscheinlich',
+        'certain': 'gewiss', 'très': 'sehr', 'bien': 'gut', 'plus': 'mehr', 'pas': 'nicht',
+        'le': 'der', 'la': 'die', 'les': 'die', 'un': 'ein', 'une': 'eine', 'des': 'einige',
+        'du': 'vom', 'de': 'von', 'et': 'und', 'ou': 'oder', 'mais': 'aber', 'donc': 'deshalb',
+        'dans': 'in', 'sur': 'auf', 'avec': 'mit', 'pour': 'für', 'par': 'durch',
+        'sans': 'ohne', 'sous': 'unter', 'vers': 'gegen', 'avant': 'vor', 'après': 'nach',
+        'depuis': 'seit', 'pendant': 'während', 'chez': 'bei', 'contre': 'gegen',
+        'entre': 'zwischen', 'à': 'an', 'qui': 'der/die/das', 'que': 'dass', 'quoi': 'was',
+        'ce': 'dies', 'cette': 'diese', 'ces': 'diese', 'mon': 'mein', 'ton': 'dein',
+        'son': 'sein', 'notre': 'unser', 'votre': 'euer', 'leur': 'ihr', 'on': 'man', 'ils': 'sie',
     }
     
-    # Sortiere nach Länge (längste zuerst), damit z.B. "c'est" vor "est" ersetzt wird
     sorted_keys = sorted(translations.keys(), key=len, reverse=True)
-    
     for fr in sorted_keys:
         de = translations[fr]
-        
-        # BUGFIX: Standard-\b scheitert bei französischen Wörtern mit Apostroph (z.B. "c'est", "l'est").
-        # Lösung: Ein negativer Lookbehind/Lookahead, der verhindert, dass das Wort mitten im Satz
-        # nach einem Apostroph ersetzt wird (wie in C'ist statt C'est), außer das gesuchte Wort enthält selbst eins.
-        
-        # Pattern escaped den französischen Suchbegriff
         fr_esc = re.escape(fr)
-        
-        # Sicherstellen, dass das Wort nicht Teil eines anderen Wortes ist
-        # (?<![a-zA-ZÀ-ÿ']) stellt sicher, dass links kein Buchstabe oder Apostroph ist
-        # (?![a-zA-ZÀ-ÿ]) stellt sicher, dass rechts kein Buchstabe ist
         pattern = r'(?<![a-zA-ZÀ-ÿ\'])' + fr_esc + r'(?![a-zA-ZÀ-ÿ])'
-        
         text = re.sub(pattern, de, text, flags=re.IGNORECASE)
     
     return text
 
 def extract_summaries(posts, max_summaries=5):
-    """Extrahiert Stichpunkte aus allen Posts zusammen"""
+    """Extrahiert Stichpunkte aus allen Posts zusammen mit Rate-Limit Schutz"""
     if not posts:
         return []
     
@@ -387,19 +239,23 @@ def extract_summaries(posts, max_summaries=5):
         if not words.issubset(used_words):
             selected.append(sentence)
             used_words.update(words)
+            
+    if not selected:
+        return []
     
-    # Übersetzen
+    # Übersetze alle ausgewählten Sätze AUF EINMAL (Bulk) um Google Rate-Limits zu verhindern
+    translated_sentences = translate_french_to_german_bulk(selected[:max_summaries])
+    
     summaries = []
-    for sentence in selected[:max_summaries]:
-        translated = translate_french_to_german(sentence)
+    for translated in translated_sentences:
         translated = clean_text(translated)
         
-        # Entferne nur noch Satzanfänge, die den Stichpunkt unflüssig machen, 
-        # aber keine Verben oder Pronomen (da die API jetzt echte Sätze liefert)
-        # Bsp: "Der neue Lift" -> "Neuer Lift" (optional, aber für Stichpunkte oft gut)
+        # Säubern für Stichpunkt-Look
         translated = re.sub(r'^(der|die|das|ein|eine)\s+', '', translated, flags=re.IGNORECASE)
+        # Säubere API Artefakte wie führende Pipes falls aufgetreten
+        translated = re.sub(r'^[|\s]+', '', translated)
         
-        if len(translated) > 20: # Limit leicht gesenkt, da deutsche Übersetzungen kompakter sein können
+        if len(translated) > 20: 
             translated = translated[0].upper() + translated[1:]
             summaries.append(translated)
     
