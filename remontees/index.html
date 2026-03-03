@@ -118,7 +118,7 @@
             flex-wrap: wrap;
         }
 
-        .last-updated {
+        .last-updated, .info-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
@@ -140,85 +140,6 @@
         @keyframes pulse {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        .refresh-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .refresh-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
-        }
-
-        .refresh-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .refresh-btn.spinning .refresh-icon {
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .posts-range {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            background: rgba(255,255,255,0.05);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-        }
-
-        .posts-range label {
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-
-        .posts-slider {
-            -webkit-appearance: none;
-            width: 180px;
-            height: 6px;
-            border-radius: 3px;
-            background: rgba(255,255,255,0.1);
-            outline: none;
-        }
-
-        .posts-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .posts-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-        }
-
-        .posts-value {
-            font-weight: 600;
-            color: var(--text);
-            min-width: 90px;
-            text-align: left;
         }
 
         .content-grid {
@@ -474,33 +395,8 @@
             margin: 0 auto 1rem;
         }
 
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9998;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .loading-overlay .spinner {
-            width: 60px;
-            height: 60px;
-        }
-
-        .loading-text {
-            margin-top: 1rem;
-            font-size: 1.1rem;
-            color: var(--text);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         footer {
@@ -562,18 +458,12 @@
         </div>
     </header>
 
-    <!-- Loading Overlay für Scraper-Aufruf -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="spinner"></div>
-        <div class="loading-text">Scrape läuft... Das kann 20-40 Sekunden dauern 🚠</div>
-    </div>
-
     <main>
         <section class="hero">
             <h1>🚠 Remontées</h1>
             <p class="subtitle">
                 Tägliche Updates aus der französischen Skigebiet-Szene.<br>
-                Stationen-Neuigkeiten und Lifte-Projekte.
+                Zusammenfassungen der neuesten Forenbeiträge.
             </p>
             
             <div class="controls">
@@ -581,18 +471,6 @@
                     <span class="dot"></span>
                     <span id="update-time">Lade...</span>
                 </div>
-                
-                <div class="posts-range">
-                    <label>Beiträge pro Thread:</label>
-                    <input type="range" class="posts-slider" id="posts-slider" 
-                           min="5" max="40" value="20" step="5">
-                    <span class="posts-value" id="posts-value">20 Beiträge</span>
-                </div>
-                
-                <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
-                    <span class="refresh-icon">🔄</span>
-                    <span>Neu scrapen</span>
-                </button>
             </div>
         </section>
 
@@ -631,7 +509,7 @@
 
     <footer>
         <p>Daten von <a href="https://www.remontees-mecaniques.net" target="_blank" class="source-link">remontees-mecaniques.net</a></p>
-        <p style="margin-top: 0.5rem; font-size: 0.75rem;">Automatisch aktualisiert täglich um 00:00 Uhr</p>
+        <p style="margin-top: 0.5rem; font-size: 0.75rem;">Automatisch generiert per Skript</p>
     </footer>
 
     <!-- Lightbox -->
@@ -642,16 +520,6 @@
 
     <script>
         let currentData = null;
-        let postsPerThread = 20;
-
-        // Slider Event
-        const postsSlider = document.getElementById('posts-slider');
-        const postsValue = document.getElementById('posts-value');
-        
-        postsSlider.addEventListener('input', (e) => {
-            postsPerThread = parseInt(e.target.value);
-            postsValue.textContent = postsPerThread + ' Beiträge';
-        });
 
         // Expand/Collapse
         function toggleItem(id) {
@@ -768,14 +636,8 @@
                 
                 // Update-Zeit
                 const updateTime = currentData.last_updated_display || new Date(currentData.last_updated).toLocaleString('de-DE');
-                const postsInfo = currentData.posts_per_thread ? ` (${currentData.posts_per_thread} Posts)` : '';
+                const postsInfo = currentData.posts_per_thread ? ` (Basis: Letzte ${currentData.posts_per_thread} Posts)` : '';
                 document.getElementById('update-time').textContent = 'Letztes Update: ' + updateTime + postsInfo;
-                
-                // Slider auf gespeicherten Wert setzen
-                if (currentData.posts_per_thread) {
-                    postsSlider.value = currentData.posts_per_thread;
-                    postsValue.textContent = currentData.posts_per_thread + ' Beiträge';
-                }
                 
                 renderData();
                 
@@ -793,41 +655,6 @@
                         <p>Fehler beim Laden der Daten</p>
                     </div>
                 `;
-            }
-        }
-
-        async function refreshData() {
-            const btn = document.getElementById('refresh-btn');
-            const overlay = document.getElementById('loading-overlay');
-            
-            btn.classList.add('spinning');
-            btn.disabled = true;
-            overlay.classList.add('active');
-            
-            try {
-                // API-Call zum Scraper mit Posts-Parameter
-                // HIER KOMMT DEINE API-URL REIN!
-                // Option 1: Flask/FastAPI Endpoint
-                // const response = await fetch(`/api/scrape?posts=${postsPerThread}`);
-                
-                // Option 2: ODER direkt das Skript triggern (benötigt entsprechendes Backend)
-                const response = await fetch(`/api/scrape?posts=${postsPerThread}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                if (!response.ok) throw new Error('Scraper-Fehler');
-                
-                // Daten neu laden
-                await loadData();
-                
-            } catch (error) {
-                console.error('Scraper-Fehler:', error);
-                alert('Fehler beim Scrape. Bitte versuche es später erneut.\n\nHinweis: Der Scraper benötigt ein Backend-API.');
-            } finally {
-                btn.classList.remove('spinning');
-                btn.disabled = false;
-                overlay.classList.remove('active');
             }
         }
 
