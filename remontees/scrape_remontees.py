@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Remontées Mécaniques Forum Scraper v5.2
-Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen (OpenRouter/Stepfun)
-Fix für französisches Datumsformat inkl. Abkürzungen wie "févr."
+Remontées Mécaniques Forum Scraper v6.0
+Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen
+NEU: Keine Datums-Parsing-Hölle mehr, einfach "letzte X Beiträge"
 """
 
 import requests
@@ -11,119 +11,26 @@ import json
 import os
 import re
 import html
-import time
-from datetime import datetime, timedelta
+import sys
+from datetime import datetime
 
 BASE_URL = "https://www.remontees-mecaniques.net/forums"
 STATIONS_URL = f"{BASE_URL}/index.php?showforum=129"
 LIFTS_URL = f"{BASE_URL}/index.php?showforum=220"
 OUTPUT_DIR = "/home/ubuntu/projects/mauricefun.lol/html/data"
 
-# OpenRouter API Konfiguration (Wird aus Environment Variable geladen)
+# OpenRouter API Konfiguration
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 
-# Auch abgekürzte Monate wie "févr." hinzufügen!
-FRENCH_MONTHS = {
-    'janvier': 1, 'janv': 1, 'janv.': 1, 
-    'février': 2, 'févr': 2, 'févr.': 2, 'fevrier': 2, 'fevr': 2, 'fevr.': 2,
-    'mars': 3, 
-    'avril': 4, 'avr': 4, 'avr.': 4,
-    'mai': 5, 
-    'juin': 6, 
-    'juillet': 7, 'juil': 7, 'juil.': 7,
-    'août': 8, 'aout': 8,
-    'septembre': 9, 'sept': 9, 'sept.': 9,
-    'octobre': 10, 'oct': 10, 'oct.': 10,
-    'novembre': 11, 'nov': 11, 'nov.': 11,
-    'décembre': 12, 'decembre': 12, 'déc': 12, 'déc.': 12, 'dec': 12, 'dec.': 12
-}
+# === KONFIGURATION ===
+MAX_THREADS = 30        # Max Threads pro Kategorie von der ersten Seite
+DEFAULT_POSTS = 20      # Standard: Letzte X Beiträge pro Thread
 
-# Globale Session für bessere Performance
+# Globale Session
 GLOBAL_SESSION = requests.Session()
 GLOBAL_SESSION.headers.update({
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 })
-
-def parse_french_date(date_str):
-    """Parst französische Datumsangaben in allen möglichen Formaten"""
-    date_str = html.unescape(date_str).strip().lower()
-    now = datetime.now()
-    
-    # Heute
-    if "aujourd'hui" in date_str or "aujourd" in date_str:
-        time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
-        if time_match:
-            hour, minute = int(time_match.group(1)), int(time_match.group(2))
-            return now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        return now
-    
-    # Gestern
-    if "hier" in date_str:
-        time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
-        yesterday = now - timedelta(days=1)
-        if time_match:
-            hour, minute = int(time_match.group(1)), int(time_match.group(2))
-            return yesterday.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        return yesterday
-    
-    # Vor X Minuten / Stunden
-    if "il y a" in date_str:
-        min_match = re.search(r'(\d+)\s*minute', date_str)
-        if min_match:
-            return now - timedelta(minutes=int(min_match.group(1)))
-        hour_match = re.search(r'(\d+)\s*heure', date_str)
-        if hour_match:
-            return now - timedelta(hours=int(hour_match.group(1)))
-        if "seconde" in date_str:
-            return now
-
-    # Absolutes Datum parsen
-    day, month_str, year = None, None, now.year
-    date_str_clean = date_str.replace(',', ' ').replace('.', '')
-    
-    # Format 1: "28 février 2026" oder "28 févr 2026"
-    m1 = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str_clean)
-    # Format 2: "mars 01 2026" (Dieses Format nutzt das Forum oft!)
-    m2 = re.search(r'([a-zûéè]+)\s+(\d{1,2})\s+(\d{4})', date_str_clean)
-    # Format 3: "28 février" (Ohne Jahr)
-    m3 = re.search(r'(\d{1,2})\s+([a-zûéè]+)', date_str_clean)
-    # Format 4: "février 28" (Ohne Jahr)
-    m4 = re.search(r'([a-zûéè]+)\s+(\d{1,2})', date_str_clean)
-    
-    if m1:
-        day, month_str, year = int(m1.group(1)), m1.group(2), int(m1.group(3))
-    elif m2:
-        month_str, day, year = m2.group(1), int(m2.group(2)), int(m2.group(3))
-    elif m3:
-        day, month_str = int(m3.group(1)), m3.group(2)
-    elif m4:
-        month_str, day = m4.group(1), int(m4.group(2))
-        
-    if day and month_str:
-        month = FRENCH_MONTHS.get(month_str)
-        if not month:
-            # Fallback falls es ein ganz komischer Monats-String ist
-            for k, v in FRENCH_MONTHS.items():
-                if month_str.startswith(k) or k.startswith(month_str):
-                    month = v
-                    break
-        
-        if month:
-            time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
-            hour, minute = 0, 0
-            if time_match:
-                hour, minute = int(time_match.group(1)), int(time_match.group(2))
-                
-            try:
-                parsed_date = datetime(year, month, day, hour, minute)
-                # Wenn Datum in der Zukunft liegt (z.B. Dezember, obwohl wir Januar haben), war es letztes Jahr
-                if parsed_date > now + timedelta(days=1):
-                    parsed_date = parsed_date.replace(year=year-1)
-                return parsed_date
-            except ValueError:
-                pass
-            
-    return None
 
 def get_session():
     return GLOBAL_SESSION
@@ -138,6 +45,7 @@ def clean_text(text):
     return text
 
 def summarize_all_threads_bulk(all_threads_data):
+    """Bulk-Zusammenfassung via OpenRouter"""
     if not OPENROUTER_API_KEY:
         print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt.")
         return {}
@@ -165,8 +73,8 @@ def summarize_all_threads_bulk(all_threads_data):
                 thread_content += f"Post {idx+1}: {clean_content}\n"
                 
         if thread_content.strip():
-            if len(thread_content) > 3000:
-                thread_content = thread_content[:3000] + "... [Text gekürzt]"
+            if len(thread_content) > 4000:
+                thread_content = thread_content[:4000] + "... [Text gekürzt]"
                 
             combined_text += f"=== THREAD_ID: {thread['id']} | TITEL: {thread['name']} ===\n"
             combined_text += f"{thread_content}\n\n"
@@ -175,8 +83,8 @@ def summarize_all_threads_bulk(all_threads_data):
     if not thread_order:
         return {}
         
-    if len(combined_text) > 40000:
-        combined_text = combined_text[:40000] + "\n... [Rest abgeschnitten aufgrund von Token-Limit]"
+    if len(combined_text) > 50000:
+        combined_text = combined_text[:50000] + "\n... [Rest abgeschnitten aufgrund von Token-Limit]"
 
     system_prompt = (
         "Du bist ein Experte für Skigebiete und Seilbahnen. Du erhältst Beiträge aus verschiedenen "
@@ -206,7 +114,7 @@ def summarize_all_threads_bulk(all_threads_data):
     }
 
     try:
-        print("Sende gebündelten Request an LLM (Rate Limits umgehen)...")
+        print("Sende gebündelten Request an LLM...")
         response = requests.post(url, headers=headers, json=payload, timeout=60)
         
         if response.status_code == 200:
@@ -226,7 +134,7 @@ def summarize_all_threads_bulk(all_threads_data):
                     current_id = id_match.group(1)
                     summaries_dict[current_id] = []
                 elif current_id and line.startswith('-'):
-                    clean_line = re.sub(r'^-\s*', '', line).strip()
+                    clean_line = re.sub(r'^[\-\•\*]\s*', '', line).strip()
                     if clean_line:
                         if len(summaries_dict[current_id]) < 5:
                             summaries_dict[current_id].append(clean_line)
@@ -237,12 +145,15 @@ def summarize_all_threads_bulk(all_threads_data):
             return {}
             
     except Exception as e:
-        print(f"Ausnahmefehler bei OpenRouter API: {e}")
+        print(f"Fehler bei OpenRouter API: {e}")
         return {}
 
 
-def scrape_forum_list(url):
-    """Scraped die Thread-Liste aus einem Forum"""
+def scrape_forum_list(url, max_threads=MAX_THREADS):
+    """
+    Scraped Threads von der ersten Seite eines Forums.
+    Keine Datumsfilter mehr - einfach die ersten X Threads nehmen.
+    """
     try:
         html_content = get_page_content(url)
         soup = BeautifulSoup(html_content, 'html.parser')
@@ -266,6 +177,12 @@ def scrape_forum_list(url):
             topic_td = tds[1]
             best_text = ''
             topic_link = None
+            is_pinned = False
+            
+            # Check ob angepinnt (Epinglé)
+            pin_indicator = topic_td.find(['img', 'span'], class_=lambda x: x and ('pin' in str(x).lower() if x else False))
+            if pin_indicator or '📌' in topic_td.get_text():
+                is_pinned = True
             
             for link in topic_td.find_all('a', href=True):
                 href = link.get('href', '')
@@ -303,58 +220,61 @@ def scrape_forum_list(url):
             elif not clean_url.startswith('http'):
                 clean_url = BASE_URL + '/' + clean_url
             
-            # Zeit finden
+            # Letztes Post-Datum als STRING auslesen (nicht parsen!)
             last_post_td = tds[4]
-            last_post_time = None
+            last_post_display = "Unbekannt"
             
             for link in last_post_td.find_all('a', href=True):
                 if 'view=getlastpost' in link.get('href', ''):
                     time_text = link.get_text(strip=True)
                     if time_text:
-                        parsed_time = parse_french_date(time_text)
-                        if parsed_time:
-                            last_post_time = parsed_time
-                            break
-                        else:
-                            print(f"WARNUNG: Konnte Datum nicht parsen: '{time_text}' in Thread '{title}'")
+                        last_post_display = time_text
+                        break
             
-            # Letzte 7 Tage
-            if last_post_time:
-                time_diff = datetime.now() - last_post_time
-                if time_diff <= timedelta(days=7):
-                    threads.append({
-                        'id': topic_id,
-                        'title': title,
-                        'url': clean_url,
-                        'last_post': last_post_time.isoformat(),
-                        'last_post_display': last_post_time.strftime('%d.%m. %H:%M')
-                    })
-                    print(f"  + [{topic_id}] {title[:45]}... ({last_post_time.strftime('%d.%m.%H:%M')})")
+            threads.append({
+                'id': topic_id,
+                'title': title,
+                'url': clean_url,
+                'last_update': last_post_display,
+                'is_pinned': is_pinned
+            })
+            
+            pin_marker = "📌 " if is_pinned else ""
+            print(f"  + [{topic_id}] {pin_marker}{title[:45]}... ({last_post_display})")
+            
+            # Limit erreicht?
+            if len(threads) >= max_threads:
+                break
         
         return threads
+        
     except Exception as e:
         print(f"Fehler beim Scrapen {url}: {e}")
         import traceback
         traceback.print_exc()
         return []
 
-def scrape_thread_posts(url, days_back=7):
-    """Scraped Posts und Bilder aus einem Thread mit Pagination"""
+
+def scrape_thread_posts(url, posts_to_fetch=DEFAULT_POSTS):
+    """
+    Scraped die letzten X Beiträge aus einem Thread.
+    KEIN Datumsfilter mehr - wir zählen einfach Posts!
+    """
     try:
         posts = []
         images = []
-        cutoff_time = datetime.now() - timedelta(days=days_back)
+        posts_collected = 0
         
+        # Starte mit letzter Seite
         if '?' in url:
             current_url = url + '&view=getlastpost'
         else:
             current_url = url + '?view=getlastpost'
         
         page_count = 0
-        max_pages = 10
-        oldest_post_time = datetime.now()
+        max_pages = 15  # Safety limit
         
-        while page_count < max_pages:
+        while page_count < max_pages and posts_collected < posts_to_fetch:
             page_count += 1
             print(f"    Seite {page_count}...")
             
@@ -362,82 +282,71 @@ def scrape_thread_posts(url, days_back=7):
             soup = BeautifulSoup(html_content, 'html.parser')
             
             post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower() if x else False)
-            page_has_recent = False
             
-            for post in post_containers:
-                time_found = None
-                abbr = post.find('abbr', class_='published')
-                if abbr:
-                    title = abbr.get('title', '')
-                    if title:
-                        try:
-                            time_found = datetime.fromisoformat(title.replace('Z', '+00:00').replace('+00:00', ''))
-                        except:
-                            pass
-                
-                if not time_found:
-                    continue
-                
-                if time_found < oldest_post_time:
-                    oldest_post_time = time_found
+            # Posts von unten nach oben durchgehen (neueste zuerst)
+            for post in reversed(post_containers):
+                if posts_collected >= posts_to_fetch:
+                    break
                 
                 content_div = post.find('div', class_=lambda x: x and 'content' in str(x).lower() if x else False)
                 if not content_div:
                     continue
                 
-                # Bilder extrahieren
-                for img in content_div.find_all('img'):
-                    img_src = img.get('src', '')
-                    if not img_src or img_src.startswith('data:'):
-                        continue
-                    
-                    if 'showuser=' in img_src:
-                        continue
-                    
-                    width = img.get('width', '')
-                    height = img.get('height', '')
-                    if width and height:
-                        try:
-                            w, h = int(width), int(height)
-                            if w < 100 or h < 100:
-                                continue
-                        except:
-                            pass
-                    
-                    lower_src = img_src.lower()
-                    if any(x in lower_src for x in ['smile', 'icon', 'emoji', 'style_images', 'button', 'arrow']):
-                        continue
-                    
-                    if not any(lower_src.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
-                        if '?' in lower_src:
-                            base = lower_src.split('?')[0]
-                            if not any(base.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
-                                continue
-                        else:
-                            continue
-                    
-                    if img_src.startswith('/'):
-                        img_src = BASE_URL + img_src
-                    elif not img_src.startswith('http'):
-                        img_src = BASE_URL + '/' + img_src
-                    
-                    if 'remontees-mecaniques.net' in img_src:
-                        images.append({'url': img_src, 'alt': img.get('alt', '')})
+                # Text extrahieren
+                text = content_div.get_text(separator=' ', strip=True)
+                text = clean_text(text)
+                text = re.sub(r'Quote[\s\S]*?End Quote', '', text, flags=re.IGNORECASE)
+                text = clean_text(text)
                 
-                # Posts im Zeitfenster
-                if time_found >= cutoff_time:
-                    page_has_recent = True
-                    text = content_div.get_text(separator=' ', strip=True)
-                    text = clean_text(text)
-                    text = re.sub(r'Quote[\s\S]*?End Quote', '', text, flags=re.IGNORECASE)
-                    text = clean_text(text)
-                    
-                    if len(text) > 30:
-                        posts.append({'time': time_found.isoformat(), 'content': text})
+                if len(text) > 20:  # Minimale Länge für echte Posts
+                    posts.append({'content': text})
+                    posts_collected += 1
+                
+                # Bilder extrahieren (nur von den Posts die wir sammeln)
+                if posts_collected <= posts_to_fetch:
+                    for img in content_div.find_all('img'):
+                        img_src = img.get('src', '')
+                        if not img_src or img_src.startswith('data:'):
+                            continue
+                        
+                        if 'showuser=' in img_src:
+                            continue
+                        
+                        width = img.get('width', '')
+                        height = img.get('height', '')
+                        if width and height:
+                            try:
+                                w, h = int(width), int(height)
+                                if w < 100 or h < 100:
+                                    continue
+                            except:
+                                pass
+                        
+                        lower_src = img_src.lower()
+                        if any(x in lower_src for x in ['smile', 'icon', 'emoji', 'style_images', 'button', 'arrow']):
+                            continue
+                        
+                        if not any(lower_src.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
+                            if '?' in lower_src:
+                                base = lower_src.split('?')[0]
+                                if not any(base.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
+                                    continue
+                            else:
+                                continue
+                        
+                        if img_src.startswith('/'):
+                            img_src = BASE_URL + img_src
+                        elif not img_src.startswith('http'):
+                            img_src = BASE_URL + '/' + img_src
+                        
+                        if 'remontees-mecaniques.net' in img_src:
+                            images.append({'url': img_src, 'alt': img.get('alt', '')})
             
-            # Weiter zurück?
-            if oldest_post_time >= cutoff_time and page_has_recent:
+            # Noch mehr Posts nötig? -> Zurückblättern
+            if posts_collected < posts_to_fetch:
                 prev_link = None
+                
+                # Pagination-Link suchen
                 for link in soup.find_all('a', href=True):
                     href = link.get('href', '')
                     text = link.get_text(strip=True).lower()
@@ -455,6 +364,7 @@ def scrape_thread_posts(url, days_back=7):
                                     prev_link = href
                                     break
                 
+                # Manuelle Pagination falls nötig
                 if not prev_link:
                     st_match = re.search(r'st=(\d+)', current_url)
                     if st_match:
@@ -475,37 +385,43 @@ def scrape_thread_posts(url, days_back=7):
                     
                     current_url = prev_link
                     continue
+            
             break
         
+        # Bilder deduplizieren und limitieren
         unique_images = list({i['url']: i for i in images}.values())[:15]
         print(f"    Total: {len(posts)} Posts, {len(unique_images)} Bilder")
+        
         return {'posts': posts, 'images': unique_images}
         
     except Exception as e:
         print(f"Fehler beim Scrapen Thread {url}: {e}")
         return {'posts': [], 'images': []}
 
-def process_forum(url, category_name, days_back=7):
+
+def process_forum(url, category_name, posts_to_fetch=DEFAULT_POSTS, max_threads=MAX_THREADS):
+    """Verarbeitet ein komplettes Forum"""
     print(f"Scraping {category_name}...")
-    threads = scrape_forum_list(url)
+    threads = scrape_forum_list(url, max_threads=max_threads)
     
     results = []
     
-    for thread in threads[:25]: # Limit leicht erhöht auf 25, damit auch angepinnte Posts Platz haben
-        print(f"  → Scraping Inhalte: {thread['title'][:40]}...")
-        data = scrape_thread_posts(thread['url'], days_back=days_back)
+    for thread in threads:
+        print(f"  → {thread['title'][:40]}...")
+        data = scrape_thread_posts(thread['url'], posts_to_fetch=posts_to_fetch)
         
         results.append({
             'id': thread['id'],
             'name': thread['title'],
             'url': thread['url'],
-            'last_update': thread['last_post_display'],
+            'last_update': thread['last_update'],
+            'is_pinned': thread.get('is_pinned', False),
             'raw_posts': data['posts'],
             'images': data['images'],
             'summaries': []
         })
 
-    print(f"\nSende alle {len(results)} Threads aus {category_name} zur Zusammenfassung an das LLM...")
+    print(f"\nSende alle {len(results)} Threads aus {category_name} zur Zusammenfassung...")
     llm_summaries = summarize_all_threads_bulk(results)
 
     for thread in results:
@@ -514,30 +430,44 @@ def process_forum(url, category_name, days_back=7):
             thread['summaries'] = llm_summaries[thread_id]
         else:
             if thread['raw_posts']:
-                thread['summaries'] = ['Keine spezifische Zusammenfassung generiert, aber neue Beiträge vorhanden.']
+                thread['summaries'] = ['Zusammenfassung wird generiert...']
             else:
-                thread['summaries'] = ['Keine neuen Text-Beiträge in den letzten 7 Tagen.']
+                thread['summaries'] = ['Keine Beiträge gefunden.']
                 
         del thread['raw_posts']
         
     return results
 
+
 def main():
+    """Hauptfunktion - kann mit Parameter für Posts-Anzahl aufgerufen werden"""
     if not OPENROUTER_API_KEY:
         print("ACHTUNG: OPENROUTER_API_KEY ist nicht gesetzt!")
-        
+        return
+    
+    # Parameter auslesen (z.B. python3 scrape_remontees.py 25)
+    posts_to_fetch = DEFAULT_POSTS
+    if len(sys.argv) > 1:
+        try:
+            posts_to_fetch = int(sys.argv[1])
+            print(f"📊 Anzahl Beiträge pro Thread: {posts_to_fetch}")
+        except ValueError:
+            print(f"⚠️ Ungültiger Parameter. Nutze Standard: {DEFAULT_POSTS}")
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    print(f"=== Remontées Scraper (LLM BULK Version 5.2) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
+    now = datetime.now()
+    print(f"=== Remontées Scraper v6.0 (Posts: {posts_to_fetch}) {now.strftime('%Y-%m-%d %H:%M')} ===\n")
     
-    stations = process_forum(STATIONS_URL, "Stationen", days_back=7)
+    stations = process_forum(STATIONS_URL, "Stationen", posts_to_fetch=posts_to_fetch)
     print()
-    lifts = process_forum(LIFTS_URL, "Lifte", days_back=7)
+    lifts = process_forum(LIFTS_URL, "Lifte", posts_to_fetch=posts_to_fetch)
     print()
     
     data = {
-        'last_updated': datetime.now().isoformat(),
-        'last_updated_display': datetime.now().strftime('%d.%m.%Y %H:%M'),
+        'last_updated': now.isoformat(),
+        'last_updated_display': now.strftime('%d.%m.%Y %H:%M'),
+        'posts_per_thread': posts_to_fetch,
         'stations': stations,
         'lifts': lifts
     }
@@ -548,6 +478,7 @@ def main():
     
     print(f"✅ Gespeichert: {output_file}")
     print(f"   Stationen: {len(stations)}, Lifte: {len(lifts)}")
+
 
 if __name__ == '__main__':
     main()
