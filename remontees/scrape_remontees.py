@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Remontées Mécaniques Forum Scraper v5
+Remontées Mécaniques Forum Scraper v5.1
 Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen (OpenRouter/Stepfun)
-Alle Foren-Themen werden in EINER API-Anfrage zusammengefasst, um Rate-Limits zu umgehen.
+Fix für französisches Datumsformat (z.B. "mars 01 2026").
 """
 
 import requests
@@ -27,14 +27,14 @@ FRENCH_MONTHS = {
     'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12
 }
 
-# Globale Session für bessere Performance (Connection Pooling)
+# Globale Session für bessere Performance
 GLOBAL_SESSION = requests.Session()
 GLOBAL_SESSION.headers.update({
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
 })
 
 def parse_french_date(date_str):
-    """Parst französische Datumsangaben (relativ und absolut)"""
+    """Parst französische Datumsangaben in allen möglichen Formaten"""
     date_str = html.unescape(date_str).strip().lower()
     now = datetime.now()
     
@@ -55,60 +55,70 @@ def parse_french_date(date_str):
             return yesterday.replace(hour=hour, minute=minute, second=0, microsecond=0)
         return yesterday
     
-    # "il y a X minutes/heures" (vor X Minuten/Stunden)
+    # Vor X Minuten / Stunden
     if "il y a" in date_str:
         min_match = re.search(r'(\d+)\s*minute', date_str)
         if min_match:
-            minutes = int(min_match.group(1))
-            return now - timedelta(minutes=minutes)
+            return now - timedelta(minutes=int(min_match.group(1)))
         hour_match = re.search(r'(\d+)\s*heure', date_str)
         if hour_match:
-            hours = int(hour_match.group(1))
-            return now - timedelta(hours=hours)
+            return now - timedelta(hours=int(hour_match.group(1)))
         if "seconde" in date_str:
             return now
 
-    # Absolutes Datum
-    date_match = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str)
-    if date_match:
-        day = int(date_match.group(1))
-        month_str = date_match.group(2)
-        year = int(date_match.group(3))
+    # Absolutes Datum parsen
+    day, month_str, year = None, None, now.year
+    date_str_clean = date_str.replace(',', ' ')
+    
+    # Format 1: "28 février 2026"
+    m1 = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str_clean)
+    # Format 2: "mars 01 2026" (Dieses Format nutzt das Forum oft!)
+    m2 = re.search(r'([a-zûéè]+)\s+(\d{1,2})\s+(\d{4})', date_str_clean)
+    # Format 3: "28 février" (Ohne Jahr)
+    m3 = re.search(r'(\d{1,2})\s+([a-zûéè]+)', date_str_clean)
+    # Format 4: "février 28" (Ohne Jahr)
+    m4 = re.search(r'([a-zûéè]+)\s+(\d{1,2})', date_str_clean)
+    
+    if m1:
+        day, month_str, year = int(m1.group(1)), m1.group(2), int(m1.group(3))
+    elif m2:
+        month_str, day, year = m2.group(1), int(m2.group(2)), int(m2.group(3))
+    elif m3:
+        day, month_str = int(m3.group(1)), m3.group(2)
+    elif m4:
+        month_str, day = m4.group(1), int(m4.group(2))
         
+    if day and month_str:
         month = FRENCH_MONTHS.get(month_str, 1)
-        
         time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
         hour, minute = 0, 0
         if time_match:
             hour, minute = int(time_match.group(1)), int(time_match.group(2))
             
         try:
-            return datetime(year, month, day, hour, minute)
+            parsed_date = datetime(year, month, day, hour, minute)
+            # Wenn Datum in der Zukunft liegt (z.B. Dezember, obwohl wir Januar haben), war es letztes Jahr
+            if parsed_date > now + timedelta(days=1):
+                parsed_date = parsed_date.replace(year=year-1)
+            return parsed_date
         except ValueError:
             pass
-    
+            
     return None
 
 def get_session():
-    """Gibt die globale Session zurück"""
     return GLOBAL_SESSION
 
 def get_page_content(url):
-    """Holt Seiteninhalt mit korrekter Kodierung"""
     session = get_session()
     resp = session.get(url, timeout=30)
     return resp.content.decode('latin-1')
 
 def clean_text(text):
-    """Bereinigt Text von überflüssigen Leerzeichen"""
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
 def summarize_all_threads_bulk(all_threads_data):
-    """
-    Nimmt alle gescrapten Threads und sendet sie als EINEN großen Block an die LLM-API.
-    Gibt ein Dictionary zurück, das die Thread-IDs auf eine Liste von Stichpunkten mappt.
-    """
     if not OPENROUTER_API_KEY:
         print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt.")
         return {}
@@ -121,17 +131,14 @@ def summarize_all_threads_bulk(all_threads_data):
         "Content-Type": "application/json"
     }
 
-    # Baue EINEN riesigen Prompt für alle Threads
     combined_text = "Bitte analysiere die folgenden Foren-Themen und gib für jedes Thema eine deutschsprachige Zusammenfassung.\n\n"
-    thread_order = [] # Merkt sich die IDs, um sie später zuzuordnen
+    thread_order = []
     
     for thread in all_threads_data:
-        # Extrahiere die rohen Posts, wenn vorhanden
         raw_posts = thread.get('raw_posts', [])
         if not raw_posts:
             continue
             
-        # Baue Text für diesen spezifischen Thread
         thread_content = ""
         for idx, post in enumerate(raw_posts):
             clean_content = clean_text(post['content'])
@@ -139,7 +146,6 @@ def summarize_all_threads_bulk(all_threads_data):
                 thread_content += f"Post {idx+1}: {clean_content}\n"
                 
         if thread_content.strip():
-            # Limitiere den Text pro Thread ein wenig, falls extrem lang, damit der Gesamt-Prompt nicht platzt
             if len(thread_content) > 3000:
                 thread_content = thread_content[:3000] + "... [Text gekürzt]"
                 
@@ -148,9 +154,8 @@ def summarize_all_threads_bulk(all_threads_data):
             thread_order.append(thread['id'])
             
     if not thread_order:
-        return {} # Nichts zu tun
+        return {}
         
-    # Noch ein globales Token-Limit als Sicherung (ca. 40k Zeichen)
     if len(combined_text) > 40000:
         combined_text = combined_text[:40000] + "\n... [Rest abgeschnitten aufgrund von Token-Limit]"
 
@@ -189,7 +194,6 @@ def summarize_all_threads_bulk(all_threads_data):
             result_text = response.json()['choices'][0]['message']['content'].strip()
             print("Antwort erhalten! Parse Ergebnisse...")
             
-            # Zerlege die Antwort basierend auf "THREAD_ID:"
             summaries_dict = {}
             current_id = None
             
@@ -198,21 +202,17 @@ def summarize_all_threads_bulk(all_threads_data):
                 if not line:
                     continue
                     
-                # Prüfe, ob eine neue ID anfängt
                 id_match = re.search(r'THREAD_ID:\s*(\d+)', line, re.IGNORECASE)
                 if id_match:
                     current_id = id_match.group(1)
                     summaries_dict[current_id] = []
                 elif current_id and line.startswith('-'):
-                    # Säubere den Stichpunkt
                     clean_line = re.sub(r'^-\s*', '', line).strip()
                     if clean_line:
-                        # Auf 5 beschränken (falls das LLM die Anweisung ignoriert hat)
                         if len(summaries_dict[current_id]) < 5:
                             summaries_dict[current_id].append(clean_line)
                             
             return summaries_dict
-            
         else:
             print(f"OpenRouter API Fehler {response.status_code}: {response.text}")
             return {}
@@ -292,9 +292,12 @@ def scrape_forum_list(url):
                 if 'view=getlastpost' in link.get('href', ''):
                     time_text = link.get_text(strip=True)
                     if time_text:
-                        last_post_time = parse_french_date(time_text)
-                        if last_post_time:
+                        parsed_time = parse_french_date(time_text)
+                        if parsed_time:
+                            last_post_time = parsed_time
                             break
+                        else:
+                            print(f"WARNUNG: Konnte Datum nicht parsen: '{time_text}' in Thread '{title}'")
             
             # Letzte 7 Tage
             if last_post_time:
@@ -323,7 +326,6 @@ def scrape_thread_posts(url, days_back=7):
         images = []
         cutoff_time = datetime.now() - timedelta(days=days_back)
         
-        # Starte mit letzter Seite
         if '?' in url:
             current_url = url + '&view=getlastpost'
         else:
@@ -341,11 +343,9 @@ def scrape_thread_posts(url, days_back=7):
             soup = BeautifulSoup(html_content, 'html.parser')
             
             post_containers = soup.find_all('div', class_=lambda x: x and 'post' in str(x).lower() if x else False)
-            
             page_has_recent = False
             
             for post in post_containers:
-                # Zeit finden
                 time_found = None
                 abbr = post.find('abbr', class_='published')
                 if abbr:
@@ -366,17 +366,15 @@ def scrape_thread_posts(url, days_back=7):
                 if not content_div:
                     continue
                 
-                # Bilder extrahieren (gefiltert)
+                # Bilder extrahieren
                 for img in content_div.find_all('img'):
                     img_src = img.get('src', '')
                     if not img_src or img_src.startswith('data:'):
                         continue
                     
-                    # Filter: Profilbilder
                     if 'showuser=' in img_src:
                         continue
                     
-                    # Filter: Smileys/Icons (klein)
                     width = img.get('width', '')
                     height = img.get('height', '')
                     if width and height:
@@ -387,12 +385,10 @@ def scrape_thread_posts(url, days_back=7):
                         except:
                             pass
                     
-                    # Filter: Pfade
                     lower_src = img_src.lower()
                     if any(x in lower_src for x in ['smile', 'icon', 'emoji', 'style_images', 'button', 'arrow']):
                         continue
                     
-                    # Nur echte Bildformate
                     if not any(lower_src.endswith(ext) for ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp']):
                         if '?' in lower_src:
                             base = lower_src.split('?')[0]
@@ -401,7 +397,6 @@ def scrape_thread_posts(url, days_back=7):
                         else:
                             continue
                     
-                    # URL absolut machen
                     if img_src.startswith('/'):
                         img_src = BASE_URL + img_src
                     elif not img_src.startswith('http'):
@@ -424,8 +419,6 @@ def scrape_thread_posts(url, days_back=7):
             # Weiter zurück?
             if oldest_post_time >= cutoff_time and page_has_recent:
                 prev_link = None
-                
-                # Pagination-Link suchen
                 for link in soup.find_all('a', href=True):
                     href = link.get('href', '')
                     text = link.get_text(strip=True).lower()
@@ -443,7 +436,6 @@ def scrape_thread_posts(url, days_back=7):
                                     prev_link = href
                                     break
                 
-                # Manuelle Pagination
                 if not prev_link:
                     st_match = re.search(r'st=(\d+)', current_url)
                     if st_match:
@@ -464,34 +456,26 @@ def scrape_thread_posts(url, days_back=7):
                     
                     current_url = prev_link
                     continue
-            
             break
         
-        # Bilder deduplizieren
         unique_images = list({i['url']: i for i in images}.values())[:15]
-        
         print(f"    Total: {len(posts)} Posts, {len(unique_images)} Bilder")
         return {'posts': posts, 'images': unique_images}
         
     except Exception as e:
         print(f"Fehler beim Scrapen Thread {url}: {e}")
-        import traceback
-        traceback.print_exc()
         return {'posts': [], 'images': []}
 
 def process_forum(url, category_name, days_back=7):
-    """Verarbeitet ein Forum"""
     print(f"Scraping {category_name}...")
     threads = scrape_forum_list(url)
     
     results = []
     
-    # SCHRITT 1: Lade von allen Threads erstmal nur die Rohdaten (Posts/Bilder) herunter
-    for thread in threads[:15]:
+    for thread in threads[:25]: # Limit leicht erhöht auf 25, damit auch angepinnte Posts Platz haben
         print(f"  → Scraping Inhalte: {thread['title'][:40]}...")
         data = scrape_thread_posts(thread['url'], days_back=days_back)
         
-        # Speichere die Rohdaten vorübergehend im Result-Objekt
         results.append({
             'id': thread['id'],
             'name': thread['title'],
@@ -499,26 +483,22 @@ def process_forum(url, category_name, days_back=7):
             'last_update': thread['last_post_display'],
             'raw_posts': data['posts'],
             'images': data['images'],
-            'summaries': [] # Wird in Schritt 2 befüllt
+            'summaries': []
         })
 
-    # SCHRITT 2: Führe einen einizgen Bulk-API-Call für ALLE gescrapten Threads dieser Kategorie aus
     print(f"\nSende alle {len(results)} Threads aus {category_name} zur Zusammenfassung an das LLM...")
     llm_summaries = summarize_all_threads_bulk(results)
 
-    # SCHRITT 3: Ordne die vom LLM zurückgegebenen Zusammenfassungen den richtigen Threads zu
     for thread in results:
         thread_id = str(thread['id'])
         if thread_id in llm_summaries and llm_summaries[thread_id]:
             thread['summaries'] = llm_summaries[thread_id]
         else:
             if thread['raw_posts']:
-                # Fallback, falls das LLM einen Thread versehentlich übersprungen hat
                 thread['summaries'] = ['Keine spezifische Zusammenfassung generiert, aber neue Beiträge vorhanden.']
             else:
                 thread['summaries'] = ['Keine neuen Text-Beiträge in den letzten 7 Tagen.']
                 
-        # Entferne die rohen Posts, da sie nicht im endgültigen JSON gespeichert werden sollen
         del thread['raw_posts']
         
     return results
@@ -526,13 +506,11 @@ def process_forum(url, category_name, days_back=7):
 def main():
     if not OPENROUTER_API_KEY:
         print("ACHTUNG: OPENROUTER_API_KEY ist nicht gesetzt!")
-        print("Bitte exportiere den Key vor dem Ausführen: export OPENROUTER_API_KEY='dein-key'")
         
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    print(f"=== Remontées Scraper (LLM BULK Version) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
+    print(f"=== Remontées Scraper (LLM BULK Version 5.1) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
     
-    # Immer 7 Tage scrapen
     stations = process_forum(STATIONS_URL, "Stationen", days_back=7)
     print()
     lifts = process_forum(LIFTS_URL, "Lifte", days_back=7)
