@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Remontées Mécaniques Forum Scraper v3
-Scrapt Skigebiet- und Lifte-News mit vollständigen Posts und Bildern
+Remontées Mécaniques Forum Scraper v4
+Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen (OpenRouter/Stepfun)
 """
 
 import requests
@@ -17,6 +17,9 @@ BASE_URL = "https://www.remontees-mecaniques.net/forums"
 STATIONS_URL = f"{BASE_URL}/index.php?showforum=129"
 LIFTS_URL = f"{BASE_URL}/index.php?showforum=220"
 OUTPUT_DIR = "/home/ubuntu/projects/mauricefun.lol/html/data"
+
+# OpenRouter API Konfiguration (Wird aus Environment Variable geladen)
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 
 FRENCH_MONTHS = {
     'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
@@ -64,7 +67,7 @@ def parse_french_date(date_str):
         if "seconde" in date_str:
             return now
 
-    # Absolutes Datum (z.B. "28 février 2026 - 15:30" oder nur "28 février 2026")
+    # Absolutes Datum
     date_match = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str)
     if date_match:
         day = int(date_match.group(1))
@@ -100,166 +103,99 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def translate_french_to_german_bulk(texts):
-    """Übersetzt eine Liste von Texten per Batch mit Rate-Limit Schutz."""
-    if not texts:
-        return []
+def summarize_with_llm(posts_text, title, max_summaries=5):
+    """Nutzt OpenRouter (Stepfun/andere Modelle) für echte Zusammenfassung und Übersetzung"""
+    if not OPENROUTER_API_KEY:
+        print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt. Skript gibt leere Liste zurück.")
+        return ["Bitte API-Key für Zusammenfassungen hinterlegen."]
         
-    # Kombiniere mit seltenem Trennzeichen
-    separator = " ||| "
-    combined_text = separator.join(texts)
+    url = "https://openrouter.ai/api/v1/chat/completions"
     
-    try:
-        # Kurzer Delay um Rate-Limits vorzubeugen, wenn Funktion mehrfach aufgerufen wird
-        time.sleep(1)
-        
-        url = "https://translate.googleapis.com/translate_a/single"
-        params = {
-            "client": "gtx",
-            "sl": "fr",
-            "tl": "de",
-            "dt": "t",
-            "q": combined_text
-        }
-        
-        resp = get_session().get(url, params=params, timeout=10)
-        if resp.status_code == 200:
-            data = resp.json()
-            translated_combined = "".join(item[0] for item in data[0] if item[0])
-            
-            # Wieder aufsplitten und säubern
-            translated_list = translated_combined.split(separator.strip())
-            return [t.strip() for t in translated_list if t.strip()]
-            
-    except Exception as e:
-        print(f"API-Bulk-Übersetzung fehlgeschlagen, nutze Fallback: {e}")
-    
-    # Fallback: Dictionary (wie vorher, aber iterativ für die Liste)
-    return [translate_french_to_german_fallback(t) for t in texts]
-
-
-def translate_french_to_german_fallback(text):
-    """Lokales Fallback-Wörterbuch für Übersetzungen"""
-    translations = {
-        "c'est": "es ist", "n'est": "ist nicht", "qu'ils": "dass sie", "qu'il": "dass er",
-        "d'un": "von einem", "d'une": "von einer", "l'on": "man", "il y a": "vor", "aujourd'hui": "heute",
-        'remise en service': 'Wiederinbetriebnahme', 'enquête publique': 'öffentliche Anhörung',
-        'remontée mécanique': 'Aufstiegshilfe', 'remontées mécaniques': 'Aufstiegshilfen',
-        'domaine skiable': 'Skigebiet', 'gare aval': 'Talstation', 'gare amont': 'Bergstation',
-        'piste verte': 'blaue Piste', 'piste bleue': 'blaue Piste', 'piste rouge': 'rote Piste',
-        'piste noire': 'schwarze Piste', 'construction': 'Bau', 'projet': 'Projekt',
-        'projets': 'Projekte', 'rénovation': 'Renovierung', 'démolition': 'Abriss',
-        'remplacement': 'Ersatz', 'ouverture': 'Eröffnung', 'fermeture': 'Schließung',
-        'retard': 'Verzögerung', 'avancement': 'Fortschritt', 'gare': 'Station',
-        'pylône': 'Pylon', 'cabine': 'Kabine', 'télécabine': 'Gondelbahn',
-        'télésiège': 'Sessellift', 'téléski': 'Schlepplift', 'téléphérique': 'Seilbahn',
-        'piste': 'Piste', 'pistes': 'Pisten', 'neige': 'Schnee', 'dameuse': 'Pistenraupe',
-        'été': 'Sommer', 'hiver': 'Winter', 'saison': 'Saison', 'année': 'Jahr',
-        'mois': 'Monat', 'semaine': 'Woche', 'jour': 'Tag', 'hier': 'gestern',
-        'demain': 'morgen', 'permis': 'Genehmigung', 'autorisation': 'Genehmigung',
-        'étude': 'Studie', 'enquête': 'Anhörung', 'travaux': 'Arbeiten',
-        'chantier': 'Baustelle', 'installation': 'Anlage', 'démontage': 'Abbau',
-        'montage': 'Aufbau', 'massif': 'Massiv', 'vallée': 'Tal', 'sommet': 'Gipfel',
-        'altitude': 'Höhe', 'débit': 'Kapazität', 'longueur': 'Länge', 'chose': 'Sache',
-        'question': 'Frage', 'argent': 'Geld', 'recherche': 'Suche', 'construit': 'gebaut',
-        'construire': 'bauen', 'projeté': 'geplant', 'remplacé': 'ersetzt',
-        'remplacer': 'ersetzen', 'ouvert': 'geöffnet', 'ouvrir': 'öffnen',
-        'fermé': 'geschlossen', 'fermer': 'schließen', 'terminé': 'fertiggestellt',
-        'commencé': 'begonnen', 'commencer': 'beginnen', 'prévu': 'geplant',
-        'reporté': 'verschoben', 'annulé': 'abgesagt', 'confirmé': 'bestätigt',
-        'être': 'sein', 'est': 'ist', 'sont': 'sind', 'avoir': 'haben', 'a': 'hat',
-        'faire': 'machen', 'fait': 'gemacht', 'dire': 'sagen', 'dit': 'gesagt',
-        'voir': 'sehen', 'voit': 'sieht', 'savoir': 'wissen', 'sait': 'weiß',
-        'pouvoir': 'können', 'peut': 'kann', 'devoir': 'müssen', 'doit': 'muss',
-        'aller': 'gehen', 'va': 'geht', 'venir': 'kommen', 'vient': 'kommt',
-        'prendre': 'nehmen', 'prend': 'nimmt', 'donner': 'geben', 'donne': 'gibt',
-        'trouver': 'finden', 'trouve': 'findet', 'demander': 'fragen', 'demande': 'fragt',
-        'rester': 'bleiben', 'reste': 'bleibt', 'répondre': 'antworten', 'répond': 'antwortet',
-        'nouveau': 'neu', 'nouvelle': 'neue', 'ancien': 'alt', 'ancienne': 'alte',
-        'grand': 'groß', 'grande': 'große', 'petit': 'klein', 'petite': 'kleine',
-        'bon': 'gut', 'bonne': 'gute', 'mauvais': 'schlecht', 'beau': 'schön',
-        'belle': 'schöne', 'haut': 'hoch', 'haute': 'hohe', 'bas': 'niedrig',
-        'basse': 'niedrige', 'long': 'lang', 'longue': 'lange', 'facile': 'einfach',
-        'difficile': 'schwierig', 'possible': 'möglich', 'probable': 'wahrscheinlich',
-        'certain': 'gewiss', 'très': 'sehr', 'bien': 'gut', 'plus': 'mehr', 'pas': 'nicht',
-        'le': 'der', 'la': 'die', 'les': 'die', 'un': 'ein', 'une': 'eine', 'des': 'einige',
-        'du': 'vom', 'de': 'von', 'et': 'und', 'ou': 'oder', 'mais': 'aber', 'donc': 'deshalb',
-        'dans': 'in', 'sur': 'auf', 'avec': 'mit', 'pour': 'für', 'par': 'durch',
-        'sans': 'ohne', 'sous': 'unter', 'vers': 'gegen', 'avant': 'vor', 'après': 'nach',
-        'depuis': 'seit', 'pendant': 'während', 'chez': 'bei', 'contre': 'gegen',
-        'entre': 'zwischen', 'à': 'an', 'qui': 'der/die/das', 'que': 'dass', 'quoi': 'was',
-        'ce': 'dies', 'cette': 'diese', 'ces': 'diese', 'mon': 'mein', 'ton': 'dein',
-        'son': 'sein', 'notre': 'unser', 'votre': 'euer', 'leur': 'ihr', 'on': 'man', 'ils': 'sie',
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "HTTP-Referer": "https://mauricefun.lol",
+        "X-Title": "Remontees Scraper",
+        "Content-Type": "application/json"
     }
     
-    sorted_keys = sorted(translations.keys(), key=len, reverse=True)
-    for fr in sorted_keys:
-        de = translations[fr]
-        fr_esc = re.escape(fr)
-        pattern = r'(?<![a-zA-ZÀ-ÿ\'])' + fr_esc + r'(?![a-zA-ZÀ-ÿ])'
-        text = re.sub(pattern, de, text, flags=re.IGNORECASE)
+    # Kürze den Text falls er extrem lang ist, um Token-Limits zu respektieren
+    if len(posts_text) > 8000:
+        posts_text = posts_text[:8000] + "... [Text gekürzt]"
+        
+    system_prompt = (
+        "Du bist ein Experte für Skigebiete und Seilbahnen. "
+        "Deine Aufgabe ist es, französische Forenbeiträge zu analysieren und "
+        "die wichtigsten Neuigkeiten auf Deutsch zusammenzufassen."
+    )
     
-    return text
+    user_prompt = (
+        f"Lies die folgenden Forenbeiträge zum Thema '{title}'.\n\n"
+        f"Beiträge:\n{posts_text}\n\n"
+        f"Fasse die Kerninformationen in maximal {max_summaries} kurzen, prägnanten Stichpunkten auf Deutsch zusammen.\n"
+        "Regeln:\n"
+        "- Gib NUR die Stichpunkte zurück, keinen Einleitungstext.\n"
+        "- Jeder Stichpunkt muss mit einem Bindestrich (-) beginnen.\n"
+        "- Konzentriere dich auf Fakten: Neue Lifte, Pisten, Bauarbeiten, Eröffnungsdaten.\n"
+        "- Ignoriere persönliche Meinungen, Grüße oder irrelevante Diskussionen."
+    )
+    
+    payload = {
+        "model": "stepfun/step-1-8k",  # Nutze das korrekte Stepfun Modell via OpenRouter
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ],
+        "temperature": 0.3 # Niedrige Temperatur für faktische Zusammenfassungen
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=payload, timeout=45)
+        
+        if response.status_code == 200:
+            result_text = response.json()['choices'][0]['message']['content'].strip()
+            
+            # Zerlege den String in eine Liste basierend auf den Bindestrichen
+            summaries = []
+            for line in result_text.split('\n'):
+                line = line.strip()
+                if line.startswith('-'):
+                    # Entferne den Bindestrich am Anfang für das JSON-Format
+                    clean_line = re.sub(r'^-\s*', '', line).strip()
+                    if clean_line:
+                        summaries.append(clean_line)
+                        
+            # Fallback falls das Modell keine Bindestriche nutzt
+            if not summaries and result_text:
+                summaries = [line.strip() for line in result_text.split('\n') if line.strip()]
+                
+            return summaries[:max_summaries]
+        else:
+            print(f"OpenRouter API Fehler {response.status_code}: {response.text}")
+            return ["API-Fehler bei der Zusammenfassung"]
+            
+    except Exception as e:
+        print(f"Ausnahmefehler bei OpenRouter API: {e}")
+        return ["Verbindungsfehler bei der Zusammenfassung"]
 
-def extract_summaries(posts, max_summaries=5):
-    """Extrahiert Stichpunkte aus allen Posts zusammen mit Rate-Limit Schutz"""
+
+def process_thread_summaries(posts, title, max_summaries=5):
+    """Sammelt die Texte und schickt sie an das LLM"""
     if not posts:
         return []
     
-    # Alle Posts kombinieren
-    all_text = " ".join([post['content'] for post in posts])
-    all_text = clean_text(all_text)
-    
-    # In Sätze aufteilen und filtern
-    sentences = re.split(r'[.!?]+', all_text)
-    
-    # Sätze mit Substanz finden (50-180 Zeichen)
-    candidates = []
-    for sentence in sentences:
-        sentence = sentence.strip()
-        if 50 <= len(sentence) <= 180:
-            # Filtere Zitate und Meta-Text
-            if not any(sentence.lower().startswith(x) for x in ['dit', 'le ', 'la ', 'les ', 'un ', 'une ']):
-                if ':' not in sentence[:30]:  # Keine Zeitstempel
-                    candidates.append(sentence)
-    
-    # Nach Länge sortieren (mehr Substanz)
-    candidates.sort(key=len, reverse=True)
-    
-    # Beste Sätze auswählen
-    selected = []
-    used_words = set()
-    
-    for sentence in candidates:
-        if len(selected) >= max_summaries:
-            break
-        
-        # Prüfe auf neue Information
-        words = set(re.findall(r'\b[a-zA-ZÀ-ÿ]{5,}\b', sentence.lower()))
-        if not words.issubset(used_words):
-            selected.append(sentence)
-            used_words.update(words)
+    # Alle Posts kombinieren (inklusive Zeitstempel zur Kontextualisierung)
+    combined_posts = ""
+    for idx, post in enumerate(posts):
+        clean_content = clean_text(post['content'])
+        # Filter offensichtlichen Müll und Meta-Texte heraus bevor es zum LLM geht
+        if len(clean_content) > 15:
+            combined_posts += f"Post {idx+1}: {clean_content}\n\n"
             
-    if not selected:
+    if not combined_posts.strip():
         return []
-    
-    # Übersetze alle ausgewählten Sätze AUF EINMAL (Bulk) um Google Rate-Limits zu verhindern
-    translated_sentences = translate_french_to_german_bulk(selected[:max_summaries])
-    
-    summaries = []
-    for translated in translated_sentences:
-        translated = clean_text(translated)
         
-        # Säubern für Stichpunkt-Look
-        translated = re.sub(r'^(der|die|das|ein|eine)\s+', '', translated, flags=re.IGNORECASE)
-        # Säubere API Artefakte wie führende Pipes falls aufgetreten
-        translated = re.sub(r'^[|\s]+', '', translated)
-        
-        if len(translated) > 20: 
-            translated = translated[0].upper() + translated[1:]
-            summaries.append(translated)
-    
-    return summaries
+    # LLM Zusammenfassung aufrufen
+    return summarize_with_llm(combined_posts, title, max_summaries)
 
 def scrape_forum_list(url):
     """Scraped die Thread-Liste aus einem Forum"""
@@ -532,7 +468,7 @@ def process_forum(url, category_name, days_back=7):
         images = data['images']
         
         if posts:
-            summaries = extract_summaries(posts, max_summaries=5)
+            summaries = process_thread_summaries(posts, thread['title'], max_summaries=5)
         else:
             summaries = []
         
@@ -548,9 +484,13 @@ def process_forum(url, category_name, days_back=7):
     return results
 
 def main():
+    if not OPENROUTER_API_KEY:
+        print("ACHTUNG: OPENROUTER_API_KEY ist nicht gesetzt!")
+        print("Bitte exportiere den Key vor dem Ausführen: export OPENROUTER_API_KEY='dein-key'")
+        
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    print(f"=== Remontées Scraper {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
+    print(f"=== Remontées Scraper (LLM Version) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
     
     # Immer 7 Tage scrapen
     stations = process_forum(STATIONS_URL, "Stationen", days_back=7)
