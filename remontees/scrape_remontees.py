@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Remontées Mécaniques Forum Scraper v4
+Remontées Mécaniques Forum Scraper v5
 Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen (OpenRouter/Stepfun)
+Alle Foren-Themen werden in EINER API-Anfrage zusammengefasst, um Rate-Limits zu umgehen.
 """
 
 import requests
@@ -103,99 +104,123 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
-def summarize_with_llm(posts_text, title, max_summaries=5):
-    """Nutzt OpenRouter für echte Zusammenfassung und Übersetzung"""
+def summarize_all_threads_bulk(all_threads_data):
+    """
+    Nimmt alle gescrapten Threads und sendet sie als EINEN großen Block an die LLM-API.
+    Gibt ein Dictionary zurück, das die Thread-IDs auf eine Liste von Stichpunkten mappt.
+    """
     if not OPENROUTER_API_KEY:
-        print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt. Skript gibt leere Liste zurück.")
-        return ["Bitte API-Key für Zusammenfassungen hinterlegen."]
+        print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt.")
+        return {}
         
     url = "https://openrouter.ai/api/v1/chat/completions"
-    
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "HTTP-Referer": "https://mauricefun.lol",
         "X-Title": "Remontees Scraper",
         "Content-Type": "application/json"
     }
+
+    # Baue EINEN riesigen Prompt für alle Threads
+    combined_text = "Bitte analysiere die folgenden Foren-Themen und gib für jedes Thema eine deutschsprachige Zusammenfassung.\n\n"
+    thread_order = [] # Merkt sich die IDs, um sie später zuzuordnen
     
-    # Großzügigeres Token-Limit für das neue Modell
-    if len(posts_text) > 20000:
-        posts_text = posts_text[:20000] + "... [Text gekürzt]"
+    for thread in all_threads_data:
+        # Extrahiere die rohen Posts, wenn vorhanden
+        raw_posts = thread.get('raw_posts', [])
+        if not raw_posts:
+            continue
+            
+        # Baue Text für diesen spezifischen Thread
+        thread_content = ""
+        for idx, post in enumerate(raw_posts):
+            clean_content = clean_text(post['content'])
+            if len(clean_content) > 15:
+                thread_content += f"Post {idx+1}: {clean_content}\n"
+                
+        if thread_content.strip():
+            # Limitiere den Text pro Thread ein wenig, falls extrem lang, damit der Gesamt-Prompt nicht platzt
+            if len(thread_content) > 3000:
+                thread_content = thread_content[:3000] + "... [Text gekürzt]"
+                
+            combined_text += f"=== THREAD_ID: {thread['id']} | TITEL: {thread['name']} ===\n"
+            combined_text += f"{thread_content}\n\n"
+            thread_order.append(thread['id'])
+            
+    if not thread_order:
+        return {} # Nichts zu tun
         
+    # Noch ein globales Token-Limit als Sicherung (ca. 40k Zeichen)
+    if len(combined_text) > 40000:
+        combined_text = combined_text[:40000] + "\n... [Rest abgeschnitten aufgrund von Token-Limit]"
+
     system_prompt = (
-        "Du bist ein Experte für Skigebiete und Seilbahnen. "
-        "Deine Aufgabe ist es, französische Forenbeiträge zu analysieren und "
-        "die wichtigsten Neuigkeiten auf Deutsch zusammenzufassen."
+        "Du bist ein Experte für Skigebiete und Seilbahnen. Du erhältst Beiträge aus verschiedenen "
+        "Foren-Themen. Deine Aufgabe ist es, für jedes Thema die wichtigsten Fakten als deutsche Stichpunkte "
+        "zusammenzufassen.\n\n"
+        "Regeln für die Ausgabe:\n"
+        "1. Nutze exakt das Format: THREAD_ID: [ID des Themas]\n"
+        "2. Darunter listest du die Zusammenfassungen auf.\n"
+        "3. Jeder Stichpunkt muss mit einem Bindestrich (-) beginnen.\n"
+        "4. Konzentriere dich auf harte Fakten (neue Lifte, Eröffnungen, Bauarbeiten) und ignoriere Grüße/Meinungen.\n"
+        "5. Maximal 5 Stichpunkte pro Thema.\n\n"
+        "Beispielausgabe:\n"
+        "THREAD_ID: 12345\n"
+        "- Neue 6er-Sesselbahn wird gebaut.\n"
+        "- Eröffnung für Dezember geplant.\n"
+        "THREAD_ID: 67890\n"
+        "- Alter Schlepplift wurde abgerissen."
     )
-    
-    user_prompt = (
-        f"Lies die folgenden Forenbeiträge zum Thema '{title}'.\n\n"
-        f"Beiträge:\n{posts_text}\n\n"
-        f"Fasse die Kerninformationen in maximal {max_summaries} kurzen, prägnanten Stichpunkten auf Deutsch zusammen.\n"
-        "Regeln:\n"
-        "- Gib NUR die Stichpunkte zurück, keinen Einleitungstext.\n"
-        "- Jeder Stichpunkt muss mit einem Bindestrich (-) beginnen.\n"
-        "- Konzentriere dich auf Fakten: Neue Lifte, Pisten, Bauarbeiten, Eröffnungsdaten.\n"
-        "- Ignoriere persönliche Meinungen, Grüße oder irrelevante Diskussionen."
-    )
-    
+
     payload = {
-        "model": "stepfun/step-3.5-flash:free",  # Aktualisiert auf das kostenlose/schnellere Modell
+        "model": "stepfun/step-3.5-flash:free",
         "messages": [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt}
+            {"role": "user", "content": combined_text}
         ],
-        "temperature": 0.3 # Niedrige Temperatur für faktische Zusammenfassungen
+        "temperature": 0.2
     }
-    
+
     try:
-        response = requests.post(url, headers=headers, json=payload, timeout=45)
+        print("Sende gebündelten Request an LLM (Rate Limits umgehen)...")
+        response = requests.post(url, headers=headers, json=payload, timeout=60)
         
         if response.status_code == 200:
             result_text = response.json()['choices'][0]['message']['content'].strip()
+            print("Antwort erhalten! Parse Ergebnisse...")
             
-            # Zerlege den String in eine Liste basierend auf den Bindestrichen
-            summaries = []
+            # Zerlege die Antwort basierend auf "THREAD_ID:"
+            summaries_dict = {}
+            current_id = None
+            
             for line in result_text.split('\n'):
                 line = line.strip()
-                if line.startswith('-'):
-                    # Entferne den Bindestrich am Anfang für das JSON-Format
+                if not line:
+                    continue
+                    
+                # Prüfe, ob eine neue ID anfängt
+                id_match = re.search(r'THREAD_ID:\s*(\d+)', line, re.IGNORECASE)
+                if id_match:
+                    current_id = id_match.group(1)
+                    summaries_dict[current_id] = []
+                elif current_id and line.startswith('-'):
+                    # Säubere den Stichpunkt
                     clean_line = re.sub(r'^-\s*', '', line).strip()
                     if clean_line:
-                        summaries.append(clean_line)
-                        
-            # Fallback falls das Modell keine Bindestriche nutzt
-            if not summaries and result_text:
-                summaries = [line.strip() for line in result_text.split('\n') if line.strip()]
-                
-            return summaries[:max_summaries]
+                        # Auf 5 beschränken (falls das LLM die Anweisung ignoriert hat)
+                        if len(summaries_dict[current_id]) < 5:
+                            summaries_dict[current_id].append(clean_line)
+                            
+            return summaries_dict
+            
         else:
             print(f"OpenRouter API Fehler {response.status_code}: {response.text}")
-            return ["API-Fehler bei der Zusammenfassung"]
+            return {}
             
     except Exception as e:
         print(f"Ausnahmefehler bei OpenRouter API: {e}")
-        return ["Verbindungsfehler bei der Zusammenfassung"]
+        return {}
 
-
-def process_thread_summaries(posts, title, max_summaries=5):
-    """Sammelt die Texte und schickt sie an das LLM"""
-    if not posts:
-        return []
-    
-    # Alle Posts kombinieren (inklusive Zeitstempel zur Kontextualisierung)
-    combined_posts = ""
-    for idx, post in enumerate(posts):
-        clean_content = clean_text(post['content'])
-        # Filter offensichtlichen Müll und Meta-Texte heraus bevor es zum LLM geht
-        if len(clean_content) > 15:
-            combined_posts += f"Post {idx+1}: {clean_content}\n\n"
-            
-    if not combined_posts.strip():
-        return []
-        
-    # LLM Zusammenfassung aufrufen
-    return summarize_with_llm(combined_posts, title, max_summaries)
 
 def scrape_forum_list(url):
     """Scraped die Thread-Liste aus einem Forum"""
@@ -460,27 +485,42 @@ def process_forum(url, category_name, days_back=7):
     threads = scrape_forum_list(url)
     
     results = []
+    
+    # SCHRITT 1: Lade von allen Threads erstmal nur die Rohdaten (Posts/Bilder) herunter
     for thread in threads[:15]:
-        print(f"  → {thread['title'][:40]}...")
+        print(f"  → Scraping Inhalte: {thread['title'][:40]}...")
         data = scrape_thread_posts(thread['url'], days_back=days_back)
         
-        posts = data['posts']
-        images = data['images']
-        
-        if posts:
-            summaries = process_thread_summaries(posts, thread['title'], max_summaries=5)
-        else:
-            summaries = []
-        
+        # Speichere die Rohdaten vorübergehend im Result-Objekt
         results.append({
             'id': thread['id'],
             'name': thread['title'],
             'url': thread['url'],
             'last_update': thread['last_post_display'],
-            'summaries': summaries if summaries else ['Neue Beiträge im Forum'],
-            'images': images
+            'raw_posts': data['posts'],
+            'images': data['images'],
+            'summaries': [] # Wird in Schritt 2 befüllt
         })
-    
+
+    # SCHRITT 2: Führe einen einizgen Bulk-API-Call für ALLE gescrapten Threads dieser Kategorie aus
+    print(f"\nSende alle {len(results)} Threads aus {category_name} zur Zusammenfassung an das LLM...")
+    llm_summaries = summarize_all_threads_bulk(results)
+
+    # SCHRITT 3: Ordne die vom LLM zurückgegebenen Zusammenfassungen den richtigen Threads zu
+    for thread in results:
+        thread_id = str(thread['id'])
+        if thread_id in llm_summaries and llm_summaries[thread_id]:
+            thread['summaries'] = llm_summaries[thread_id]
+        else:
+            if thread['raw_posts']:
+                # Fallback, falls das LLM einen Thread versehentlich übersprungen hat
+                thread['summaries'] = ['Keine spezifische Zusammenfassung generiert, aber neue Beiträge vorhanden.']
+            else:
+                thread['summaries'] = ['Keine neuen Text-Beiträge in den letzten 7 Tagen.']
+                
+        # Entferne die rohen Posts, da sie nicht im endgültigen JSON gespeichert werden sollen
+        del thread['raw_posts']
+        
     return results
 
 def main():
@@ -490,7 +530,7 @@ def main():
         
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    print(f"=== Remontées Scraper (LLM Version) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
+    print(f"=== Remontées Scraper (LLM BULK Version) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
     
     # Immer 7 Tage scrapen
     stations = process_forum(STATIONS_URL, "Stationen", days_back=7)
