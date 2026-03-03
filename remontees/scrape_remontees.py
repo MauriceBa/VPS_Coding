@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Remontées Mécaniques Forum Scraper v5.1
+Remontées Mécaniques Forum Scraper v5.2
 Scrapt Skigebiet- und Lifte-News mit LLM-basierten Zusammenfassungen (OpenRouter/Stepfun)
-Fix für französisches Datumsformat (z.B. "mars 01 2026").
+Fix für französisches Datumsformat inkl. Abkürzungen wie "févr."
 """
 
 import requests
@@ -22,9 +22,20 @@ OUTPUT_DIR = "/home/ubuntu/projects/mauricefun.lol/html/data"
 # OpenRouter API Konfiguration (Wird aus Environment Variable geladen)
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 
+# Auch abgekürzte Monate wie "févr." hinzufügen!
 FRENCH_MONTHS = {
-    'janvier': 1, 'février': 2, 'mars': 3, 'avril': 4, 'mai': 5, 'juin': 6,
-    'juillet': 7, 'août': 8, 'septembre': 9, 'octobre': 10, 'novembre': 11, 'décembre': 12
+    'janvier': 1, 'janv': 1, 'janv.': 1, 
+    'février': 2, 'févr': 2, 'févr.': 2, 'fevrier': 2, 'fevr': 2, 'fevr.': 2,
+    'mars': 3, 
+    'avril': 4, 'avr': 4, 'avr.': 4,
+    'mai': 5, 
+    'juin': 6, 
+    'juillet': 7, 'juil': 7, 'juil.': 7,
+    'août': 8, 'aout': 8,
+    'septembre': 9, 'sept': 9, 'sept.': 9,
+    'octobre': 10, 'oct': 10, 'oct.': 10,
+    'novembre': 11, 'nov': 11, 'nov.': 11,
+    'décembre': 12, 'decembre': 12, 'déc': 12, 'déc.': 12, 'dec': 12, 'dec.': 12
 }
 
 # Globale Session für bessere Performance
@@ -68,9 +79,9 @@ def parse_french_date(date_str):
 
     # Absolutes Datum parsen
     day, month_str, year = None, None, now.year
-    date_str_clean = date_str.replace(',', ' ')
+    date_str_clean = date_str.replace(',', ' ').replace('.', '')
     
-    # Format 1: "28 février 2026"
+    # Format 1: "28 février 2026" oder "28 févr 2026"
     m1 = re.search(r'(\d{1,2})\s+([a-zûéè]+)\s+(\d{4})', date_str_clean)
     # Format 2: "mars 01 2026" (Dieses Format nutzt das Forum oft!)
     m2 = re.search(r'([a-zûéè]+)\s+(\d{1,2})\s+(\d{4})', date_str_clean)
@@ -89,20 +100,28 @@ def parse_french_date(date_str):
         month_str, day = m4.group(1), int(m4.group(2))
         
     if day and month_str:
-        month = FRENCH_MONTHS.get(month_str, 1)
-        time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
-        hour, minute = 0, 0
-        if time_match:
-            hour, minute = int(time_match.group(1)), int(time_match.group(2))
-            
-        try:
-            parsed_date = datetime(year, month, day, hour, minute)
-            # Wenn Datum in der Zukunft liegt (z.B. Dezember, obwohl wir Januar haben), war es letztes Jahr
-            if parsed_date > now + timedelta(days=1):
-                parsed_date = parsed_date.replace(year=year-1)
-            return parsed_date
-        except ValueError:
-            pass
+        month = FRENCH_MONTHS.get(month_str)
+        if not month:
+            # Fallback falls es ein ganz komischer Monats-String ist
+            for k, v in FRENCH_MONTHS.items():
+                if month_str.startswith(k) or k.startswith(month_str):
+                    month = v
+                    break
+        
+        if month:
+            time_match = re.search(r'(\d{1,2}):(\d{2})', date_str)
+            hour, minute = 0, 0
+            if time_match:
+                hour, minute = int(time_match.group(1)), int(time_match.group(2))
+                
+            try:
+                parsed_date = datetime(year, month, day, hour, minute)
+                # Wenn Datum in der Zukunft liegt (z.B. Dezember, obwohl wir Januar haben), war es letztes Jahr
+                if parsed_date > now + timedelta(days=1):
+                    parsed_date = parsed_date.replace(year=year-1)
+                return parsed_date
+            except ValueError:
+                pass
             
     return None
 
@@ -509,7 +528,7 @@ def main():
         
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    print(f"=== Remontées Scraper (LLM BULK Version 5.1) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
+    print(f"=== Remontées Scraper (LLM BULK Version 5.2) {datetime.now().strftime('%Y-%m-%d %H:%M')} ===\n")
     
     stations = process_forum(STATIONS_URL, "Stationen", days_back=7)
     print()
