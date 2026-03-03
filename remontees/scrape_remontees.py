@@ -104,7 +104,7 @@ def clean_text(text):
     return text
 
 def summarize_with_llm(posts_text, title, max_summaries=5):
-    """Nutzt OpenRouter (Stepfun/andere Modelle) für echte Zusammenfassung und Übersetzung"""
+    """Nutzt OpenRouter für echte Zusammenfassung und Übersetzung"""
     if not OPENROUTER_API_KEY:
         print("WARNUNG: OPENROUTER_API_KEY nicht gesetzt. Skript gibt leere Liste zurück.")
         return ["Bitte API-Key für Zusammenfassungen hinterlegen."]
@@ -118,9 +118,9 @@ def summarize_with_llm(posts_text, title, max_summaries=5):
         "Content-Type": "application/json"
     }
     
-    # Kürze den Text falls er extrem lang ist, um Token-Limits zu respektieren
-    if len(posts_text) > 8000:
-        posts_text = posts_text[:8000] + "... [Text gekürzt]"
+    # Großzügigeres Token-Limit für das neue Modell
+    if len(posts_text) > 20000:
+        posts_text = posts_text[:20000] + "... [Text gekürzt]"
         
     system_prompt = (
         "Du bist ein Experte für Skigebiete und Seilbahnen. "
@@ -140,7 +140,7 @@ def summarize_with_llm(posts_text, title, max_summaries=5):
     )
     
     payload = {
-        "model": "stepfun/step-1-8k",  # Nutze das korrekte Stepfun Modell via OpenRouter
+        "model": "stepfun/step-3.5-flash:free",  # Aktualisiert auf das kostenlose/schnellere Modell
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
