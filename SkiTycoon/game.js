@@ -1,84 +1,103 @@
 /**
- * SkiTycoon - Der ultimative Ski-Resort Manager
- * Ein Pennergame/Die Stämme Style Clicker/Idle Game
+ * SkiTycoon - Das Ultimative Retro Browsergame
+ * Enthält Mechaniken aus: OGame, Travian, Die Stämme, Pennergame, Torn City
  */
 
-// Spiel-Status
+// --- 1. CORE GAME STATE ---
 const game = {
-    money: 100,
+    money: 200,
     snow: 50,
     level: 1,
     xp: 0,
     xpToNext: 100,
-    incomePerSecond: 0,
-    slopes: 0,
-    guests: 0,
-    reputation: 'Unbekannt',
-    buildings: {},
-    weather: 'sunny',
-    temperature: -5,
-    startTime: Date.now(),
+    
+    // Torn City: Energie & Nerven
+    energy: 100,
+    maxEnergy: 100,
+    nerve: 50,
+    maxNerve: 50,
+    crimeExp: 0, // Hidden Stat
+    
+    // OGame/Travian: Lagerlimits & Upkeep
+    maxMoney: 1000,
+    maxSnow: 500,
     power: 500,
-    water: 500,
     maxPower: 500,
+    water: 500,
     maxWater: 500,
     isBlackout: false,
+    
+    // Pennergame: Schwarzmarkt (Pfandflaschen)
+    flyers: 0,
+    flyerPrice: 5,
+    
+    // Pennergame: Haustiere (Pets)
+    petActive: false,
+    petTimer: 0,
+    
+    // Pennergame: Weiterbildung
+    skillLevel: 0,
+    skillActive: false,
+    skillTimer: 0,
+    
+    // Tribal Wars / OGame: Bau-Warteschlange & Fleetsave
+    buildQueue: null,
     fleetsaveActive: false,
     fleetsaveMoney: 0,
-    isTraveling: false
+    
+    // Torn City: Travel API Lock
+    isTraveling: false,
+    
+    buildings: {}
 };
 
-// Gebäude-Typen
+// --- 2. TECH-TREE & GEBÄUDE (OGame / Tribal Wars) ---
+// Formeln: Kosten = baseCost * 1.5^level | Produktion = baseInc * level * 1.1^level
 const buildingTypes = [
-    { id: 'draglift', name: 'Schlepplift', icon: '⛓️', desc: 'Der Klassiker', baseCost: 150, income: 2, unlockLevel: 1, maxCount: 10 },
-    { id: 'chairlift', name: '2er Sessellift', icon: '🪑', desc: 'Komfortabel', baseCost: 500, income: 8, unlockLevel: 2, maxCount: 8 },
-    { id: 'quadlift', name: '4er Sessellift', icon: '🚡', desc: 'Mehr Kapazität', baseCost: 2000, income: 25, unlockLevel: 3, maxCount: 6 },
-    { id: 'gondola', name: 'Gondelbahn', icon: '🚠', desc: 'Premium', baseCost: 8000, income: 80, unlockLevel: 5, maxCount: 4 },
-    { id: 'cabin', name: 'Skihütte', icon: '🏠', desc: 'Brotzeit', baseCost: 3000, income: 35, unlockLevel: 4, maxCount: 5 },
-    { id: 'restaurant', name: 'Bergrestaurant', icon: '🍽️', desc: 'Gourmet', baseCost: 15000, income: 150, unlockLevel: 6, maxCount: 3 },
-    { id: 'snowcannon', name: 'Schneekanone', icon: '❄️', desc: 'Immer Schnee', baseCost: 5000, income: 15, unlockLevel: 4, maxCount: 10 },
-    { id: 'skischool', name: 'Skischule', icon: '🎓', desc: 'Schule', baseCost: 10000, income: 60, unlockLevel: 5, maxCount: 4 }
+    { id: 'hq', name: 'Verwaltung', icon: '🏢', desc: 'Beschleunigt Bauzeiten um 20% pro Level.', baseCost: 100, baseInc: 0, baseTime: 5, req: null },
+    { id: 'tresor', name: 'Bank-Tresor', icon: '🏦', desc: 'Erhöht das Geld-Lagerlimit massiv.', baseCost: 300, baseInc: 0, baseTime: 10, req: { hq: 1 } },
+    { id: 'depot', name: 'Schneedepot', icon: '🧊', desc: 'Erhöht das Schnee-Lagerlimit.', baseCost: 200, baseInc: 0, baseTime: 8, req: { hq: 1 } },
+    { id: 'draglift', name: 'Schlepplift', icon: '⛓️', desc: 'Generiert Einkommen. Kostet Strom.', baseCost: 150, baseInc: 2, baseTime: 15, req: { hq: 1 } },
+    { id: 'snowcannon', name: 'Schneekanone', icon: '❄️', desc: 'Generiert Schnee. Kostet Wasser.', baseCost: 500, baseInc: 0, baseTime: 25, req: { hq: 2, draglift: 1 } },
+    { id: 'chairlift', name: '2er Sessellift', icon: '🪑', desc: 'Besseres Einkommen.', baseCost: 1000, baseInc: 10, baseTime: 45, req: { hq: 3, draglift: 3 } },
+    { id: 'gondola', name: 'Gondelbahn', icon: '🚠', desc: 'Premium Einkommen.', baseCost: 5000, baseInc: 50, baseTime: 120, req: { hq: 5, chairlift: 5 } }
 ];
 
-const weatherTypes = [
-    { type: 'sunny', icon: '☀️', text: 'Sonnig', tempMod: 0, incomeMod: 1.2 },
-    { type: 'cloudy', icon: '☁️', text: 'Bewölkt', tempMod: -2, incomeMod: 1.0 },
-    { type: 'snowy', icon: '🌨️', text: 'Schneefall', tempMod: -5, incomeMod: 1.5 },
-    { type: 'foggy', icon: '🌫️', text: 'Nebelig', tempMod: -3, incomeMod: 0.7 }
-];
-
-const newsMessages = [
-    "Neuer Schneefall erwartet!",
-    "Skiverband lobt deine Pistenpräparierung!",
-    "Tourismusverband empfiehlt dein Skigebiet!",
-    "Weltcup-Event in der Region geplant!",
-    "Berühmter Skifahrer gesichtet!",
-    "Schneehöhe erreicht Rekordwert!",
-    "Gäste begeistert von den Liften!"
-];
-
-// DOM Elemente
+// --- 3. DOM ELEMENTE ---
 const elements = {
     money: document.getElementById('money'),
-    income: document.getElementById('income'),
+    maxMoney: document.getElementById('max-money'),
     snow: document.getElementById('snow'),
-    slopes: document.getElementById('slopes'),
-    guests: document.getElementById('guests'),
+    maxSnow: document.getElementById('max-snow'),
+    income: document.getElementById('income'),
     level: document.getElementById('level'),
     xpFill: document.getElementById('xp-fill'),
-    reputation: document.getElementById('reputation'),
+    
+    // Torn
+    energyVal: document.getElementById('energy-val'),
+    energyFill: document.getElementById('energy-fill'),
+    nerveVal: document.getElementById('nerve-val'),
+    nerveFill: document.getElementById('nerve-fill'),
+    ceVal: document.getElementById('ce-val'),
+    btnShovel: document.getElementById('btn-shovel'),
+    btnGroom: document.getElementById('btn-groom'),
+    btnCrime: document.getElementById('btn-crime'),
+    
+    // Pennergame
+    flyersVal: document.getElementById('flyers-val'),
+    flyerPrice: document.getElementById('flyer-price'),
+    btnSellFlyers: document.getElementById('btn-sell-flyers'),
+    petStatus: document.getElementById('pet-status'),
+    petFill: document.getElementById('pet-fill'),
+    btnPet: document.getElementById('btn-pet'),
+    skillStatus: document.getElementById('skill-status'),
+    skillFill: document.getElementById('skill-fill'),
+    btnSkill: document.getElementById('btn-skill'),
+    
+    // UI & Hardcore
     buildingsList: document.getElementById('buildings-list'),
     inventoryList: document.getElementById('inventory-list'),
     newsFeed: document.getElementById('news-feed'),
-    weatherIcon: document.getElementById('weather-icon'),
-    weatherText: document.getElementById('weather-text'),
-    temperature: document.getElementById('temperature'),
-    btnShovel: document.getElementById('btn-shovel'),
-    btnGroom: document.getElementById('btn-groom'),
-    btnRent: document.getElementById('btn-rent'),
-    btnTeach: document.getElementById('btn-teach'),
-    
-    // Hardcore Mechanics Elements
     powerVal: document.getElementById('power-val'),
     waterVal: document.getElementById('water-val'),
     blackoutWarning: document.getElementById('blackout-warning'),
@@ -91,382 +110,441 @@ const elements = {
     btnTravel: document.getElementById('btn-travel'),
     travelOverlay: document.getElementById('travel-overlay'),
     travelTimer: document.getElementById('travel-timer'),
-    helicopter: document.getElementById('helicopter')
+    helicopter: document.getElementById('helicopter'),
+    
+    // Queue
+    queueContainer: document.getElementById('build-queue-container'),
+    bqName: document.getElementById('bq-name'),
+    bqTime: document.getElementById('bq-time'),
+    bqFill: document.getElementById('bq-fill')
 };
 
+// --- INITIALISIERUNG ---
 document.addEventListener('DOMContentLoaded', () => {
-    initGame();
+    buildingTypes.forEach(t => { if(game.buildings[t.id] === undefined) game.buildings[t.id] = 0; });
     setupEventListeners();
     renderBuildings();
     updateUI();
     setInterval(gameLoop, 1000);
-    setInterval(changeWeather, 30000);
-    setInterval(addRandomNews, 60000);
 });
 
-function initGame() {
-    const saved = localStorage.getItem('skiTycoonSave');
-    if (saved) {
-        const data = JSON.parse(saved);
-        Object.assign(game, data);
-        game.isTraveling = false; // Reset if refreshed while traveling
-        game.fleetsaveActive = false; // Reset fleet
-        addNews('Spielstand geladen! Willkommen zurück!');
-    }
-    
-    buildingTypes.forEach(type => {
-        if (!game.buildings[type.id]) {
-            game.buildings[type.id] = 0;
-        }
-    });
-}
-
+// --- EVENT LISTENERS (Actions) ---
 function setupEventListeners() {
-    // Aktionen
+    // 1. Torn City Action System (Energy / Nerve)
     elements.btnShovel.addEventListener('click', (e) => {
-        const amount = Math.floor(Math.random() * 3) + 1;
-        game.snow += amount;
-        addXP(1);
-        showClickFeedback(e, `+${amount} Schnee`);
-        updateUI();
+        if(game.energy >= 10) {
+            game.energy -= 10;
+            const amt = 2 + Math.floor(Math.random() * 3);
+            game.snow = Math.min(game.maxSnow, game.snow + amt);
+            showFeedback(e, `+${amt} Schnee`);
+            updateUI();
+        } else { showFeedback(e, 'Zu wenig Energie!', true); }
     });
     
     elements.btnGroom.addEventListener('click', (e) => {
-        if (game.snow >= 5) {
-            game.snow -= 5;
-            game.money += 5;
-            game.slopes += 0.1;
+        if(game.energy >= 15) {
+            game.energy -= 15;
+            game.money = Math.min(game.maxMoney, game.money + 15);
             addXP(2);
-            showClickFeedback(e, '+5 €');
+            showFeedback(e, '+15 €');
             updateUI();
-        } else {
-            showClickFeedback(e, 'Zu wenig Schnee!', true);
+        } else { showFeedback(e, 'Zu wenig Energie!', true); }
+    });
+    
+    elements.btnCrime.addEventListener('click', (e) => {
+        if(game.nerve >= 10) {
+            game.nerve -= 10;
+            // Success chance based on Hidden CE
+            const chance = 0.4 + (game.crimeExp * 0.01);
+            if(Math.random() < chance) {
+                game.crimeExp++;
+                const loot = 50 + Math.floor(Math.random() * 100);
+                game.money = Math.min(game.maxMoney, game.money + loot);
+                addNews(`🥷 Kasse geknackt! +${loot}€`);
+                showFeedback(e, `+${loot} €`);
+            } else {
+                game.crimeExp = Math.max(0, game.crimeExp - 2);
+                addNews("🚔 Erwischt! Du hast Nerven & Erfahrung verloren.", true);
+                showFeedback(e, 'Fehlschlag!', true);
+            }
+            updateUI();
+        } else { showFeedback(e, 'Zu wenig Nerven!', true); }
+    });
+
+    // 2. Pennergame Schwarzmarkt
+    elements.btnSellFlyers.addEventListener('click', () => {
+        if(game.flyers > 0) {
+            const profit = game.flyers * game.flyerPrice;
+            game.money = Math.min(game.maxMoney, game.money + profit);
+            addNews(`📉 ${game.flyers} Pässe für ${profit}€ verkauft!`);
+            game.flyers = 0;
+            updateUI();
         }
     });
-    
-    elements.btnRent.addEventListener('click', (e) => {
-        game.money += 10;
-        game.guests += 0.5;
-        addXP(3);
-        showClickFeedback(e, '+10 €');
+
+    // 3. Pennergame Pets
+    elements.btnPet.addEventListener('click', () => {
+        if(!game.petActive) {
+            game.petActive = true;
+            game.petTimer = 60; // 60 sekunden
+            addNews("🐕 Hund Rex ist auf Patrouille...");
+            updateUI();
+        }
+    });
+
+    // 4. Pennergame Weiterbildung
+    elements.btnSkill.addEventListener('click', () => {
+        if(!game.skillActive && game.money >= 500) {
+            game.money -= 500;
+            game.skillActive = true;
+            game.skillTimer = 120; // 2 Minuten
+            addNews("📚 Studium gestartet. Dauert 2 Minuten.");
+            updateUI();
+        }
+    });
+
+    // 5. Promo Link (Pennergame)
+    elements.btnPromo.addEventListener('click', (e) => {
+        game.money = Math.min(game.maxMoney, game.money + 50);
+        addNews("Jemand hat deinen Spendenlink geklickt! +50 €");
+        showFeedback(e, '+50 €');
         updateUI();
     });
-    
-    elements.btnTeach.addEventListener('click', (e) => {
-        game.money += 25;
-        game.guests += 1;
-        addXP(5);
-        showClickFeedback(e, '+25 €');
+
+    // 6. Fleetsave (OGame)
+    elements.btnFleetsave.addEventListener('click', () => {
+        if(game.fleetsaveActive || game.money <= 0) return;
+        game.fleetsaveActive = true;
+        game.fleetsaveMoney = Math.floor(game.money * 0.9);
+        game.money -= game.fleetsaveMoney;
+        
+        elements.helicopter.style.display = 'block';
+        setTimeout(() => elements.helicopter.classList.add('flying'), 50);
+        elements.fsStatus.style.display = 'block';
+        
+        let tl = 10;
+        elements.fsTime.textContent = tl;
+        let fsInt = setInterval(() => {
+            tl--; elements.fsTime.textContent = tl;
+            if(tl <= 0) {
+                clearInterval(fsInt);
+                game.money = Math.min(game.maxMoney, game.money + game.fleetsaveMoney);
+                game.fleetsaveActive = false;
+                elements.helicopter.classList.remove('flying');
+                setTimeout(() => elements.helicopter.style.display='none', 500);
+                elements.fsStatus.style.display = 'none';
+                addNews("🚁 Fleetsave beendet. Geld ist sicher.");
+                updateUI();
+            }
+        }, 1000);
         updateUI();
     });
-    
-    // --- Hardcore Mechaniken Event Listeners ---
-    if(elements.btnPromo) {
-        elements.btnPromo.addEventListener('click', (e) => {
-            game.money += 50;
-            addNews("Viral-Klick erhalten! +50 €");
-            showClickFeedback(e, '+50 €');
-            updateUI();
-        });
-    }
 
-    if(elements.btnFleetsave) {
-        elements.btnFleetsave.addEventListener('click', () => {
-            if(game.fleetsaveActive || game.money <= 0) return;
-            game.fleetsaveActive = true;
-            game.fleetsaveMoney = Math.floor(game.money * 0.9); // Save 90%
-            game.money -= game.fleetsaveMoney;
+    // 7. Adelstrain (Tribal Wars)
+    elements.btnAdelstrain.addEventListener('click', () => {
+        elements.takeoverLog.innerHTML = "";
+        let baseTime = Date.now() + 2000;
+        [0, 50, 100, 150].forEach((gap, i) => {
+            let tTime = baseTime + gap;
+            let d = new Date(tTime);
+            let tStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}.${d.getMilliseconds().toString().padStart(3,'0')}`;
+            let li = document.createElement('li');
+            li.textContent = `Investor ${i+1} gesendet (${tStr})`;
+            elements.takeoverLog.appendChild(li);
             
-            elements.helicopter.style.display = 'block';
-            setTimeout(() => elements.helicopter.classList.add('flying'), 50);
-            elements.fsStatus.style.display = 'block';
-            
-            let timeLeft = 10;
-            elements.fsTime.textContent = timeLeft;
-            
-            let fsInterval = setInterval(() => {
-                timeLeft--;
-                elements.fsTime.textContent = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(fsInterval);
-                    game.money += game.fleetsaveMoney;
-                    game.fleetsaveActive = false;
-                    game.fleetsaveMoney = 0;
-                    
-                    elements.helicopter.classList.remove('flying');
-                    setTimeout(() => elements.helicopter.style.display = 'none', 500);
-                    elements.fsStatus.style.display = 'none';
-                    addNews("🚁 Fleetsave beendet! Dein Geld ist zurück.");
+            setTimeout(() => {
+                li.style.color = "var(--success)";
+                li.textContent = `Investor ${i+1} eingeschlagen!`;
+                if(i===3) {
+                    addNews("⚔️ Skigebiet übernommen! +1000€");
+                    game.maxMoney += 1000; // expand cap temporarily
+                    game.money += 1000;
                     updateUI();
                 }
-            }, 1000);
-            updateUI();
+            }, tTime - Date.now());
         });
-    }
+    });
 
-    if(elements.btnAdelstrain) {
-        elements.btnAdelstrain.addEventListener('click', () => {
-            elements.takeoverLog.innerHTML = "";
-            let baseTime = Date.now() + 2000;
-            let gaps = [0, 50, 100, 150];
-            
-            gaps.forEach((gap, i) => {
-                let targetTime = baseTime + gap;
-                let d = new Date(targetTime);
-                let timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}.${d.getMilliseconds().toString().padStart(3,'0')}`;
-                
-                let li = document.createElement('li');
-                li.textContent = `Investor ${i+1} auf dem Weg... (${timeStr})`;
-                elements.takeoverLog.appendChild(li);
-                
-                setTimeout(() => {
-                    li.style.color = "var(--success)";
-                    li.textContent = `Investor ${i+1} eingeschlagen! (-25%)`;
-                    if(i === 3) {
-                        addNews("⚔️ Feindliches Skigebiet übernommen!");
-                        game.money += 1000;
-                        updateUI();
-                    }
-                }, targetTime - Date.now());
-            });
-        });
-    }
-
-    if(elements.btnTravel) {
-        elements.btnTravel.addEventListener('click', () => {
-            game.isTraveling = true;
-            elements.travelOverlay.style.display = 'flex';
-            let timeLeft = 5;
-            elements.travelTimer.textContent = timeLeft;
-            
-            let tInterval = setInterval(() => {
-                timeLeft--;
-                elements.travelTimer.textContent = timeLeft;
-                if(timeLeft <= 0) {
-                    clearInterval(tInterval);
-                    game.isTraveling = false;
-                    elements.travelOverlay.style.display = 'none';
-                    addNews("🛬 Zurück aus Österreich! +2000€ vom Schwarzmarkt");
-                    game.money += 2000;
-                    updateUI();
-                }
-            }, 1000);
-        });
-    }
-    
-    window.addEventListener('beforeunload', saveGame);
+    // 8. Torn City API Lock
+    elements.btnTravel.addEventListener('click', () => {
+        game.isTraveling = true;
+        elements.travelOverlay.style.display = 'flex';
+        let tl = 5;
+        elements.travelTimer.textContent = tl;
+        let tInt = setInterval(() => {
+            tl--; elements.travelTimer.textContent = tl;
+            if(tl <= 0) {
+                clearInterval(tInt);
+                game.isTraveling = false;
+                elements.travelOverlay.style.display = 'none';
+                addNews("🛬 Zurück vom Schwarzmarkt. +300€");
+                game.money = Math.min(game.maxMoney, game.money + 300);
+                updateUI();
+            }
+        }, 1000);
+    });
 }
 
+// --- CALCULATION LOGIC (OGame / Tribal Wars Formulas) ---
+function getCost(type) {
+    const lvl = game.buildings[type.id] || 0;
+    return Math.floor(type.baseCost * Math.pow(1.5, lvl));
+}
+
+function getIncome(type) {
+    const lvl = game.buildings[type.id] || 0;
+    if(lvl === 0) return 0;
+    let base = type.baseInc * lvl * Math.pow(1.1, lvl);
+    // Apply skill bonus (Pennergame Weiterbildung)
+    base = base * (1 + (game.skillLevel * 0.2)); 
+    return Math.floor(base);
+}
+
+function getBuildTime(type) {
+    const lvl = game.buildings[type.id] || 0;
+    const hqLvl = game.buildings['hq'] || 0;
+    // OGame Style reduction: base * 1.5^lvl / (1 + hqLvl * 0.2)
+    const time = (type.baseTime * Math.pow(1.5, lvl)) / (1 + (hqLvl * 0.2));
+    return Math.max(1, Math.floor(time));
+}
+
+function checkReqs(type) {
+    if(!type.req) return true;
+    for(let reqBuilding in type.req) {
+        if((game.buildings[reqBuilding] || 0) < type.req[reqBuilding]) return false;
+    }
+    return true;
+}
+
+// --- BUILDING SYSTEM ---
 function renderBuildings() {
     elements.buildingsList.innerHTML = '';
+    
     buildingTypes.forEach(type => {
-        const owned = game.buildings[type.id] || 0;
-        const cost = calculateCost(type);
-        const locked = game.level < type.unlockLevel;
+        const lvl = game.buildings[type.id] || 0;
+        const cost = getCost(type);
+        const hasReq = checkReqs(type);
+        const time = getBuildTime(type);
         
         const div = document.createElement('div');
-        div.className = `building-item ${locked ? 'locked' : ''}`;
+        div.className = `building-item ${!hasReq || game.money < cost || game.buildQueue ? 'locked' : ''}`;
+        
+        // Req Text
+        let reqText = "";
+        if(!hasReq) {
+            let reqs = [];
+            for(let r in type.req) reqs.push(`${buildingTypes.find(b=>b.id===r).name} Lvl ${type.req[r]}`);
+            reqText = `<div class="req">Benötigt: ${reqs.join(', ')}</div>`;
+        }
+
         div.innerHTML = `
-            <div class="name">${type.icon} ${type.name}</div>
+            <div class="name">${type.icon} ${type.name} (Lvl ${lvl})</div>
             <div class="desc">${type.desc}</div>
-            <div class="cost">${locked ? `Level ${type.unlockLevel} benötigt` : `${formatMoney(cost)}`}</div>
-            ${!locked ? `<div class="income">+${type.income} €/Sek • ${owned}/${type.maxCount}</div>` : ''}
+            <div class="cost">Kosten: ${cost} € ⏱️ ${time}s</div>
+            ${type.baseInc > 0 ? `<div class="income">Bringt: +${getIncome(type)} €/s</div>` : ''}
+            ${reqText}
         `;
         
-        if (!locked && owned < type.maxCount) {
-            div.addEventListener('click', () => buyBuilding(type));
+        if (hasReq && game.money >= cost && !game.buildQueue) {
+            div.addEventListener('click', () => startBuilding(type));
         }
         elements.buildingsList.appendChild(div);
     });
-}
 
-function calculateCost(type) {
-    const owned = game.buildings[type.id] || 0;
-    return Math.floor(type.baseCost * Math.pow(1.2, owned));
-}
-
-function buyBuilding(type) {
-    const cost = calculateCost(type);
-    const owned = game.buildings[type.id] || 0;
-    
-    if (game.money >= cost && owned < type.maxCount) {
-        game.money -= cost;
-        game.buildings[type.id] = owned + 1;
-        addXP(10);
-        addNews(`Neuer ${type.name} gebaut!`);
-        renderBuildings();
-        renderInventory();
-        updateUI();
-    } else if (game.money < cost) {
-        addNews('Nicht genug Geld!', true);
-    }
-}
-
-function renderInventory() {
+    // Render Inventory
     const items = buildingTypes.filter(t => game.buildings[t.id] > 0);
-    if (items.length === 0) {
-        elements.inventoryList.innerHTML = '<p class="empty">Noch keine Gebäude vorhanden...</p>';
-        return;
+    elements.inventoryList.innerHTML = items.length === 0 ? '<p class="empty">Nichts gebaut.</p>' : 
+        items.map(t => `<div class="inventory-item"><div style="font-size:1.5em">${t.icon}</div><div class="count">Lvl ${game.buildings[t.id]}</div><div class="name">${t.name}</div></div>`).join('');
+}
+
+function startBuilding(type) {
+    const cost = getCost(type);
+    if(game.money >= cost && !game.buildQueue) {
+        game.money -= cost;
+        game.buildQueue = {
+            id: type.id,
+            name: type.name,
+            totalTime: getBuildTime(type),
+            timeLeft: getBuildTime(type)
+        };
+        addNews(`🚧 Bauauftrag gestartet: ${type.name}`);
+        renderBuildings();
+        updateUI();
     }
-    elements.inventoryList.innerHTML = items.map(type => `
-        <div class="inventory-item">
-            <div style="font-size: 1.5em;">${type.icon}</div>
-            <div class="count">${game.buildings[type.id]}x</div>
-            <div class="name">${type.name}</div>
-        </div>
-    `).join('');
 }
 
-function calculateIncome() {
-    let income = 0;
-    buildingTypes.forEach(type => {
-        const count = game.buildings[type.id] || 0;
-        income += count * type.income;
-    });
-    const weather = weatherTypes.find(w => w.type === game.weather);
-    income *= weather.incomeMod;
-    return Math.floor(income);
-}
-
+// --- MAIN GAME LOOP ---
 function gameLoop() {
-    if (game.isTraveling) return;
+    if (game.isTraveling) return; // Torn Travel API Lock
 
-    let powerCost = 0;
-    let waterCost = 0;
-    
-    const lifts = (game.buildings['draglift']||0) + (game.buildings['chairlift']||0) + (game.buildings['quadlift']||0) + (game.buildings['gondola']||0);
+    // 1. Storage Limits (OGame/Travian)
+    game.maxMoney = 1000 + (game.buildings['tresor'] || 0) * 2000;
+    game.maxSnow = 500 + (game.buildings['depot'] || 0) * 1000;
+
+    // 2. Upkeep / Blackout System (Travian)
+    const lifts = (game.buildings['draglift']||0) + (game.buildings['chairlift']||0) + (game.buildings['gondola']||0);
     const cannons = game.buildings['snowcannon'] || 0;
-    
-    powerCost = lifts * 2 + cannons * 5;
-    waterCost = cannons * 8;
+    let powerCost = lifts * 5;
+    let waterCost = cannons * 10;
     
     if (game.power >= powerCost && game.water >= waterCost) {
         game.power -= powerCost;
         game.water -= waterCost;
         game.isBlackout = false;
-        if(elements.blackoutWarning) elements.blackoutWarning.style.display = 'none';
+        elements.blackoutWarning.style.display = 'none';
         
-        const income = calculateIncome();
-        game.money += income;
-        game.incomePerSecond = income;
+        // Income
+        let totalIncome = 0;
+        buildingTypes.forEach(t => totalIncome += getIncome(t));
+        game.money = Math.min(game.maxMoney, game.money + totalIncome);
+        elements.income.textContent = `${totalIncome} €/s`;
         
-        const totalBuildings = Object.values(game.buildings).reduce((a, b) => a + b, 0);
-        game.guests += totalBuildings * 0.5;
+        // Snow generation
+        if(cannons > 0) game.snow = Math.min(game.maxSnow, game.snow + cannons * 2);
     } else {
         game.isBlackout = true;
-        game.incomePerSecond = 0;
-        if(elements.blackoutWarning) elements.blackoutWarning.style.display = 'block';
+        elements.income.textContent = `0 €/s (BLACKOUT)`;
+        elements.blackoutWarning.style.display = 'block';
     }
-    
-    if (!game.isBlackout) {
-        game.power = Math.min(game.maxPower, game.power + 5);
-        game.water = Math.min(game.maxWater, game.water + 5);
+
+    // Passive Resource Regen
+    if(!game.isBlackout) {
+        game.power = Math.min(game.maxPower, game.power + 10);
+        game.water = Math.min(game.maxWater, game.water + 10);
     }
-    
-    if (game.temperature > 0 && game.weather !== 'snowy') {
-        game.snow = Math.max(0, game.snow - 0.5);
-    } else if (game.weather === 'snowy') {
-        game.snow += 2;
+
+    // 3. Torn Energy / Nerve Regen
+    game.energy = Math.min(game.maxEnergy, game.energy + 1);
+    // Nerve regenerates slower (every 5 ticks simulated)
+    if(Math.random() < 0.2) game.nerve = Math.min(game.maxNerve, game.nerve + 1);
+
+    // 4. Pennergame Schwarzmarkt (Dynamic Market)
+    if(Math.random() < 0.2) game.flyers++; // Passive generation
+    if(Math.random() < 0.1) {
+        // Change price randomly between 1 and 20
+        game.flyerPrice = Math.floor(Math.random() * 20) + 1;
     }
-    
-    if (game.xp >= game.xpToNext) levelUp();
-    
-    updateReputation();
+
+    // 5. Pennergame Pets Timer
+    if(game.petActive) {
+        game.petTimer--;
+        if(game.petTimer <= 0) {
+            game.petActive = false;
+            const foundMoney = 50 + Math.floor(Math.random() * 150);
+            game.money = Math.min(game.maxMoney, game.money + foundMoney);
+            addNews(`🐕 Rex ist zurück und hat ${foundMoney}€ erschnüffelt!`);
+        }
+    }
+
+    // 6. Pennergame Weiterbildung Timer
+    if(game.skillActive) {
+        game.skillTimer--;
+        if(game.skillTimer <= 0) {
+            game.skillActive = false;
+            game.skillLevel++;
+            addNews(`🎓 Studium beendet! Du verdienst nun mehr Einkommen.`);
+        }
+    }
+
+    // 7. Tribal Wars Bau-Warteschlange
+    if(game.buildQueue) {
+        game.buildQueue.timeLeft--;
+        if(game.buildQueue.timeLeft <= 0) {
+            game.buildings[game.buildQueue.id]++;
+            addNews(`✅ Gebäude fertig: ${game.buildQueue.name} Lvl ${game.buildings[game.buildQueue.id]}`);
+            game.buildQueue = null;
+            addXP(15);
+            renderBuildings(); // Refresh reqs
+        }
+    }
+
     updateUI();
-    saveGame();
-}
-
-function addXP(amount) {
-    game.xp += amount;
-}
-
-function levelUp() {
-    game.level++;
-    game.xp -= game.xpToNext;
-    game.xpToNext = Math.floor(game.xpToNext * 1.5);
-    addNews(`🎉 Level Up! Du bist jetzt Level ${game.level}!`);
-    renderBuildings();
-}
-
-function updateReputation() {
-    const totalBuildings = Object.values(game.buildings).reduce((a, b) => a + b, 0);
-    if (totalBuildings === 0) game.reputation = 'Unbekannt';
-    else if (totalBuildings < 3) game.reputation = 'Bekannter Hang';
-    else if (totalBuildings < 8) game.reputation = 'Lokaler Treffpunkt';
-    else if (totalBuildings < 15) game.reputation = 'Beliebtes Skigebiet';
-    else if (totalBuildings < 25) game.reputation = 'Top Destination';
-    else game.reputation = 'Weltklasse-Resort';
-}
-
-function changeWeather() {
-    const weather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-    game.weather = weather.type;
-    game.temperature = -5 + weather.tempMod + Math.floor(Math.random() * 5);
-    
-    elements.weatherIcon.textContent = weather.icon;
-    elements.weatherText.textContent = weather.text;
-    elements.temperature.textContent = `${game.temperature}°C`;
-    
-    addNews(`Wetterwechsel: ${weather.text}`);
-}
-
-function addRandomNews() {
-    const msg = newsMessages[Math.floor(Math.random() * newsMessages.length)];
-    addNews(msg);
-}
-
-function addNews(text, isError = false) {
-    const div = document.createElement('div');
-    div.className = 'news-item';
-    div.innerHTML = `
-        <span class="time">${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
-        <p style="${isError ? 'color: var(--danger)' : ''}">${text}</p>
-    `;
-    elements.newsFeed.insertBefore(div, elements.newsFeed.firstChild);
-    while (elements.newsFeed.children.length > 10) {
-        elements.newsFeed.removeChild(elements.newsFeed.lastChild);
-    }
-}
-
-function showClickFeedback(event, text, isError = false) {
-    const feedback = document.createElement('div');
-    feedback.className = 'click-feedback';
-    feedback.textContent = text;
-    feedback.style.color = isError ? 'var(--danger)' : 'var(--success)';
-    feedback.style.left = `${event.clientX}px`;
-    feedback.style.top = `${event.clientY}px`;
-    document.body.appendChild(feedback);
-    setTimeout(() => feedback.remove(), 1000);
 }
 
 function updateUI() {
-    elements.money.textContent = formatMoney(game.money);
-    elements.income.textContent = `${formatMoney(game.incomePerSecond)} €`;
-    elements.snow.textContent = `${Math.floor(game.snow)} cm`;
-    elements.slopes.textContent = Math.floor(game.slopes);
-    elements.guests.textContent = Math.floor(game.guests);
+    elements.money.textContent = Math.floor(game.money);
+    elements.maxMoney.textContent = game.maxMoney;
+    elements.snow.textContent = Math.floor(game.snow);
+    elements.maxSnow.textContent = game.maxSnow;
     elements.level.textContent = game.level;
-    elements.reputation.textContent = game.reputation;
     
-    if(elements.powerVal) elements.powerVal.textContent = Math.floor(game.power);
-    if(elements.waterVal) elements.waterVal.textContent = Math.floor(game.water);
-    
-    const xpPercent = (game.xp / game.xpToNext) * 100;
-    elements.xpFill.style.width = `${xpPercent}%`;
+    // Torn UI
+    elements.energyVal.textContent = `${game.energy}/${game.maxEnergy}`;
+    elements.energyFill.style.width = `${(game.energy/game.maxEnergy)*100}%`;
+    elements.nerveVal.textContent = `${game.nerve}/${game.maxNerve}`;
+    elements.nerveFill.style.width = `${(game.nerve/game.maxNerve)*100}%`;
+    elements.ceVal.textContent = game.crimeExp;
+
+    // Schwarzmarkt
+    elements.flyersVal.textContent = game.flyers;
+    elements.flyerPrice.textContent = `${game.flyerPrice} €`;
+
+    // Pet
+    if(game.petActive) {
+        elements.petStatus.textContent = `Sucht... (${game.petTimer}s)`;
+        elements.petFill.style.width = `${((60-game.petTimer)/60)*100}%`;
+        elements.btnPet.disabled = true;
+    } else {
+        elements.petStatus.textContent = "Bereit";
+        elements.petFill.style.width = `0%`;
+        elements.btnPet.disabled = false;
+    }
+
+    // Skill
+    elements.skillStatus.textContent = `Level ${game.skillLevel}`;
+    if(game.skillActive) {
+        elements.skillStatus.textContent += ` (Lernt... ${game.skillTimer}s)`;
+        elements.skillFill.style.width = `${((120-game.skillTimer)/120)*100}%`;
+        elements.btnSkill.disabled = true;
+    } else {
+        elements.skillFill.style.width = `0%`;
+        elements.btnSkill.disabled = false;
+    }
+
+    // Queue
+    if(game.buildQueue) {
+        elements.queueContainer.style.display = 'block';
+        elements.bqName.textContent = game.buildQueue.name;
+        elements.bqTime.textContent = game.buildQueue.timeLeft;
+        let pct = ((game.buildQueue.totalTime - game.buildQueue.timeLeft) / game.buildQueue.totalTime) * 100;
+        elements.bqFill.style.width = `${pct}%`;
+    } else {
+        elements.queueContainer.style.display = 'none';
+    }
+
+    // Upkeep
+    elements.powerVal.textContent = game.power;
+    elements.waterVal.textContent = game.water;
 }
 
-function formatMoney(amount) {
-    if (amount >= 1000000) return (amount / 1000000).toFixed(1) + 'M €';
-    if (amount >= 1000) return (amount / 1000).toFixed(1) + 'k €';
-    return amount + ' €';
+// --- HELPER ---
+function addXP(amount) {
+    game.xp += amount;
+    if(game.xp >= game.xpToNext) {
+        game.level++;
+        game.xp -= game.xpToNext;
+        game.xpToNext = Math.floor(game.xpToNext * 1.5);
+        addNews(`🎉 LEVEL UP! Du bist Level ${game.level}`);
+        renderBuildings();
+    }
+    elements.xpFill.style.width = `${(game.xp/game.xpToNext)*100}%`;
 }
 
-function saveGame() {
-    localStorage.setItem('skiTycoonSave', JSON.stringify(game));
+function addNews(text, isError=false) {
+    const div = document.createElement('div');
+    div.className = 'news-item';
+    div.innerHTML = `<span class="time">${new Date().toLocaleTimeString()}</span><p style="color:${isError?'var(--danger)':'inherit'}">${text}</p>`;
+    elements.newsFeed.prepend(div);
+    if(elements.newsFeed.children.length > 10) elements.newsFeed.removeChild(elements.newsFeed.lastChild);
 }
 
-window.skiTycoon = {
-    game,
-    addMoney: (amount) => { game.money += amount; updateUI(); },
-    reset: () => { localStorage.removeItem('skiTycoonSave'); location.reload(); }
-};
+function showFeedback(e, text, isError=false) {
+    const fb = document.createElement('div');
+    fb.className = 'click-feedback';
+    fb.textContent = text;
+    fb.style.color = isError ? 'var(--danger)' : 'var(--success)';
+    fb.style.left = `${e.clientX}px`;
+    fb.style.top = `${e.clientY}px`;
+    document.body.appendChild(fb);
+    setTimeout(() => fb.remove(), 1000);
+}

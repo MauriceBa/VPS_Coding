@@ -3,140 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>❄️ SkiTycoon - Werde zum Bergbahn-Mogul</title>
+    <title>❄️ SkiTycoon - The Ultimate Browsergame</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
             <h1>❄️ SkiTycoon</h1>
-            <p class="subtitle">Baue dein Skigebiet und werde reich!</p>
+            <p class="subtitle">Das Hardcore Retro Browsergame (OGame, Travian, Pennergame, Torn)</p>
         </header>
 
         <div class="game-grid">
             <!-- Linke Spalte: Ressourcen & Stats -->
             <aside class="stats-panel">
                 <div class="card">
-                    <h2>💰 Finanzen</h2>
+                    <h2>💰 Finanzen & Lager (Travian/OGame)</h2>
                     <div class="stat-row">
                         <span class="label">Geld:</span>
-                        <span id="money" class="value">0 €</span>
+                        <span class="value"><span id="money">0</span> / <span id="max-money">1000</span> €</span>
                     </div>
                     <div class="stat-row">
-                        <span class="label">Einnahmen/Sek:</span>
-                        <span id="income" class="value">0 €</span>
+                        <span class="label">Schnee:</span>
+                        <span class="value"><span id="snow">50</span> / <span id="max-snow">500</span> cm</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Einnahmen:</span>
+                        <span id="income" class="value">0 €/s</span>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h2>🏔️ Berg-Status</h2>
-                    <div class="stat-row">
-                        <span class="label">Schneehöhe:</span>
-                        <span id="snow" class="value">50 cm</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Pisten:</span>
-                        <span id="slopes" class="value">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Gäste:</span>
-                        <span id="guests" class="value">0</span>
-                    </div>
+                    <h2>⚡ Charakter (Torn City)</h2>
+                    <div class="stat-row"><span class="label">Energie (Regen: 1/s):</span><span id="energy-val" class="value">100/100</span></div>
+                    <div class="level-bar"><div id="energy-fill" class="xp-fill" style="background: #e74c3c; width: 100%"></div></div>
+                    
+                    <div class="stat-row"><span class="label">Nerven (Crimes):</span><span id="nerve-val" class="value">50/50</span></div>
+                    <div class="level-bar"><div id="nerve-fill" class="xp-fill" style="background: #9b59b6; width: 100%"></div></div>
+                    
+                    <div class="stat-row"><span class="label">Hidden CE (Erfahrung):</span><span id="ce-val" class="value">0</span></div>
                 </div>
 
                 <div class="card">
-                    <h2>📊 Level</h2>
+                    <h2>📊 Account Level</h2>
                     <div class="level-bar">
                         <div id="xp-fill" class="xp-fill" style="width: 0%"></div>
                     </div>
-                    <div class="stat-row">
-                        <span class="label">Level:</span>
-                        <span id="level" class="value">1</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Ruf:</span>
-                        <span id="reputation" class="value">Unbekannt</span>
-                    </div>
+                    <div class="stat-row"><span class="label">Level:</span><span id="level" class="value">1</span></div>
+                    <div class="stat-row"><span class="label">Ruf:</span><span id="reputation" class="value">Unbekannt</span></div>
                 </div>
             </aside>
 
             <!-- Mitte: Aktionen -->
             <main class="main-area">
                 <div class="card actions-card">
-                    <h2>🎿 Aktionen</h2>
-                    
+                    <h2>🎿 Aktionen (Kosten Energie/Nerven)</h2>
                     <div class="action-buttons">
                         <button id="btn-shovel" class="action-btn primary">
                             <span class="icon">❄️</span>
-                            <span class="text">Schnee schaufeln</span>
-                            <span class="reward">+1-3 Schnee</span>
+                            <span class="text">Schaufeln</span>
+                            <span class="reward">-10 Energie | +Schnee</span>
                         </button>
-                        
                         <button id="btn-groom" class="action-btn">
                             <span class="icon">🚜</span>
                             <span class="text">Piste präparieren</span>
-                            <span class="reward">+5 €</span>
+                            <span class="reward">-15 Energie | +5 €</span>
                         </button>
-                        
-                        <button id="btn-rent" class="action-btn">
-                            <span class="icon">🎿</span>
-                            <span class="text">Skier vermieten</span>
-                            <span class="reward">+10 €</span>
-                        </button>
-                        
-                        <button id="btn-teach" class="action-btn">
-                            <span class="icon">👨‍🏫</span>
-                            <span class="text">Skikurs geben</span>
-                            <span class="reward">+25 €</span>
+                        <button id="btn-crime" class="action-btn" style="border-color: #9b59b6;">
+                            <span class="icon">🥷</span>
+                            <span class="text">Kasse knacken</span>
+                            <span class="reward">-10 Nerven | Risiko!</span>
                         </button>
                     </div>
                 </div>
 
-                <div class="card buildings-card">
-                    <h2>🏗️ Gebäude bauen</h2>
-                    <div class="buildings-grid" id="buildings-list">
-                        <!-- Wird per JS gefüllt -->
-                    </div>
-                </div>
-
+                <!-- Hardcore Features Grid -->
                 <div class="card hardcore-card">
-                    <h2>🔥 Hardcore Mechaniken</h2>
+                    <h2>🔥 Retro Browsergame Mechaniken</h2>
                     <div class="hardcore-grid">
+                        
+                        <!-- Pfandflaschen / Schwarzmarkt -->
+                        <div class="hc-feature">
+                            <h3>📉 Schwarzmarkt (Pennergame)</h3>
+                            <p>Sammle passiv gefälschte Skipässe. Verkaufe sie, wenn der dynamische Kurs hoch ist (1-20€)!</p>
+                            <div class="stat-row"><span class="label">Skipässe:</span><span id="flyers-val" class="value">0</span></div>
+                            <div class="stat-row"><span class="label">Aktueller Kurs:</span><span id="flyer-price" class="value" style="color:var(--success)">5 €</span></div>
+                            <button id="btn-sell-flyers" class="action-btn" style="padding:10px;">Alles verkaufen</button>
+                        </div>
+
+                        <!-- Pets -->
+                        <div class="hc-feature">
+                            <h3>🐕 Lawinenhund (Pets)</h3>
+                            <p>Schicke Hund "Rex" auf 60s Patrouille, um verstecktes Geld im Schnee zu finden.</p>
+                            <div class="stat-row"><span class="label">Status:</span><span id="pet-status" class="value">Bereit</span></div>
+                            <div class="level-bar"><div id="pet-fill" class="xp-fill" style="background: var(--gold); width:0%"></div></div>
+                            <button id="btn-pet" class="action-btn" style="padding:10px;">Auf Patrouille schicken</button>
+                        </div>
+
+                        <!-- Weiterbildung -->
+                        <div class="hc-feature">
+                            <h3>📚 Weiterbildung (Skills)</h3>
+                            <p>Studiere "Pisten-Rhetorik" (Dauer: 2 Min). Gibt dauerhaft +20% mehr Einkommen!</p>
+                            <div class="stat-row"><span class="label">Fortschritt:</span><span id="skill-status" class="value">Level 0</span></div>
+                            <div class="level-bar"><div id="skill-fill" class="xp-fill" style="background: var(--accent); width:0%"></div></div>
+                            <button id="btn-skill" class="action-btn" style="padding:10px;">Studium starten (500€)</button>
+                        </div>
+
+                        <!-- Upkeep -->
                         <div class="hc-feature" id="hc-upkeep">
-                            <h3>⚡ Ressourcen (Travian)</h3>
+                            <h3>⚡ Ressourcen-Kollaps (Travian)</h3>
                             <p>Lifte kosten Strom, Kanonen Wasser. Bei 0: Blackout!</p>
                             <div class="stat-row"><span class="label">Strom:</span><span id="power-val" class="value">500</span></div>
                             <div class="stat-row"><span class="label">Wasser:</span><span id="water-val" class="value">500</span></div>
                             <div id="blackout-warning" style="display:none; color:var(--danger); font-weight:bold; margin-top:10px; animation: flash 1s infinite;">⚠️ BLACKOUT! Einnahmen gestoppt!</div>
                         </div>
+
+                        <!-- Promo / Viral -->
                         <div class="hc-feature">
                             <h3>📢 Viral-Pass (Pennergame)</h3>
-                            <p>Verteile deinen Link für Spenden!</p>
+                            <p>Spendenlink verteilen!</p>
                             <input type="text" value="skitycoon.de/promo/user123" readonly class="promo-input">
-                            <button id="btn-promo" class="action-btn" style="padding:10px;">🔗 Klick simulieren</button>
+                            <button id="btn-promo" class="action-btn" style="padding:10px;">🔗 Spenden-Klick simulieren</button>
                         </div>
+
+                        <!-- Fleetsave -->
                         <div class="hc-feature">
                             <h3>🚁 VIP Fleetsave (OGame)</h3>
-                            <p>Sende 90% deines Geldes in Sicherheit (10 Sek)!</p>
+                            <p>Sende 90% deines Geldes vor Angreifern in Sicherheit (10s)!</p>
                             <button id="btn-fleetsave" class="action-btn" style="padding:10px;">Geld fliegen</button>
                             <div id="fleetsave-status" style="display:none; color:var(--accent); margin-top:10px;">Rückkehr in <span id="fs-time">10</span>s</div>
                         </div>
+
+                        <!-- Adelstrain -->
                         <div class="hc-feature">
-                            <h3>⚔️ Übernahme (Die Stämme)</h3>
-                            <p>4 Investoren in 150ms Abstand senden!</p>
+                            <h3>⚔️ Sniping (Die Stämme)</h3>
+                            <p>Sende 4 Investoren in exakt 150ms Abstand zur Übernahme!</p>
                             <button id="btn-adelstrain" class="action-btn" style="padding:10px;">🚂 Adelstrain senden</button>
                             <ul id="takeover-log" style="font-size:0.8em; margin-top:10px; padding-left:15px; color:var(--text-muted);"></ul>
                         </div>
+
+                        <!-- Torn API Travel -->
                         <div class="hc-feature">
-                            <h3>✈️ Einkaufsreise (Torn)</h3>
-                            <p>Fliege nach Österreich (UI gesperrt)!</p>
-                            <button id="btn-travel" class="action-btn" style="padding:10px;">Nach Österreich (5s)</button>
+                            <h3>✈️ API Lock Reise (Torn)</h3>
+                            <p>Fliege zum Schwarzmarkt. Das Spiel ist für 5s komplett gesperrt!</p>
+                            <button id="btn-travel" class="action-btn" style="padding:10px;">Nach Österreich reisen</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Warteschlange & Tech-Tree -->
+                <div class="card buildings-card">
+                    <h2>🏗️ Bau-Warteschlange & Tech-Tree (Tribal Wars)</h2>
+                    <p style="color:var(--text-muted); font-size:0.9em; margin-bottom:15px;">Hauptgebäude (Verwaltung) beschleunigen Bauzeiten. Gebäude schalten sich gegenseitig frei!</p>
+                    
+                    <div id="build-queue-container" style="display:none; background:rgba(0,0,0,0.3); padding:10px; border-radius:5px; margin-bottom:15px; border:1px solid var(--accent);">
+                        <span style="color:var(--gold); font-weight:bold;">🚧 In Bau: <span id="bq-name">Lift</span></span>
+                        <div class="level-bar" style="margin-top:5px;"><div id="bq-fill" class="xp-fill" style="width:0%"></div></div>
+                        <span style="font-size:0.8em;">Noch <span id="bq-time">0</span>s</span>
+                    </div>
+
+                    <div class="buildings-grid" id="buildings-list">
+                        <!-- Wird per JS gefüllt -->
+                    </div>
+                </div>
+
                 <div class="card inventory-card">
-                    <h2>🏗️ Deine Lifte & Gebäude</h2>
+                    <h2>🏭 Dein Resort</h2>
                     <div id="inventory-list" class="inventory-list">
                         <p class="empty">Noch keine Gebäude vorhanden...</p>
                     </div>
@@ -154,27 +185,18 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="card weather-card">
-                    <h2>🌤️ Wetter</h2>
-                    <div class="weather-display">
-                        <span id="weather-icon" class="weather-icon">☀️</span>
-                        <span id="weather-text" class="weather-text">Sonnig</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="label">Temperatur:</span>
-                        <span id="temperature" class="value">-5°C</span>
-                    </div>
-                </div>
             </aside>
         </div>
     </div>
 
+    <!-- Torn City Lock Overlay -->
     <div id="travel-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; color:white; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
         <h2 style="font-size:3em; margin-bottom:20px; color:var(--accent);">✈️ Flug nach Österreich</h2>
         <p style="font-size:1.5em;">Bitte warten... Aktionen gesperrt.</p>
         <p style="font-size:2em; color:var(--gold); margin-top:20px;">Ankunft in <span id="travel-timer">5</span>s</p>
     </div>
+    
+    <!-- OGame Fleetsave Heli -->
     <div id="helicopter" style="display:none; position:fixed; top:20%; left:-200px; font-size:4em; z-index:1000; transition: left 10s linear;">🚁💸</div>
 
     <script src="game.js"></script>
