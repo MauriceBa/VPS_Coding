@@ -17,94 +17,29 @@ const game = {
     buildings: {},
     weather: 'sunny',
     temperature: -5,
-    startTime: Date.now()
+    startTime: Date.now(),
+    power: 500,
+    water: 500,
+    maxPower: 500,
+    maxWater: 500,
+    isBlackout: false,
+    fleetsaveActive: false,
+    fleetsaveMoney: 0,
+    isTraveling: false
 };
 
-// Gebäude-Typen (wie in Die Stämme/Pennergame)
+// Gebäude-Typen
 const buildingTypes = [
-    {
-        id: 'draglift',
-        name: 'Schlepplift',
-        icon: '⛓️',
-        desc: 'Der Klassiker für Anfänger',
-        baseCost: 150,
-        income: 2,
-        unlockLevel: 1,
-        maxCount: 10
-    },
-    {
-        id: 'chairlift',
-        name: '2er Sessellift',
-        icon: '🪑',
-        desc: 'Komfortabel den Berg hoch',
-        baseCost: 500,
-        income: 8,
-        unlockLevel: 2,
-        maxCount: 8
-    },
-    {
-        id: 'quadlift',
-        name: '4er Sessellift',
-        icon: '🚡',
-        desc: 'Mehr Kapazität für mehr Gäste',
-        baseCost: 2000,
-        income: 25,
-        unlockLevel: 3,
-        maxCount: 6
-    },
-    {
-        id: 'gondola',
-        name: 'Gondelbahn',
-        icon: '🚠',
-        desc: 'Premium-Transport für alle',
-        baseCost: 8000,
-        income: 80,
-        unlockLevel: 5,
-        maxCount: 4
-    },
-    {
-        id: 'cabin',
-        name: 'Skihütte',
-        icon: '🏠',
-        desc: 'Brotzeit mit Aussicht',
-        baseCost: 3000,
-        income: 35,
-        unlockLevel: 4,
-        maxCount: 5
-    },
-    {
-        id: 'restaurant',
-        name: 'Bergrestaurant',
-        icon: '🍽️',
-        desc: 'Gourmet auf 2000m',
-        baseCost: 15000,
-        income: 150,
-        unlockLevel: 6,
-        maxCount: 3
-    },
-    {
-        id: 'snowcannon',
-        name: 'Schneekanone',
-        icon: '❄️',
-        desc: 'Immer Schnee, egal wie warm',
-        baseCost: 5000,
-        income: 15,
-        unlockLevel: 4,
-        maxCount: 10
-    },
-    {
-        id: 'skischool',
-        name: 'Skischule',
-        icon: '🎓',
-        desc: 'Lehre die nächste Generation',
-        baseCost: 10000,
-        income: 60,
-        unlockLevel: 5,
-        maxCount: 4
-    }
+    { id: 'draglift', name: 'Schlepplift', icon: '⛓️', desc: 'Der Klassiker', baseCost: 150, income: 2, unlockLevel: 1, maxCount: 10 },
+    { id: 'chairlift', name: '2er Sessellift', icon: '🪑', desc: 'Komfortabel', baseCost: 500, income: 8, unlockLevel: 2, maxCount: 8 },
+    { id: 'quadlift', name: '4er Sessellift', icon: '🚡', desc: 'Mehr Kapazität', baseCost: 2000, income: 25, unlockLevel: 3, maxCount: 6 },
+    { id: 'gondola', name: 'Gondelbahn', icon: '🚠', desc: 'Premium', baseCost: 8000, income: 80, unlockLevel: 5, maxCount: 4 },
+    { id: 'cabin', name: 'Skihütte', icon: '🏠', desc: 'Brotzeit', baseCost: 3000, income: 35, unlockLevel: 4, maxCount: 5 },
+    { id: 'restaurant', name: 'Bergrestaurant', icon: '🍽️', desc: 'Gourmet', baseCost: 15000, income: 150, unlockLevel: 6, maxCount: 3 },
+    { id: 'snowcannon', name: 'Schneekanone', icon: '❄️', desc: 'Immer Schnee', baseCost: 5000, income: 15, unlockLevel: 4, maxCount: 10 },
+    { id: 'skischool', name: 'Skischule', icon: '🎓', desc: 'Schule', baseCost: 10000, income: 60, unlockLevel: 5, maxCount: 4 }
 ];
 
-// Wetter-System
 const weatherTypes = [
     { type: 'sunny', icon: '☀️', text: 'Sonnig', tempMod: 0, incomeMod: 1.2 },
     { type: 'cloudy', icon: '☁️', text: 'Bewölkt', tempMod: -2, incomeMod: 1.0 },
@@ -112,16 +47,14 @@ const weatherTypes = [
     { type: 'foggy', icon: '🌫️', text: 'Nebelig', tempMod: -3, incomeMod: 0.7 }
 ];
 
-// News-Meldungen
 const newsMessages = [
     "Neuer Schneefall erwartet!",
     "Skiverband lobt deine Pistenpräparierung!",
     "Tourismusverband empfiehlt dein Skigebiet!",
     "Weltcup-Event in der Region geplant!",
-    "Berühmter Skifahrer gesichtet auf deinen Pisten!",
+    "Berühmter Skifahrer gesichtet!",
     "Schneehöhe erreicht Rekordwert!",
-    "Neue Abfahrt wird eröffnet!",
-    "Gäste begeistert von den neuen Liften!"
+    "Gäste begeistert von den Liften!"
 ];
 
 // DOM Elemente
@@ -143,36 +76,44 @@ const elements = {
     btnShovel: document.getElementById('btn-shovel'),
     btnGroom: document.getElementById('btn-groom'),
     btnRent: document.getElementById('btn-rent'),
-    btnTeach: document.getElementById('btn-teach')
+    btnTeach: document.getElementById('btn-teach'),
+    
+    // Hardcore Mechanics Elements
+    powerVal: document.getElementById('power-val'),
+    waterVal: document.getElementById('water-val'),
+    blackoutWarning: document.getElementById('blackout-warning'),
+    btnPromo: document.getElementById('btn-promo'),
+    btnFleetsave: document.getElementById('btn-fleetsave'),
+    fsStatus: document.getElementById('fleetsave-status'),
+    fsTime: document.getElementById('fs-time'),
+    btnAdelstrain: document.getElementById('btn-adelstrain'),
+    takeoverLog: document.getElementById('takeover-log'),
+    btnTravel: document.getElementById('btn-travel'),
+    travelOverlay: document.getElementById('travel-overlay'),
+    travelTimer: document.getElementById('travel-timer'),
+    helicopter: document.getElementById('helicopter')
 };
 
-// Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
     initGame();
     setupEventListeners();
     renderBuildings();
     updateUI();
-    
-    // Game Loop
     setInterval(gameLoop, 1000);
-    
-    // Wetter-Wechsel
     setInterval(changeWeather, 30000);
-    
-    // News
     setInterval(addRandomNews, 60000);
 });
 
 function initGame() {
-    // Lade gespeicherten Stand (localStorage)
     const saved = localStorage.getItem('skiTycoonSave');
     if (saved) {
         const data = JSON.parse(saved);
         Object.assign(game, data);
+        game.isTraveling = false; // Reset if refreshed while traveling
+        game.fleetsaveActive = false; // Reset fleet
         addNews('Spielstand geladen! Willkommen zurück!');
     }
     
-    // Initialisiere Gebäude-Counts
     buildingTypes.forEach(type => {
         if (!game.buildings[type.id]) {
             game.buildings[type.id] = 0;
@@ -219,13 +160,105 @@ function setupEventListeners() {
         updateUI();
     });
     
-    // Speichern vor dem Verlassen
+    // --- Hardcore Mechaniken Event Listeners ---
+    if(elements.btnPromo) {
+        elements.btnPromo.addEventListener('click', (e) => {
+            game.money += 50;
+            addNews("Viral-Klick erhalten! +50 €");
+            showClickFeedback(e, '+50 €');
+            updateUI();
+        });
+    }
+
+    if(elements.btnFleetsave) {
+        elements.btnFleetsave.addEventListener('click', () => {
+            if(game.fleetsaveActive || game.money <= 0) return;
+            game.fleetsaveActive = true;
+            game.fleetsaveMoney = Math.floor(game.money * 0.9); // Save 90%
+            game.money -= game.fleetsaveMoney;
+            
+            elements.helicopter.style.display = 'block';
+            setTimeout(() => elements.helicopter.classList.add('flying'), 50);
+            elements.fsStatus.style.display = 'block';
+            
+            let timeLeft = 10;
+            elements.fsTime.textContent = timeLeft;
+            
+            let fsInterval = setInterval(() => {
+                timeLeft--;
+                elements.fsTime.textContent = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(fsInterval);
+                    game.money += game.fleetsaveMoney;
+                    game.fleetsaveActive = false;
+                    game.fleetsaveMoney = 0;
+                    
+                    elements.helicopter.classList.remove('flying');
+                    setTimeout(() => elements.helicopter.style.display = 'none', 500);
+                    elements.fsStatus.style.display = 'none';
+                    addNews("🚁 Fleetsave beendet! Dein Geld ist zurück.");
+                    updateUI();
+                }
+            }, 1000);
+            updateUI();
+        });
+    }
+
+    if(elements.btnAdelstrain) {
+        elements.btnAdelstrain.addEventListener('click', () => {
+            elements.takeoverLog.innerHTML = "";
+            let baseTime = Date.now() + 2000;
+            let gaps = [0, 50, 100, 150];
+            
+            gaps.forEach((gap, i) => {
+                let targetTime = baseTime + gap;
+                let d = new Date(targetTime);
+                let timeStr = `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}.${d.getMilliseconds().toString().padStart(3,'0')}`;
+                
+                let li = document.createElement('li');
+                li.textContent = `Investor ${i+1} auf dem Weg... (${timeStr})`;
+                elements.takeoverLog.appendChild(li);
+                
+                setTimeout(() => {
+                    li.style.color = "var(--success)";
+                    li.textContent = `Investor ${i+1} eingeschlagen! (-25%)`;
+                    if(i === 3) {
+                        addNews("⚔️ Feindliches Skigebiet übernommen!");
+                        game.money += 1000;
+                        updateUI();
+                    }
+                }, targetTime - Date.now());
+            });
+        });
+    }
+
+    if(elements.btnTravel) {
+        elements.btnTravel.addEventListener('click', () => {
+            game.isTraveling = true;
+            elements.travelOverlay.style.display = 'flex';
+            let timeLeft = 5;
+            elements.travelTimer.textContent = timeLeft;
+            
+            let tInterval = setInterval(() => {
+                timeLeft--;
+                elements.travelTimer.textContent = timeLeft;
+                if(timeLeft <= 0) {
+                    clearInterval(tInterval);
+                    game.isTraveling = false;
+                    elements.travelOverlay.style.display = 'none';
+                    addNews("🛬 Zurück aus Österreich! +2000€ vom Schwarzmarkt");
+                    game.money += 2000;
+                    updateUI();
+                }
+            }, 1000);
+        });
+    }
+    
     window.addEventListener('beforeunload', saveGame);
 }
 
 function renderBuildings() {
     elements.buildingsList.innerHTML = '';
-    
     buildingTypes.forEach(type => {
         const owned = game.buildings[type.id] || 0;
         const cost = calculateCost(type);
@@ -243,7 +276,6 @@ function renderBuildings() {
         if (!locked && owned < type.maxCount) {
             div.addEventListener('click', () => buyBuilding(type));
         }
-        
         elements.buildingsList.appendChild(div);
     });
 }
@@ -272,12 +304,10 @@ function buyBuilding(type) {
 
 function renderInventory() {
     const items = buildingTypes.filter(t => game.buildings[t.id] > 0);
-    
     if (items.length === 0) {
         elements.inventoryList.innerHTML = '<p class="empty">Noch keine Gebäude vorhanden...</p>';
         return;
     }
-    
     elements.inventoryList.innerHTML = items.map(type => `
         <div class="inventory-item">
             <div style="font-size: 1.5em;">${type.icon}</div>
@@ -293,38 +323,55 @@ function calculateIncome() {
         const count = game.buildings[type.id] || 0;
         income += count * type.income;
     });
-    
-    // Wetter-Modifier
     const weather = weatherTypes.find(w => w.type === game.weather);
     income *= weather.incomeMod;
-    
     return Math.floor(income);
 }
 
 function gameLoop() {
-    const income = calculateIncome();
-    game.money += income;
-    game.incomePerSecond = income;
+    if (game.isTraveling) return;
+
+    let powerCost = 0;
+    let waterCost = 0;
     
-    // Gäste-Generierung
-    const totalBuildings = Object.values(game.buildings).reduce((a, b) => a + b, 0);
-    game.guests += totalBuildings * 0.5;
+    const lifts = (game.buildings['draglift']||0) + (game.buildings['chairlift']||0) + (game.buildings['quadlift']||0) + (game.buildings['gondola']||0);
+    const cannons = game.buildings['snowcannon'] || 0;
     
-    // Schneeschmelze
+    powerCost = lifts * 2 + cannons * 5;
+    waterCost = cannons * 8;
+    
+    if (game.power >= powerCost && game.water >= waterCost) {
+        game.power -= powerCost;
+        game.water -= waterCost;
+        game.isBlackout = false;
+        if(elements.blackoutWarning) elements.blackoutWarning.style.display = 'none';
+        
+        const income = calculateIncome();
+        game.money += income;
+        game.incomePerSecond = income;
+        
+        const totalBuildings = Object.values(game.buildings).reduce((a, b) => a + b, 0);
+        game.guests += totalBuildings * 0.5;
+    } else {
+        game.isBlackout = true;
+        game.incomePerSecond = 0;
+        if(elements.blackoutWarning) elements.blackoutWarning.style.display = 'block';
+    }
+    
+    if (!game.isBlackout) {
+        game.power = Math.min(game.maxPower, game.power + 5);
+        game.water = Math.min(game.maxWater, game.water + 5);
+    }
+    
     if (game.temperature > 0 && game.weather !== 'snowy') {
         game.snow = Math.max(0, game.snow - 0.5);
     } else if (game.weather === 'snowy') {
         game.snow += 2;
     }
     
-    // Level-Up prüfen
-    if (game.xp >= game.xpToNext) {
-        levelUp();
-    }
+    if (game.xp >= game.xpToNext) levelUp();
     
-    // Reputation aktualisieren
     updateReputation();
-    
     updateUI();
     saveGame();
 }
@@ -343,7 +390,6 @@ function levelUp() {
 
 function updateReputation() {
     const totalBuildings = Object.values(game.buildings).reduce((a, b) => a + b, 0);
-    
     if (totalBuildings === 0) game.reputation = 'Unbekannt';
     else if (totalBuildings < 3) game.reputation = 'Bekannter Hang';
     else if (totalBuildings < 8) game.reputation = 'Lokaler Treffpunkt';
@@ -376,10 +422,7 @@ function addNews(text, isError = false) {
         <span class="time">${new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
         <p style="${isError ? 'color: var(--danger)' : ''}">${text}</p>
     `;
-    
     elements.newsFeed.insertBefore(div, elements.newsFeed.firstChild);
-    
-    // Max 10 News behalten
     while (elements.newsFeed.children.length > 10) {
         elements.newsFeed.removeChild(elements.newsFeed.lastChild);
     }
@@ -393,7 +436,6 @@ function showClickFeedback(event, text, isError = false) {
     feedback.style.left = `${event.clientX}px`;
     feedback.style.top = `${event.clientY}px`;
     document.body.appendChild(feedback);
-    
     setTimeout(() => feedback.remove(), 1000);
 }
 
@@ -405,6 +447,9 @@ function updateUI() {
     elements.guests.textContent = Math.floor(game.guests);
     elements.level.textContent = game.level;
     elements.reputation.textContent = game.reputation;
+    
+    if(elements.powerVal) elements.powerVal.textContent = Math.floor(game.power);
+    if(elements.waterVal) elements.waterVal.textContent = Math.floor(game.water);
     
     const xpPercent = (game.xp / game.xpToNext) * 100;
     elements.xpFill.style.width = `${xpPercent}%`;
@@ -420,7 +465,6 @@ function saveGame() {
     localStorage.setItem('skiTycoonSave', JSON.stringify(game));
 }
 
-// Debug/Hilfe
 window.skiTycoon = {
     game,
     addMoney: (amount) => { game.money += amount; updateUI(); },

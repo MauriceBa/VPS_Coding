@@ -99,6 +99,42 @@
                     </div>
                 </div>
 
+                <div class="card hardcore-card">
+                    <h2>🔥 Hardcore Mechaniken</h2>
+                    <div class="hardcore-grid">
+                        <div class="hc-feature" id="hc-upkeep">
+                            <h3>⚡ Ressourcen (Travian)</h3>
+                            <p>Lifte kosten Strom, Kanonen Wasser. Bei 0: Blackout!</p>
+                            <div class="stat-row"><span class="label">Strom:</span><span id="power-val" class="value">500</span></div>
+                            <div class="stat-row"><span class="label">Wasser:</span><span id="water-val" class="value">500</span></div>
+                            <div id="blackout-warning" style="display:none; color:var(--danger); font-weight:bold; margin-top:10px; animation: flash 1s infinite;">⚠️ BLACKOUT! Einnahmen gestoppt!</div>
+                        </div>
+                        <div class="hc-feature">
+                            <h3>📢 Viral-Pass (Pennergame)</h3>
+                            <p>Verteile deinen Link für Spenden!</p>
+                            <input type="text" value="skitycoon.de/promo/user123" readonly class="promo-input">
+                            <button id="btn-promo" class="action-btn" style="padding:10px;">🔗 Klick simulieren</button>
+                        </div>
+                        <div class="hc-feature">
+                            <h3>🚁 VIP Fleetsave (OGame)</h3>
+                            <p>Sende 90% deines Geldes in Sicherheit (10 Sek)!</p>
+                            <button id="btn-fleetsave" class="action-btn" style="padding:10px;">Geld fliegen</button>
+                            <div id="fleetsave-status" style="display:none; color:var(--accent); margin-top:10px;">Rückkehr in <span id="fs-time">10</span>s</div>
+                        </div>
+                        <div class="hc-feature">
+                            <h3>⚔️ Übernahme (Die Stämme)</h3>
+                            <p>4 Investoren in 150ms Abstand senden!</p>
+                            <button id="btn-adelstrain" class="action-btn" style="padding:10px;">🚂 Adelstrain senden</button>
+                            <ul id="takeover-log" style="font-size:0.8em; margin-top:10px; padding-left:15px; color:var(--text-muted);"></ul>
+                        </div>
+                        <div class="hc-feature">
+                            <h3>✈️ Einkaufsreise (Torn)</h3>
+                            <p>Fliege nach Österreich (UI gesperrt)!</p>
+                            <button id="btn-travel" class="action-btn" style="padding:10px;">Nach Österreich (5s)</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="card inventory-card">
                     <h2>🏗️ Deine Lifte & Gebäude</h2>
                     <div id="inventory-list" class="inventory-list">
@@ -133,6 +169,13 @@
             </aside>
         </div>
     </div>
+
+    <div id="travel-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:9999; color:white; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+        <h2 style="font-size:3em; margin-bottom:20px; color:var(--accent);">✈️ Flug nach Österreich</h2>
+        <p style="font-size:1.5em;">Bitte warten... Aktionen gesperrt.</p>
+        <p style="font-size:2em; color:var(--gold); margin-top:20px;">Ankunft in <span id="travel-timer">5</span>s</p>
+    </div>
+    <div id="helicopter" style="display:none; position:fixed; top:20%; left:-200px; font-size:4em; z-index:1000; transition: left 10s linear;">🚁💸</div>
 
     <script src="game.js"></script>
 </body>
