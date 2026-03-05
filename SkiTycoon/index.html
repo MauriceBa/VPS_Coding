@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>❄️ SkiTycoon - Werde zum Bergbahn-Mogul</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>❄️ SkiTycoon</h1>
+            <p class="subtitle">Baue dein Skigebiet und werde reich!</p>
+        </header>
+
+        <div class="game-grid">
+            <!-- Linke Spalte: Ressourcen & Stats -->
+            <aside class="stats-panel">
+                <div class="card">
+                    <h2>💰 Finanzen</h2>
+                    <div class="stat-row">
+                        <span class="label">Geld:</span>
+                        <span id="money" class="value">0 €</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Einnahmen/Sek:</span>
+                        <span id="income" class="value">0 €</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🏔️ Berg-Status</h2>
+                    <div class="stat-row">
+                        <span class="label">Schneehöhe:</span>
+                        <span id="snow" class="value">50 cm</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Pisten:</span>
+                        <span id="slopes" class="value">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Gäste:</span>
+                        <span id="guests" class="value">0</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Level</h2>
+                    <div class="level-bar">
+                        <div id="xp-fill" class="xp-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Level:</span>
+                        <span id="level" class="value">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Ruf:</span>
+                        <span id="reputation" class="value">Unbekannt</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Mitte: Aktionen -->
+            <main class="main-area">
+                <div class="card actions-card">
+                    <h2>🎿 Aktionen</h2>
+                    
+                    <div class="action-buttons">
+                        <button id="btn-shovel" class="action-btn primary">
+                            <span class="icon">❄️</span>
+                            <span class="text">Schnee schaufeln</span>
+                            <span class="reward">+1-3 Schnee</span>
+                        </button>
+                        
+                        <button id="btn-groom" class="action-btn">
+                            <span class="icon">🚜</span>
+                            <span class="text">Piste präparieren</span>
+                            <span class="reward">+5 €</span>
+                        </button>
+                        
+                        <button id="btn-rent" class="action-btn">
+                            <span class="icon">🎿</span>
+                            <span class="text">Skier vermieten</span>
+                            <span class="reward">+10 €</span>
+                        </button>
+                        
+                        <button id="btn-teach" class="action-btn">
+                            <span class="icon">👨‍🏫</span>
+                            <span class="text">Skikurs geben</span>
+                            <span class="reward">+25 €</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card buildings-card">
+                    <h2>🏗️ Gebäude bauen</h2>
+                    <div class="buildings-grid" id="buildings-list">
+                        <!-- Wird per JS gefüllt -->
+                    </div>
+                </div>
+
+                <div class="card inventory-card">
+                    <h2>🏗️ Deine Lifte & Gebäude</h2>
+                    <div id="inventory-list" class="inventory-list">
+                        <p class="empty">Noch keine Gebäude vorhanden...</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Rechte Spalte: News & Log -->
+            <aside class="news-panel">
+                <div class="card">
+                    <h2>📰 Berg-Nachrichten</h2>
+                    <div id="news-feed" class="news-feed">
+                        <div class="news-item">
+                            <span class="time">Jetzt</span>
+                            <p>Willkommen in SkiTycoon! Baue dein erstes Skigebiet auf.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card weather-card">
+                    <h2>🌤️ Wetter</h2>
+                    <div class="weather-display">
+                        <span id="weather-icon" class="weather-icon">☀️</span>
+                        <span id="weather-text" class="weather-text">Sonnig</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Temperatur:</span>
+                        <span id="temperature" class="value">-5°C</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
