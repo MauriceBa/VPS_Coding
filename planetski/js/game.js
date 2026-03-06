@@ -1,6 +1,6 @@
 /**
  * PlanetSki - 3D Ski Resort Builder
- * Haupt-Game-Logik
+ * Hauptspiel-Logik
  */
 
 class PlanetSkiGame {
@@ -9,6 +9,7 @@ class PlanetSkiGame {
         this.camera = null;
         this.renderer = null;
         this.controls = null;
+        
         this.terrain = null;
         this.economy = null;
         
@@ -21,12 +22,10 @@ class PlanetSkiGame {
         this.selectedBuildingType = null;
         this.selectedSlopeDifficulty = 'blue';
         
-        this.liftStartPoint = null;
+        this.liftStartPos = null;
+        this.isPlacingLift = false;
         
-        this.raycaster = new THREE.Raycaster();
-        this.mouse = new THREE.Vector2();
-        
-        this.clock = new THREE.Clock();
+        this.lastTime = 0;
         
         this.init();
     }
@@ -35,34 +34,32 @@ class PlanetSkiGame {
         this.setupThreeJS();
         this.setupTerrain();
         this.setupEconomy();
-        this.setupEventListeners();
         this.setupUI();
+        this.setupInput();
         this.animate();
-        
-        console.log('🎿 PlanetSki geladen!');
     }
     
     setupThreeJS() {
-        // Scene
+        // Szene
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x87CEEB);
         this.scene.fog = new THREE.Fog(0x87CEEB, 50, 200);
         
-        // Camera
+        // Kamera
         this.camera = new THREE.PerspectiveCamera(
-            60, 
-            window.innerWidth / window.innerHeight, 
-            0.1, 
+            60,
+            window.innerWidth / window.innerHeight,
+            0.1,
             1000
         );
-        this.camera.position.set(40, 40, 40);
+        this.camera.position.set(40, 40, 60);
         
         // Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(this.renderer.domElement);
+        document.getElementById('game-container').appendChild(this.renderer.domElement);
         
         // Controls
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -70,161 +67,185 @@ class PlanetSkiGame {
         this.controls.dampingFactor = 0.05;
         this.controls.maxPolarAngle = Math.PI / 2.2;
         this.controls.minDistance = 10;
-        this.controls.maxDistance = 150;
-        this.controls.target.set(0, 10, 0);
+        this.controls.maxDistance = 200;
         
         // Licht
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        this.scene.add(ambientLight);
+        const ambient = new THREE.AmbientLight(0x404040, 0.6);
+        this.scene.add(ambient);
         
-        const sunLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        sunLight.position.set(50, 100, 50);
-        sunLight.castShadow = true;
-        sunLight.shadow.camera.left = -100;
-        sunLight.shadow.camera.right = 100;
-        sunLight.shadow.camera.top = 100;
-        sunLight.shadow.camera.bottom = -100;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        this.scene.add(sunLight);
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(50, 100, 50);
+        sun.castShadow = true;
+        sun.shadow.camera.left = -100;
+        sun.shadow.camera.right = 100;
+        sun.shadow.camera.top = 100;
+        sun.shadow.camera.bottom = -100;
+        sun.shadow.mapSize.width = 4096;
+        sun.shadow.mapSize.height = 4096;
+        this.scene.add(sun);
+        
+        // Resize
+        window.addEventListener('resize', () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     }
     
     setupTerrain() {
-        this.terrain = new Terrain(100, this.scene);
+        this.terrain = new Terrain(120, this.scene);
         this.terrain.createSnowfall();
     }
     
     setupEconomy() {
         this.economy = new Economy();
-        this.economy.onUpdate = (report) => {
-            this.updateUI(report);
-        };
-    }
-    
-    setupEventListeners() {
-        // Resize
-        window.addEventListener('resize', () => this.onResize());
-        
-        // Maus-Interaktion
-        this.renderer.domElement.addEventListener('mousemove', (e) => this.onMouseMove(e));
-        this.renderer.domElement.addEventListener('click', (e) => this.onClick(e));
-        this.renderer.domElement.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            this.cancelTool();
-        });
+        this.updateUI();
     }
     
     setupUI() {
-        // UI wird durch HTML/JS gesteuert
-        window.gameUI = new GameUI(this);
-    }
-    
-    // Tool-Auswahl
-    selectTool(tool) {
-        this.selectedTool = tool;
-        this.liftStartPoint = null;
+        // Lift-Typen ins Menü laden
+        const liftMenu = document.getElementById('lift-menu');
+        const categories = {
+            surface: '🎿 Surface Lifts',
+            fixed: '🪑 Fixed Chairlifts',  
+            detachable: '⚡ Detachable Chairs',
+            gondola: '🚠 Gondolas',
+            bicable: '🚡 Bicable/Tricable',
+            funitel: '🚡 Funitel',
+            tramway: '🚠 Aerial Tramways',
+            chondola: '🚠+🪑 Chondola',
+            funicular: '🚞 Rail-Based'
+        };
         
-        // Highlight aktives Tool
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.classList.remove('active');
+        Object.entries(categories).forEach(([cat, label]) => {
+            const catDiv = document.createElement('div');
+            catDiv.className = 'category';
+            catDiv.innerHTML = `<h4>${label}</h4>`;
+            
+            Object.entries(LIFT_TYPES)
+                .filter(([key, lift]) => lift.category === cat)
+                .forEach(([key, lift]) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'lift-btn';
+                    btn.dataset.type = key;
+                    btn.innerHTML = `
+                        ${lift.name}
+                        <span class="cost">${lift.cost.toLocaleString()}€</span>
+                        <span class="capacity">${lift.capacity}/h</span>
+                    `;
+                    btn.onclick = () => this.selectLiftType(key);
+                    catDiv.appendChild(btn);
+                });
+            
+            liftMenu.appendChild(catDiv);
         });
         
-        const btn = document.querySelector(`[data-tool="${tool}"]`);
-        if (btn) btn.classList.add('active');
+        // Gebäude ins Menü laden
+        const buildingMenu = document.getElementById('building-menu');
+        const buildingCats = {
+            infrastructure: '🏗️ Infrastruktur',
+            service: '🍽️ Gastronomie & Service',
+            accommodation: '🏨 Unterkünfte'
+        };
         
-        // Tool-spezifische Panels anzeigen
-        this.showToolPanel(tool);
+        Object.entries(buildingCats).forEach(([cat, label]) => {
+            const catDiv = document.createElement('div');
+            catDiv.className = 'category';
+            catDiv.innerHTML = `<h4>${label}</h4>`;
+            
+            Object.entries(BUILDING_TYPES)
+                .filter(([key, b]) => b.category === cat)
+                .forEach(([key, building]) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'building-btn';
+                    btn.dataset.type = key;
+                    btn.innerHTML = `
+                        ${building.name}
+                        <span class="cost">${building.cost.toLocaleString()}€</span>
+                    `;
+                    btn.onclick = () => this.selectBuildingType(key);
+                    catDiv.appendChild(btn);
+                });
+            
+            buildingMenu.appendChild(catDiv);
+        });
     }
     
     selectLiftType(type) {
-        this.selectedLiftType = type;
         this.selectedTool = 'lift';
+        this.selectedLiftType = type;
+        this.isPlacingLift = true;
+        this.liftStartPos = null;
         
-        document.querySelectorAll('.lift-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.lift-btn, .building-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelector(`[data-type="${type}"]`)?.classList.add('selected');
         
-        const btn = document.querySelector(`[data-lift="${type}"]`);
-        if (btn) btn.classList.add('active');
+        this.showNotification(`${LIFT_TYPES[type].name} ausgewählt. Klicke für Talstation.`);
     }
     
     selectBuildingType(type) {
-        this.selectedBuildingType = type;
         this.selectedTool = 'building';
+        this.selectedBuildingType = type;
+        this.isPlacingLift = false;
         
-        document.querySelectorAll('.building-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('.lift-btn, .building-btn').forEach(b => b.classList.remove('selected'));
+        document.querySelector(`[data-type="${type}"]`)?.classList.add('selected');
         
-        const btn = document.querySelector(`[data-building="${type}"]`);
-        if (btn) btn.classList.add('active');
+        this.showNotification(`${BUILDING_TYPES[type].name} ausgewählt. Klicke zum Platzieren.`);
     }
     
-    selectSlopeDifficulty(difficulty) {
-        this.selectedSlopeDifficulty = difficulty;
+    selectSlopeTool(difficulty) {
         this.selectedTool = 'slope';
+        this.selectedSlopeDifficulty = difficulty;
+        this.isPlacingLift = false;
         
-        document.querySelectorAll('.slope-btn').forEach(btn => {
-            btn.classList.remove('active');
+        this.showNotification(`Piste ${difficulty.toUpperCase()} ausgewählt.`);
+    }
+    
+    setupInput() {
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        this.renderer.domElement.addEventListener('mousemove', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, this.camera);
+            
+            if (this.terrain && this.terrain.terrainMesh) {
+                const intersects = raycaster.intersectObject(this.terrain.terrainMesh);
+                
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    this.updatePreview(point);
+                }
+            }
         });
         
-        const btn = document.querySelector(`[data-slope="${difficulty}"]`);
-        if (btn) btn.classList.add('active');
-    }
-    
-    showToolPanel(tool) {
-        document.querySelectorAll('.tool-panel').forEach(panel => {
-            panel.style.display = 'none';
-        });
-        
-        const panel = document.getElementById(`${tool}-panel`);
-        if (panel) panel.style.display = 'block';
-    }
-    
-    cancelTool() {
-        this.selectedTool = null;
-        this.liftStartPoint = null;
-        this.selectedLiftType = null;
-        this.selectedBuildingType = null;
-        
-        document.querySelectorAll('.tool-btn, .lift-btn, .building-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        document.querySelectorAll('.tool-panel').forEach(panel => {
-            panel.style.display = 'none';
+        this.renderer.domElement.addEventListener('click', (e) => {
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, this.camera);
+            
+            if (this.terrain && this.terrain.terrainMesh) {
+                const intersects = raycaster.intersectObject(this.terrain.terrainMesh);
+                
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    this.handleClick(point);
+                }
+            }
         });
     }
     
-    // Maus-Interaktion
-    getIntersectPoint(event) {
-        this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        
-        this.raycaster.setFromCamera(this.mouse, this.camera);
-        
-        // Intersect mit Terrain
-        const intersects = this.raycaster.intersectObject(this.terrain.terrainMesh);
-        
-        if (intersects.length > 0) {
-            return intersects[0].point;
-        }
-        return null;
+    updatePreview(point) {
+        // Vorschau für Lift/Bauen anzeigen
+        // TODO: Implementieren
     }
     
-    onMouseMove(event) {
-        const point = this.getIntersectPoint(event);
-        if (!point) return;
-        
-        // Preview anzeigen
-        this.updatePreview(point);
-    }
-    
-    onClick(event) {
+    handleClick(point) {
         if (!this.selectedTool) return;
-        
-        const point = this.getIntersectPoint(event);
-        if (!point) return;
         
         switch(this.selectedTool) {
             case 'lift':
@@ -236,311 +257,130 @@ class PlanetSkiGame {
             case 'slope':
                 this.handleSlopePlacement(point);
                 break;
-            case 'delete':
-                this.handleDelete(point);
-                break;
         }
     }
     
     handleLiftPlacement(point) {
-        if (!this.selectedLiftType) {
-            alert('Wähle zuerst einen Lifttyp aus!');
-            return;
-        }
+        if (!this.isPlacingLift || !this.selectedLiftType) return;
         
-        const config = LIFT_TYPES[this.selectedLiftType];
-        if (!this.economy.canAfford(config.cost)) {
-            alert(`Nicht genug Geld! Du brauchst ${config.cost}€`);
-            return;
-        }
-        
-        if (!this.liftStartPoint) {
+        if (!this.liftStartPos) {
             // Erster Klick = Talstation
-            this.liftStartPoint = { x: point.x, z: point.z };
-            this.showPreviewLine(point);
-            
-            // Visuelles Feedback
-            this.createPlacementMarker(point.x, point.z, 0x00ff00);
+            this.liftStartPos = { x: point.x, z: point.z };
+            this.showNotification('Talstation gesetzt. Klicke für Bergstation.');
         } else {
             // Zweiter Klick = Bergstation
-            const endPoint = { x: point.x, z: point.z };
+            const cost = LIFT_TYPES[this.selectedLiftType].cost;
             
-            // Prüfe Länge
-            const length = Math.sqrt(
-                Math.pow(endPoint.x - this.liftStartPoint.x, 2) + 
-                Math.pow(endPoint.z - this.liftStartPoint.z, 2)
-            );
-            
-            if (length > config.maxLength) {
-                alert(`Lift zu lang! Maximal ${config.maxLength}m`);
-                return;
+            if (this.economy.spend(cost)) {
+                const lift = new SkiLift(
+                    this.selectedLiftType,
+                    this.liftStartPos.x,
+                    this.liftStartPos.z,
+                    point.x,
+                    point.z,
+                    this.scene,
+                    this.terrain
+                );
+                
+                this.lifts.push(lift);
+                this.showNotification(`${LIFT_TYPES[this.selectedLiftType].name} gebaut!`);
+                this.updateUI();
+            } else {
+                this.showNotification('Nicht genug Geld!', 'error');
             }
             
-            if (length < 20) {
-                alert('Lift zu kurz! Mindestens 20m');
-                return;
-            }
-            
-            // Lift erstellen
-            const lift = new SkiLift(
-                this.selectedLiftType,
-                this.liftStartPoint.x,
-                this.liftStartPoint.z,
-                endPoint.x,
-                endPoint.z,
-                this.scene
-            );
-            
-            this.lifts.push(lift);
-            this.economy.spend(config.cost, config.name);
-            
-            // Reset
-            this.liftStartPoint = null;
-            this.hidePreviewLine();
-            
-            // Erfolgsmeldung
-            this.economy.notify(`${config.name} gebaut!`);
+            this.liftStartPos = null;
         }
     }
     
     handleBuildingPlacement(point) {
-        if (!this.selectedBuildingType) return;
+        const cost = BUILDING_TYPES[this.selectedBuildingType].cost;
         
-        const config = BUILDING_TYPES[this.selectedBuildingType];
-        if (!this.economy.canAfford(config.cost)) {
-            alert(`Nicht genug Geld! Du brauchst ${config.cost}€`);
-            return;
-        }
-        
-        const building = createBuilding(this.selectedBuildingType, point.x, point.z);
-        if (building) {
-            this.scene.add(building.mesh);
-            this.buildings.push(building);
-            this.economy.spend(config.cost, config.name);
+        if (this.economy.spend(cost)) {
+            const building = createBuilding(this.selectedBuildingType, point.x, point.z);
             
-            // Pop-In Animation
-            this.animatePlacement(building.mesh);
-            
-            this.economy.notify(`${config.name} gebaut!`);
+            if (building) {
+                this.scene.add(building.mesh);
+                this.buildings.push(building);
+                this.showNotification(`${BUILDING_TYPES[this.selectedBuildingType].name} gebaut!`);
+                this.updateUI();
+            }
+        } else {
+            this.showNotification('Nicht genug Geld!', 'error');
         }
     }
     
     handleSlopePlacement(point) {
-        if (!this.slopeStartPoint) {
-            this.slopeStartPoint = { x: point.x, z: point.z };
-            this.createPlacementMarker(point.x, point.z, 0x4169E1);
-        } else {
-            const endPoint = { x: point.x, z: point.z };
-            
-            const slope = this.terrain.createSlope(
-                this.slopeStartPoint.x,
-                this.slopeStartPoint.z,
-                endPoint.x,
-                endPoint.z,
-                this.selectedSlopeDifficulty
-            );
-            
-            this.slopes.push(slope);
-            this.slopeStartPoint = null;
-            
-            this.economy.notify(`Piste (${this.selectedSlopeDifficulty}) angelegt!`);
-        }
+        // TODO: Pisten-Platzierung implementieren
     }
     
-    handleDelete(point) {
-        // Finde nahes Objekt zum Löschen
-        const threshold = 5;
+    showNotification(text, type = 'info') {
+        const notif = document.getElementById('notification');
+        notif.textContent = text;
+        notif.className = type;
+        notif.style.opacity = '1';
         
-        // Prüfe Gebäude
-        for (let i = this.buildings.length - 1; i >= 0; i--) {
-            const b = this.buildings[i];
-            const dist = Math.sqrt(Math.pow(b.x - point.x, 2) + Math.pow(b.z - point.z, 2));
-            if (dist < threshold) {
-                this.scene.remove(b.mesh);
-                this.buildings.splice(i, 1);
-                this.economy.notify('Gebäude entfernt');
-                return;
-            }
-        }
-        
-        // Prüfe Lifte
-        for (let i = this.lifts.length - 1; i >= 0; i--) {
-            const l = this.lifts[i];
-            const dist = Math.sqrt(
-                Math.pow(l.startPos.x - point.x, 2) + 
-                Math.pow(l.startPos.z - point.z, 2)
-            );
-            if (dist < threshold) {
-                l.dispose();
-                this.lifts.splice(i, 1);
-                this.economy.notify('Lift entfernt');
-                return;
-            }
-        }
-    }
-    
-    // Visualisierung
-    createPlacementMarker(x, z, color) {
-        const geometry = new THREE.RingGeometry(2, 2.5, 16);
-        const material = new THREE.MeshBasicMaterial({ 
-            color: color, 
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.8
-        });
-        const marker = new THREE.Mesh(geometry, material);
-        marker.rotation.x = -Math.PI / 2;
-        marker.position.set(x, 0.2, z);
-        this.scene.add(marker);
-        
-        // Entferne nach kurzer Zeit
         setTimeout(() => {
-            this.scene.remove(marker);
-        }, 2000);
+            notif.style.opacity = '0';
+        }, 3000);
     }
     
-    showPreviewLine(point) {
-        // Wird bei Mouse-Move aktualisiert
-    }
-    
-    hidePreviewLine() {
-        // Preview entfernen
-    }
-    
-    updatePreview(point) {
-        // Hier könnte man einen Ghost-Bauanzeige implementieren
-    }
-    
-    animatePlacement(mesh) {
-        mesh.scale.set(0, 0, 0);
+    updateUI() {
+        const stats = this.economy.getStats();
         
-        let scale = 0;
-        const animate = () => {
-            scale += 0.1;
-            if (scale <= 1) {
-                mesh.scale.set(scale, scale, scale);
-                requestAnimationFrame(animate);
-            }
-        };
-        animate();
-    }
-    
-    updateUI(report) {
-        // UI wird durch GameUI-Klasse aktualisiert
-        if (window.gameUI) {
-            window.gameUI.update(report);
-        }
-    }
-    
-    onResize() {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-    
-    animate() {
-        requestAnimationFrame(() => this.animate());
+        document.getElementById('money').textContent = stats.money.toLocaleString();
+        document.getElementById('visitors').textContent = stats.visitors.toLocaleString();
+        document.getElementById('reputation').textContent = stats.reputation;
+        document.getElementById('day').textContent = stats.day;
+        document.getElementById('weather').textContent = {
+            'sunny': '☀️',
+            'cloudy': '☁️',
+            'snowing': '❄️',
+            'foggy': '🌫️',
+            'stormy': '⛈️'
+        }[stats.weather] || '☀️';
         
-        const deltaTime = this.clock.getDelta() * 1000;
+        // Lift-Buttons aktivieren/deaktivieren
+        document.querySelectorAll('.lift-btn').forEach(btn => {
+            const type = btn.dataset.type;
+            const cost = LIFT_TYPES[type].cost;
+            btn.disabled = stats.money < cost;
+        });
+    }
+    
+    animate(time) {
+        requestAnimationFrame((t) => this.animate(t));
         
-        // Updates
+        const deltaTime = (time - this.lastTime) / 1000 || 0;
+        this.lastTime = time;
+        
+        // Controls
         this.controls.update();
-        this.terrain.updateSnowfall();
-        this.economy.update(deltaTime);
         
-        // Lift-Animation
-        this.lifts.forEach(lift => lift.update(deltaTime));
+        // Schneefall
+        if (this.terrain) {
+            this.terrain.updateSnowfall();
+        }
         
+        // Lifte updaten
+        this.lifts.forEach(lift => lift.update(deltaTime * 1000));
+        
+        // Wirtschaft updaten
+        if (this.economy) {
+            this.economy.update(deltaTime, this.lifts, this.buildings);
+            
+            // UI alle Sekunde updaten
+            if (Math.floor(time / 1000) > Math.floor((time - deltaTime * 1000) / 1000)) {
+                this.updateUI();
+            }
+        }
+        
+        // Render
         this.renderer.render(this.scene, this.camera);
     }
 }
 
-// UI-Controller
-class GameUI {
-    constructor(game) {
-        this.game = game;
-        this.setupEventListeners();
-    }
-    
-    setupEventListeners() {
-        // Tool-Buttons
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const tool = btn.dataset.tool;
-                this.game.selectTool(tool);
-            });
-        });
-        
-        // Lift-Buttons
-        document.querySelectorAll('.lift-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.lift;
-                this.game.selectLiftType(type);
-            });
-        });
-        
-        // Building-Buttons
-        document.querySelectorAll('.building-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.building;
-                this.game.selectBuildingType(type);
-            });
-        });
-        
-        // Slope-Buttons
-        document.querySelectorAll('.slope-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const difficulty = btn.dataset.slope;
-                this.game.selectSlopeDifficulty(difficulty);
-            });
-        });
-        
-        // Geschwindigkeits-Steuerung
-        const speedBtn = document.getElementById('speed-btn');
-        if (speedBtn) {
-            speedBtn.addEventListener('click', () => {
-                // Zeitbeschleunigung
-            });
-        }
-    }
-    
-    update(report) {
-        // Stats aktualisieren
-        const moneyEl = document.getElementById('stat-money');
-        const visitorsEl = document.getElementById('stat-visitors');
-        const reputationEl = document.getElementById('stat-reputation');
-        const dayEl = document.getElementById('stat-day');
-        const timeEl = document.getElementById('stat-time');
-        
-        if (moneyEl) moneyEl.textContent = Math.floor(report.money).toLocaleString() + '€';
-        if (visitorsEl) visitorsEl.textContent = report.visitors;
-        if (reputationEl) reputationEl.textContent = report.reputation + '%';
-        if (dayEl) dayEl.textContent = 'Tag ' + report.day;
-        if (timeEl) timeEl.textContent = report.hour + ':00';
-        
-        // Finanz-Details
-        const incomeEl = document.getElementById('stat-income');
-        const expensesEl = document.getElementById('stat-expenses');
-        
-        if (incomeEl) incomeEl.textContent = '+' + report.income.total.toFixed(0) + '€';
-        if (expensesEl) expensesEl.textContent = '-' + report.expenses.total.toFixed(0) + '€';
-    }
-    
-    showNotification(message) {
-        const notif = document.getElementById('notification');
-        if (notif) {
-            notif.textContent = message;
-            notif.classList.add('show');
-            
-            setTimeout(() => {
-                notif.classList.remove('show');
-            }, 3000);
-        }
-    }
-}
-
 // Spiel starten wenn DOM bereit
-let game;
-document.addEventListener('DOMContentLoaded', () => {
-    game = new PlanetSkiGame();
+window.addEventListener('DOMContentLoaded', () => {
+    window.game = new PlanetSkiGame();
 });

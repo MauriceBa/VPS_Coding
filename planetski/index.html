@@ -7,236 +7,164 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- 3D Canvas -->
-    <div id="canvas-container"></div>
+    <!-- Game Container -->
+    <div id="game-container"></div>
     
-    <!-- Top Bar mit Stats -->
+    <!-- Top Bar -->
     <div id="top-bar">
-        <div id="logo">🏔️ PlanetSki</div>
-        
-        <div id="stats-bar">
+        <div class="logo">🎿 PlanetSki</div>
+        <div class="stats">
             <div class="stat">
-                <div class="stat-value" id="stat-money">10.000€</div>
-                <div class="stat-label">Kontostand</div>
+                <span class="icon">💰</span>
+                <span id="money">100.000</span>€
             </div>
             <div class="stat">
-                <div class="stat-value" id="stat-visitors">0</div>
-                <div class="stat-label">Gäste</div>
+                <span class="icon">👥</span>
+                <span id="visitors">0</span>
             </div>
             <div class="stat">
-                <div class="stat-value" id="stat-reputation">50%</div>
-                <div class="stat-label">Reputation</div>
+                <span class="icon">⭐</span>
+                <span id="reputation">50</span>%
             </div>
             <div class="stat">
-                <div class="stat-value" id="stat-day">Tag 1</div>
-                <div class="stat-label">Spieltag</div>
+                <span class="icon" id="weather">☀️</span>
+                Tag <span id="day">1</span>
             </div>
-            <div class="stat">
-                <div class="stat-value" id="stat-time">8:00</div>
-                <div class="stat-label">Uhrzeit</div>
-            </div>
-        </div>
-        
-        <div id="time-controls">
-            <button id="speed-btn">⏩ 1x</button>
         </div>
     </div>
     
-    <!-- Linke Sidebar - Tools -->
-    <div id="sidebar">
-        <button class="tool-btn" data-tool="lift" title="Lift bauen">🚡</button>
-        <button class="tool-btn" data-tool="building" title="Gebäude bauen">🏗️</button>
-        <button class="tool-btn" data-tool="slope" title="Piste anlegen">⛷️</button>
-        <div class="tool-divider"></div>
-        <button class="tool-btn" data-tool="delete" title="Löschen">🗑️</button>
-        <button class="tool-btn" data-tool="info" title="Information">ℹ️</button>
-    </div>
-    
-    <!-- Rechte Sidebar - Details Panel -->
-    <div id="details-panel">
-        
-        <!-- Lift Panel -->
-        <div id="lift-panel" class="tool-panel" style="display:none;">
-            <div class="panel-header">🚡 Lift auswählen</div>
-            
-            <div class="lift-option" data-lift="tbar">
-                <div class="lift-name">🎿 Bügellift</div>
-                <div class="lift-stats">
-                    <span>📊 800 Pers./h</span>
-                    <span>📏 max 500m</span>
-                </div>
-                <div class="lift-cost">5.000€</div>
-            </div>
-            
-            <div class="lift-option" data-lift="chair2">
-                <div class="lift-name">🪑 2er Sessellift</div>
-                <div class="lift-stats">
-                    <span>📊 1.200 Pers./h</span>
-                    <span>📏 max 1.500m</span>
-                </div>
-                <div class="lift-cost">15.000€</div>
-            </div>
-            
-            <div class="lift-option" data-lift="chair4">
-                <div class="lift-name">🪑🪑 4er Sessellift</div>
-                <div class="lift-stats">
-                    <span>📊 2.400 Pers./h</span>
-                    <span>📏 max 2.500m</span>
-                </div>
-                <div class="lift-cost">35.000€</div>
-            </div>
-            
-            <div class="lift-option" data-lift="chair6">
-                <div class="lift-name">🪑🪑🪑 6er Sessellift</div>
-                <div class="lift-stats">
-                    <span>📊 3.200 Pers./h</span>
-                    <span>📏 max 3.000m</span>
-                </div>
-                <div class="lift-cost">60.000€</div>
-            </div>
-            
-            <div class="lift-option" data-lift="gondola">
-                <div class="lift-name">🚠 Gondelbahn</div>
-                <div class="lift-stats">
-                    <span>📊 2.000 Pers./h</span>
-                    <span>📏 max 4.000m</span>
-                </div>
-                <div class="lift-cost">80.000€</div>
-            </div>
-            
-            <div class="lift-option" data-lift="cableCar">
-                <div class="lift-name">🚡 Pendelbahn</div>
-                <div class="lift-stats">
-                    <span>📊 800 Pers./h</span>
-                    <span>📏 max 5.000m</span>
-                </div>
-                <div class="lift-cost">150.000€</div>
-            </div>
-            
-            <p style="margin-top:20px;color:var(--text-muted);font-size:13px;">
-                💡 <b>Hinweis:</b> Klicke zweimal auf die Karte – erst für die Talstation, dann für die Bergstation.
-            </p>
+    <!-- Left Sidebar - Tools -->
+    <div id="sidebar-left">
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="lifts">🚡 Lifte</button>
+            <button class="tab-btn" data-tab="buildings">🏗️ Gebäude</button>
+            <button class="tab-btn" data-tab="slopes">⛷️ Pisten</button>
         </div>
         
-        <!-- Building Panel -->
-        <div id="building-panel" class="tool-panel" style="display:none;">
-            <div class="panel-header">🏗️ Gebäude bauen</div>
-            
-            <div class="building-grid">
-                <div class="building-card" data-building="valleyStation">
-                    <div class="building-icon">🏠</div>
-                    <div class="building-name">Talstation</div>
-                    <div class="building-cost">3.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="mountainStation">
-                    <div class="building-icon">🏔️</div>
-                    <div class="building-name">Bergstation</div>
-                    <div class="building-cost">5.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="hut">
-                    <div class="building-icon">🍽️</div>
-                    <div class="building-name">Skihütte</div>
-                    <div class="building-cost">8.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="restaurant">
-                    <div class="building-icon">🍕</div>
-                    <div class="building-name">Restaurant</div>
-                    <div class="building-cost">15.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="parking">
-                    <div class="building-icon">🅿️</div>
-                    <div class="building-name">Parkplatz</div>
-                    <div class="building-cost">2.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="snowCannon">
-                    <div class="building-icon">❄️</div>
-                    <div class="building-name">Schneekanone</div>
-                    <div class="building-cost">3.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="hostel">
-                    <div class="building-icon">🛏️</div>
-                    <div class="building-name">Jugendherberge</div>
-                    <div class="building-cost">15.000€</div>
-                </div>
-                
-                <div class="building-card" data-building="hotel">
-                    <div class="building-icon">🏨</div>
-                    <div class="building-name">Hotel</div>
-                    <div class="building-cost">50.000€</div>
-                </div>
+        <div id="lift-menu" class="menu-panel active">
+            <div class="menu-header">
+                <h3>🚡 Lifte bauen</h3>
+                <p class="hint">Wähle einen Lifttyp und platziere Tal- und Bergstation</p>
             </div>
+            <!-- Lifte werden per JS geladen -->
         </div>
         
-        <!-- Slope Panel -->
-        <div id="slope-panel" class="tool-panel" style="display:none;">
-            <div class="panel-header">⛷️ Pisten-Schwierigkeit</div>
-            
-            <div class="slope-options">
-                <button class="slope-btn" data-slope="blue">
-                    🔵 Leicht
-                </button>
-                <button class="slope-btn" data-slope="red">
-                    🔴 Mittel
-                </button>
-                <button class="slope-btn" data-slope="black">
-                    ⚫ Schwer
-                </button>
+        <div id="building-menu" class="menu-panel">
+            <div class="menu-header">
+                <h3>🏗️ Gebäude bauen</h3>
+                <p class="hint">Gastronomie, Unterkünfte und mehr</p>
+            </div>
+            <!-- Gebäude werden per JS geladen -->
+        </div>
+        
+        <div id="slope-menu" class="menu-panel">
+            <div class="menu-header">
+                <h3>⛷️ Pisten bauen</h3>
+                <p class="hint">Verbinde Berg- und Talstationen</p>
             </div>
             
-            <p style="margin-top:30px;color:var(--text-muted);font-size:13px;">
-                💡 <b>So legst du eine Piste an:</b><br><br>
-                1. Wähle die Schwierigkeit<br>
-                2. Klicke auf den <b>Startpunkt</b> (oben)<br>
-                3. Klicke auf den <b>Endpunkt</b> (unten)<br><br>
-                Die Piste verläuft dann automatisch den Hang hinunter.
-            </p>
+            <div class="slope-tools">
+                <button class="slope-btn blue" onclick="game.selectSlopeTool('blue')">
+                    🔵 Blau (leicht)
+                </button>
+                <button class="slope-btn red" onclick="game.selectSlopeTool('red')">
+                    🔴 Rot (mittel)
+                </button>
+                <button class="slope-btn black" onclick="game.selectSlopeTool('black')">
+                    ⚫ Schwarz (schwer)
+                </button>
+            </div>
         </div>
     </div>
     
-    <!-- Bottom Bar -->
-    <div id="bottom-bar">
-        <span>🖱️ <b>Linksklick</b> = Bauen</span>
-        <span>🖱️ <b>Rechtsklick + Ziehen</b> = Kamera</span>
-        <span>🔍 <b>Scrollen</b> = Zoomen</span>
-        <span>❌ <b>Rechtsklick</b> = Abbrechen</span>
+    <!-- Right Sidebar - Info -->
+    <div id="sidebar-right">
+        <div class="info-panel">
+            <h3>📊 Resort Info</h3>
+            
+            <div class="info-section">
+                <h4>Einnahmen/Tag</h4>
+                <div class="info-row">
+                    <span>🎫 Liftkarten</span>
+                    <span id="income-lift">0€</span>
+                </div>
+                <div class="info-row">
+                    <span>🍽️ Gastronomie</span>
+                    <span id="income-food">0€</span>
+                </div>
+                <div class="info-row">
+                    <span>🏨 Hotels</span>
+                    <span id="income-hotel">0€</span>
+                </div>
+            </div>
+            
+            <div class="info-section">
+                <h4>Ausgaben/Tag</h4>
+                <div class="info-row">
+                    <span>🔧 Wartung</span>
+                    <span id="expense-maint">0€</span>
+                </div>
+                <div class="info-row">
+                    <span>👷 Personal</span>
+                    <span id="expense-staff">0€</span>
+                </div>
+                <div class="info-row">
+                    <span>⚡ Energie</span>
+                    <span id="expense-energy">0€</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <h4>⚡ Schnellzugriff</h4>
+            
+            <button onclick="game.camera.position.set(40, 40, 60); game.controls.target.set(0,0,0);">
+                🏠 Zurück zur Übersicht
+            </button>
+            
+            <button onclick="togglePause()">
+                ⏸️ Pause
+            </button>
+            
+            <a href="/" class="home-link">← Zur Startseite</a>
+        </div>
     </div>
     
     <!-- Notification -->
     <div id="notification"></div>
     
-    <!-- Finanz-Panel -->
-    <div id="finance-panel">
-        <div class="panel-header">💰 Finanzen</div>
-        
-        <div class="finance-row">
-            <span>🎫 Liftkarten</span>
-            <span id="income-tickets">+0€</span>
-        </div>
-        
-        <div class="finance-row">
-            <span>🍽️ Gastronomie</span>
-            <span id="income-food">+0€</span>
-        </div>
-        
-        <div class="finance-row">
-            <span>🏨 Übernachtung</span>
-            <span id="income-hotel">+0€</span>
-        </div>
-        
-        <div class="finance-row positive">
-            <span>📈 Einnahmen</span>
-            <span id="stat-income">+0€</span>
-        </div>
-        
-        <div class="finance-row negative">
-            <span>📉 Ausgaben</span>
-            <span id="stat-expenses">-0€</span>
+    <!-- Help Modal -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>🎿 Willkommen bei PlanetSki!</h2>
+            
+            <div class="help-section">
+                <h3>🚡 Lifte bauen</h3>
+                <p>1. Wähle einen Lifttyp aus dem Menü</p>
+                <p>2. Klicke auf das Terrain für die Talstation</p>
+                <p>3. Klicke erneut für die Bergstation</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🏗️ Gebäude bauen</h3>
+                <p>Wähle ein Gebäude und klicke auf das Terrain.</p>
+                <p>Hotels und Hütten generieren Einnahmen!</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>💰 Wirtschaft</h3>
+                <p>• Liftkarten bringen Geld</p>
+                <p>• Bessere Lifte = mehr Besucher</p>
+                <p>• Aber: Wartung und Personal kosten auch!</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎮 Steuerung</h3>
+                <p><b>Linksklick + Ziehen:</b> Kamera drehen</p>
+                <p><b>Rechtsklick + Ziehen:</b> Verschieben</p>
+                <p><b>Scrollen:</b> Zoomen</p>
+            </div>
         </div>
     </div>
 
@@ -245,10 +173,47 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     
     <!-- Game Modules -->
-    <script src="js/buildings.js"></script>
     <script src="js/lifts.js"></script>
+    <script src="js/buildings.js"></script>
     <script src="js/terrain.js"></script>
     <script src="js/economy.js"></script>
     <script src="js/game.js"></script>
+    
+    <script>
+        // Tab-Wechsel
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab + '-menu').classList.add('active');
+            });
+        });
+        
+        // Help Modal
+        const modal = document.getElementById('help-modal');
+        const closeBtn = document.querySelector('.close');
+        
+        closeBtn.onclick = () => modal.style.display = 'none';
+        window.onclick = (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        };
+        
+        // Hilfe beim ersten Besuch
+        if (!localStorage.getItem('planetski_help_shown')) {
+            modal.style.display = 'block';
+            localStorage.setItem('planetski_help_shown', 'true');
+        }
+        
+        // Pause
+        let isPaused = false;
+        function togglePause() {
+            isPaused = !isPaused;
+            if (window.game) {
+                // Pause-Logik hier
+            }
+        }
+    </script>
 </body>
 </html>

@@ -5,213 +5,168 @@
 
 class Economy {
     constructor() {
-        this.money = 10000;           // Startkapital
-        this.reputation = 50;         // 0-100, beeinflusst Besucheranzahl
-        this.visitors = 0;            // Aktuelle Besucher
-        this.totalVisitors = 0;       // Gesamtbesucher
-        this.day = 1;
-        this.hour = 8;                // Start um 8 Uhr
+        this.money = 100000; // Startkapital
+        this.reputation = 50; // 0-100
+        this.visitors = 0;
+        this.dailyVisitors = 0;
+        this.totalVisitors = 0;
         
-        // Einkommensquellen
-        this.income = {
-            liftTickets: 0,
-            food: 0,
-            hotel: 0,
-            parking: 0,
-            shop: 0
-        };
+        // Einkommensströme
+        this.liftTickets = 0;
+        this.foodRevenue = 0;
+        this.rentalRevenue = 0;
+        this.hotelRevenue = 0;
         
         // Ausgaben
-        this.expenses = {
-            maintenance: 0,
-            staff: 0,
-            energy: 0
-        };
+        this.maintenance = 0;
+        this.staffCosts = 0;
+        this.energyCosts = 0;
+        
+        // Statistiken
+        this.day = 1;
+        this.season = 'winter';
+        this.weather = 'sunny';
         
         // Preise
         this.prices = {
-            dayTicket: 45,      // Tageskarte
-            halfDayTicket: 30,  // Halbtagskarte
-            food: 15,           // Durchschnittliches Essen
-            hotelNight: 120     // Hotel pro Nacht
+            dayTicket: 55,
+            halfDay: 35,
+            seasonTicket: 800,
+            skiRental: 25,
+            food: 15,
+            hotel: 120
         };
-        
-        this.lastUpdate = Date.now();
-        
-        // UI-Update Callback
-        this.onUpdate = null;
     }
     
-    update(deltaTime) {
-        // Zeit fortschreiten (1 Stunde = 30 Sekunden Realzeit)
-        this.lastUpdate += deltaTime;
+    update(deltaTime, lifts, buildings) {
+        // Besucher basierend auf Reputation und Wetter generieren
+        this.generateVisitors(deltaTime, lifts);
         
-        if (this.lastUpdate > 30000) { // Alle 30 Sekunden = 1 Spielstunde
-            this.lastUpdate = 0;
-            this.hour++;
-            
-            if (this.hour >= 22) { // Resort schließt um 22 Uhr
-                this.endDay();
-            } else if (this.hour === 8) { // Öffnet um 8 Uhr
-                this.startDay();
-            }
-            
-            // Stündliche Updates
-            this.calculateHourlyIncome();
-        }
+        // Einnahmen berechnen
+        this.calculateRevenue(deltaTime, lifts, buildings);
+        
+        // Ausgaben berechnen
+        this.calculateExpenses(deltaTime, lifts, buildings);
+        
+        // Geld aktualisieren
+        this.money += (this.liftTickets + this.foodRevenue + this.rentalRevenue + this.hotelRevenue) * deltaTime;
+        this.money -= (this.maintenance + this.staffCosts + this.energyCosts) * deltaTime;
     }
     
-    startDay() {
-        // Neue Besucher basierend auf Reputation und Wetter
-        const baseVisitors = 50;
-        const reputationBonus = this.reputation * 2;
-        const newVisitors = Math.floor(baseVisitors + reputationBonus + Math.random() * 50);
+    generateVisitors(deltaTime, lifts) {
+        // Basis-Besucherzahl basierend auf Liftkapazität
+        const totalCapacity = lifts.reduce((sum, lift) => {
+            return sum + (lift.config ? lift.config.capacity : 0);
+        }, 0);
         
-        this.visitors = newVisitors;
+        // Wetter-Modifier
+        const weatherMod = {
+            'sunny': 1.2,
+            'cloudy': 1.0,
+            'snowing': 1.3,
+            'foggy': 0.6,
+            'stormy': 0.2
+        }[this.weather] || 1.0;
+        
+        // Reputation-Modifier
+        const repMod = 0.5 + (this.reputation / 100);
+        
+        // Neue Besucher
+        const newVisitors = (totalCapacity * 0.1 * weatherMod * repMod) * deltaTime;
+        this.dailyVisitors += newVisitors;
         this.totalVisitors += newVisitors;
-        
-        // Liftkarten-Einnahmen
-        const tickets = Math.floor(newVisitors * 0.9); // 90% kaufen Tageskarten
-        const halfDay = Math.floor(newVisitors * 0.1); // 10% Halbtags
-        
-        this.income.liftTickets += tickets * this.prices.dayTicket;
-        this.income.liftTickets += halfDay * this.prices.halfDayTicket;
-        
-        this.money += this.income.liftTickets;
-        
-        this.notify(`Tag ${this.day} gestartet! ${newVisitors} Gäste im Resort.`);
-        this.triggerUpdate();
+        this.visitors = Math.floor(this.dailyVisitors);
     }
     
-    endDay() {
-        // Tägliche Kosten
-        this.calculateDailyExpenses();
+    calculateRevenue(deltaTime, lifts, buildings) {
+        // Liftkarten
+        const ticketSales = this.dailyVisitors * this.prices.dayTicket * 0.3; // 30% kaufen Tagesticket
+        this.liftTickets = ticketSales / 86400; // Pro Sekunde
         
-        // Übersicht
-        const dayIncome = Object.values(this.income).reduce((a, b) => a + b, 0);
-        const dayExpenses = Object.values(this.expenses).reduce((a, b) => a + b, 0);
-        const profit = dayIncome - dayExpenses;
+        // Gastronomie
+        const huts = buildings.filter(b => b.type === 'hut' || b.type === 'restaurant');
+        const foodSales = huts.reduce((sum, hut) => {
+            const visitors = Math.min(hut.config.incomePerVisitor * 10, this.dailyVisitors * 0.5);
+            return sum + visitors * this.prices.food;
+        }, 0);
+        this.foodRevenue = foodSales / 86400;
         
-        // Reputation anpassen basierend auf Profit
-        if (profit > 0) {
-            this.reputation = Math.min(100, this.reputation + 1);
-        } else {
-            this.reputation = Math.max(0, this.reputation - 2);
-        }
+        // Hotels
+        const hotels = buildings.filter(b => b.type === 'hotel' || b.type === 'hostel');
+        this.hotelRevenue = hotels.reduce((sum, hotel) => sum + hotel.config.income, 0) / 86400;
+    }
+    
+    calculateExpenses(deltaTime, lifts, buildings) {
+        // Wartung pro Lift
+        this.maintenance = lifts.reduce((sum, lift) => {
+            const baseCost = lift.config ? lift.config.cost * 0.001 : 0;
+            return sum + baseCost;
+        }, 0) / 86400;
         
-        this.notify(`Tag ${this.day} beendet. Profit: ${profit >= 0 ? '+' : ''}${profit.toFixed(0)}€`);
+        // Personal-Kosten
+        const staffPerLift = 3;
+        const staffPerBuilding = 2;
+        const staffCostPerHour = 25;
+        this.staffCosts = ((lifts.length * staffPerLift + buildings.length * staffPerBuilding) * staffCostPerHour) / 3600;
         
-        // Reset für nächsten Tag
+        // Energie
+        this.energyCosts = lifts.reduce((sum, lift) => {
+            const kw = lift.config ? lift.config.capacity / 100 : 10;
+            return sum + kw * 0.15; // 15ct/kWh
+        }, 0) / 3600;
+    }
+    
+    nextDay() {
         this.day++;
-        this.hour = 7; // Bereitet sich auf Öffnung vor
-        this.visitors = 0;
+        this.dailyVisitors = 0;
         
-        // Einkommen zurücksetzen
-        Object.keys(this.income).forEach(k => this.income[k] = 0);
-        Object.keys(this.expenses).forEach(k => this.expenses[k] = 0);
+        // Wetter ändern
+        const weathers = ['sunny', 'sunny', 'cloudy', 'cloudy', 'snowing', 'foggy'];
+        this.weather = weathers[Math.floor(Math.random() * weathers.length)];
         
-        this.triggerUpdate();
-    }
-    
-    calculateHourlyIncome() {
-        // Nur während Öffnungszeiten (8-22 Uhr)
-        if (this.hour < 8 || this.hour >= 22) return;
-        
-        const activeVisitors = Math.floor(this.visitors * 0.7); // 70% sind aktiv
-        
-        // Essen (Mittagspause mehr)
-        let foodMultiplier = 0.05;
-        if (this.hour === 12 || this.hour === 13) foodMultiplier = 0.3; // Mittag
-        
-        const foodIncome = activeVisitors * foodMultiplier * this.prices.food;
-        this.income.food += foodIncome;
-        this.money += foodIncome;
-        
-        // Hotel (nur Abends)
-        if (this.hour >= 18) {
-            const hotelIncome = Math.floor(activeVisitors * 0.2) * this.prices.hotelNight;
-            this.income.hotel += hotelIncome;
-            this.money += hotelIncome;
+        // Saison-Wechsel
+        if (this.day > 90) {
+            this.day = 1;
+            this.season = this.season === 'winter' ? 'summer' : 'winter';
         }
-        
-        this.triggerUpdate();
     }
     
-    calculateDailyExpenses() {
-        // Wartung basierend auf Anzahl der Lifte/Gebäude
-        const liftCount = game?.lifts?.length || 0;
-        const buildingCount = game?.buildings?.length || 0;
-        
-        this.expenses.maintenance = liftCount * 200 + buildingCount * 50;
-        this.expenses.staff = (liftCount * 3 + buildingCount * 2) * 80; // 3-2 Mitarbeiter pro Einheit
-        this.expenses.energy = (liftCount * 100 + buildingCount * 20);
-        
-        const totalExpenses = Object.values(this.expenses).reduce((a, b) => a + b, 0);
-        this.money -= totalExpenses;
-        
-        return totalExpenses;
+    getStats() {
+        return {
+            money: Math.floor(this.money),
+            visitors: this.visitors,
+            totalVisitors: Math.floor(this.totalVisitors),
+            reputation: Math.floor(this.reputation),
+            day: this.day,
+            season: this.season,
+            weather: this.weather,
+            income: {
+                liftTickets: Math.floor(this.liftTickets * 86400),
+                food: Math.floor(this.foodRevenue * 86400),
+                hotel: Math.floor(this.hotelRevenue * 86400)
+            },
+            expenses: {
+                maintenance: Math.floor(this.maintenance * 86400),
+                staff: Math.floor(this.staffCosts * 86400),
+                energy: Math.floor(this.energyCosts * 86400)
+            }
+        };
     }
     
     canAfford(amount) {
         return this.money >= amount;
     }
     
-    spend(amount, reason = '') {
+    spend(amount) {
         if (this.canAfford(amount)) {
             this.money -= amount;
-            if (reason) {
-                console.log(`💸 Ausgabe: ${amount}€ für ${reason}`);
-            }
-            this.triggerUpdate();
             return true;
         }
         return false;
     }
     
-    earn(amount, source = '') {
+    earn(amount) {
         this.money += amount;
-        if (source && this.income[source] !== undefined) {
-            this.income[source] += amount;
-        }
-        this.triggerUpdate();
-    }
-    
-    getDailyReport() {
-        const totalIncome = Object.values(this.income).reduce((a, b) => a + b, 0);
-        const totalExpenses = Object.values(this.expenses).reduce((a, b) => a + b, 0);
-        
-        return {
-            day: this.day,
-            hour: this.hour,
-            visitors: this.visitors,
-            totalVisitors: this.totalVisitors,
-            money: this.money,
-            reputation: this.reputation,
-            income: { ...this.income, total: totalIncome },
-            expenses: { ...this.expenses, total: totalExpenses },
-            profit: totalIncome - totalExpenses
-        };
-    }
-    
-    notify(message) {
-        console.log(`📢 ${message}`);
-        if (window.gameUI) {
-            window.gameUI.showNotification(message);
-        }
-    }
-    
-    triggerUpdate() {
-        if (this.onUpdate) {
-            this.onUpdate(this.getDailyReport());
-        }
-    }
-    
-    // Preise ändern
-    setPrice(category, value) {
-        if (this.prices[category] !== undefined) {
-            this.prices[category] = Math.max(1, value);
-            this.triggerUpdate();
-        }
     }
 }
 
