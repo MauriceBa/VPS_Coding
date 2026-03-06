@@ -3,36 +3,58 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkiTycoon V3 - Epic Overhaul</title>
+  <title>SkiTycoon V4 - Strategy Wars</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">SkiTycoon V3</p>
-        <h1>Alpen-Resort-Gruppe</h1>
-        <p id="headline-status" class="muted">Baue dein Skigebiets-Imperium auf.</p>
+      <div class="branding">
+        <p class="eyebrow">SkiWars V4</p>
+        <h1>Alpen-Dominanz</h1>
+        <p id="headline-coords" class="muted">Position: Tal 1, Hang 1</p>
       </div>
-      <div class="topbar-actions">
-        <button class="ghost-btn" data-action="speed" data-speed="1">▶ 1x</button>
-        <button class="ghost-btn" data-action="speed" data-speed="3">▶▶ 3x</button>
-        <button class="primary-btn" data-action="save">💾 Speichern</button>
+      
+      <!-- OGame Style Resource Bar -->
+      <div class="res-bar">
+        <div class="res-item" title="Wird für alle Gebäude benötigt">
+          <span class="res-label">Kapital (€)</span>
+          <span class="res-val" id="res-kapital">0</span>
+          <span class="res-rate" id="prod-kapital">+0/s</span>
+        </div>
+        <div class="res-item" title="Wird für Ausbau und Einheiten benötigt">
+          <span class="res-label">Baumaterial</span>
+          <span class="res-val" id="res-material">0</span>
+          <span class="res-rate" id="prod-material">+0/s</span>
+        </div>
+        <div class="res-item" title="Dient als Treibstoff für Flotten/Kampagnen">
+          <span class="res-label">Kunstschnee</span>
+          <span class="res-val" id="res-schnee">0</span>
+          <span class="res-rate" id="prod-schnee">+0/s</span>
+        </div>
+        <div class="res-item" title="Limitiert deine Anlagen">
+          <span class="res-label">Energie</span>
+          <span class="res-val" id="res-energie">0 / 0</span>
+          <span class="res-rate" id="prod-energie">Status</span>
+        </div>
       </div>
     </header>
 
-    <section id="stats-grid" class="stats-grid"></section>
-
     <nav class="tabs">
       <button class="tab active" data-action="tab" data-tab="overview">Übersicht</button>
-      <button class="tab" data-action="tab" data-tab="build">Bauen & Erweitern</button>
+      <button class="tab" data-action="tab" data-tab="buildings">Anlagen</button>
       <button class="tab" data-action="tab" data-tab="research">Forschung</button>
-      <button class="tab" data-action="tab" data-tab="operations">Betrieb & Personal</button>
-      <button class="tab" data-action="tab" data-tab="regions">Gebiete</button>
-      <button class="tab" data-action="tab" data-tab="events">Ziele & Events</button>
-      <button class="tab" data-action="tab" data-tab="settings">Einstellungen</button>
+      <button class="tab" data-action="tab" data-tab="units">Agentur (Personal)</button>
+      <button class="tab" data-action="tab" data-tab="defense">Sicherheit (Def)</button>
+      <button class="tab" data-action="tab" data-tab="map">Tal-Karte</button>
+      <button class="tab" data-action="tab" data-tab="fleet">Kampagnen (Flotte)</button>
+      <button class="tab" data-action="tab" data-tab="reports">Berichte <span id="report-badge" class="badge hidden">0</span></button>
+      <button class="tab" data-action="tab" data-tab="settings">System</button>
     </nav>
+
+    <!-- Active Build Queue Banner -->
+    <div id="global-queue" class="global-queue hidden"></div>
 
     <main id="view" class="view"></main>
   </div>
