@@ -485,7 +485,7 @@ const LiftModels = {
             new THREE.MeshStandardMaterial({ 
                 color: color,
                 roughness: 0.9 
-            });
+            })
         );
         mat.position.y = 0.65;
         group.add(mat);
@@ -908,7 +908,7 @@ const LiftModels = {
             new THREE.MeshStandardMaterial({ 
                 color: 0x444444,
                 side: THREE.DoubleSide
-            }
+            })
         );
         portal.position.y = 0.5;
         portal.rotation.z = Math.PI / 2;
@@ -936,7 +936,7 @@ const LiftModels = {
                 color: 0x87CEEB,
                 transparent: true,
                 opacity: 0.5
-            }
+            })
         );
         door.position.set(0, 1.5, 1.01);
         group.add(door);
@@ -1038,7 +1038,7 @@ class SkiLift {
                 color: this.config.color,
                 emissive: this.config.color,
                 emissiveIntensity: 0.3
-            });
+            })
         );
         sign.position.set(0, y + height + 1, isValley ? depth/2 + 0.2 : -depth/2 - 0.2);
         stationGroup.add(sign);
