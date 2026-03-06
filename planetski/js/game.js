@@ -154,7 +154,6 @@ class PlanetSkiGame {
         localStorage.setItem('planetski_mapsize', next.size);
         this.showNotification(`🗺️ Map-Größe: ${next.name} (${next.size}m) - Seite neu laden!`, 'success');
     }
-    }
     
     setupTerrain() {
         // Map-Größe aus localStorage oder Standard
