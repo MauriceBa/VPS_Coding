@@ -461,7 +461,7 @@ const LIFT_TYPES = {
         description: 'Inclined elevator',
         color: 0x607D8B,
         poleDistance: 0,
-        model: 'elevator'
+        model: 'funicular'
     }
 };
 
@@ -703,39 +703,108 @@ const LiftModels = {
         const scales = { 50: 2, 100: 3, 150: 3.5, 200: 4 };
         const scale = scales[size] || 2;
         
+        // Huge hanger
         const hanger = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.1, 0.1, 2, 8),
+            new THREE.BoxGeometry(0.2, 3, 0.2),
             new THREE.MeshStandardMaterial({ color: 0x444444 })
         );
         hanger.position.y = -1;
         group.add(hanger);
-        
+
+        // Body
+        const width = 3 * scale;
+        const height = 2.2 * scale;
+        const depth = 2 * scale;
         const cabin = new THREE.Mesh(
-            new THREE.BoxGeometry(4 * scale, 3 * scale, 2.5 * scale),
+            new THREE.BoxGeometry(width, height, depth),
             new THREE.MeshStandardMaterial({ color: color })
         );
-        cabin.position.y = -2.5 * scale;
+        cabin.position.y = -2.5 - height/2;
         group.add(cabin);
+
+        // Windows
+        const windows = new THREE.Mesh(
+            new THREE.BoxGeometry(width + 0.1, height * 0.4, depth + 0.1),
+            new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.6 })
+        );
+        windows.position.y = cabin.position.y + height * 0.1;
+        group.add(windows);
+
         return group;
     },
     
     createDoubleDecker: (color) => {
-        return LiftModels.createTramway(color, 200);
+        const group = new THREE.Group();
+        // VANOISE EXPRESS STYLE
+        const hanger = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.2, 0.2, 4, 8),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+        );
+        hanger.position.y = -1;
+        group.add(hanger);
+        
+        const width = 12;
+        const height = 8;
+        const depth = 6;
+        
+        // Base structure
+        const bodyGeo = new THREE.BoxGeometry(width, height, depth);
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5 });
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.position.y = -6;
+        group.add(body);
+        
+        // Color accents
+        const stripeGeo = new THREE.BoxGeometry(width + 0.1, 1, depth + 0.1);
+        const stripeMat = new THREE.MeshStandardMaterial({ color: 0xe53e3e });
+        const stripe1 = new THREE.Mesh(stripeGeo, stripeMat);
+        stripe1.position.y = -6;
+        group.add(stripe1);
+        
+        // Lower windows
+        const windowGeo = new THREE.BoxGeometry(width + 0.2, 2.5, depth + 0.2);
+        const winMat = new THREE.MeshPhysicalMaterial({ color: 0x112233, transparent: true, opacity: 0.8 });
+        const lowerWins = new THREE.Mesh(windowGeo, winMat);
+        lowerWins.position.y = -8;
+        group.add(lowerWins);
+        
+        // Upper windows
+        const upperWins = new THREE.Mesh(windowGeo, winMat);
+        upperWins.position.y = -4;
+        group.add(upperWins);
+        
+        return group;
     },
     
     createFunicular: (color) => {
         const group = new THREE.Group();
-        const wagon = new THREE.Mesh(
-            new THREE.BoxGeometry(8, 3.5, 3),
+        // Sloped carriage for funicular
+        const length = 10;
+        const width = 3;
+        const height = 3;
+        
+        // Create a staircase-like base
+        const bodyGeo = new THREE.BoxGeometry(width, height, length);
+        const body = new THREE.Mesh(
+            bodyGeo,
             new THREE.MeshStandardMaterial({ color: color })
         );
-        wagon.position.y = 1.75;
-        group.add(wagon);
+        body.position.y = 2;
+        
+        // Angle the funicular to match average slope (about 20-30 degrees)
+        body.rotation.x = Math.PI / 8;
+        group.add(body);
+        
+        // Windows
+        const windows = new THREE.Mesh(
+            new THREE.BoxGeometry(width + 0.2, height * 0.4, length * 0.9),
+            new THREE.MeshPhysicalMaterial({ color: 0x222222, transparent: true, opacity: 0.7 })
+        );
+        windows.position.y = 2.5;
+        windows.rotation.x = Math.PI / 8;
+        group.add(windows);
+        
         return group;
-    },
-    
-    createElevator: (color) => {
-        return LiftModels.createFunicular(color);
     }
 };
 
@@ -753,22 +822,27 @@ class SkiLift {
         this.height = 0;
         
         this.carriers = [];
+        this.poles = []; // Speichere Stützenpositionen
         this.group = new THREE.Group();
         
         this.build();
     }
     
     build() {
+        // Stationen aufbauen (sie zeigen automatisch aufeinander)
         this.buildStation(this.startPos.x, this.startPos.z, true);
         this.buildStation(this.endPos.x, this.endPos.z, false);
         
-        if (this.config.poleDistance > 0) {
-            this.buildPoles();
+        if (this.config.category === 'funicular') {
+            this.buildRails();
+        } else {
+            if (this.config.poleDistance > 0) {
+                this.buildPoles();
+            }
+            this.buildCables();
         }
         
-        this.buildCables();
         this.buildCarriers();
-        
         this.scene.add(this.group);
     }
     
@@ -832,19 +906,13 @@ class SkiLift {
         driveWheel.position.set(0, y + height - 1, isValley ? depth/2 - 2 : -depth/2 + 2);
         stationGroup.add(driveWheel);
         
-        // Sign
-        const sign = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 1.2, 0.3),
-            new THREE.MeshStandardMaterial({ 
-                color: this.config.color,
-                emissive: this.config.color,
-                emissiveIntensity: 0.4
-            })
-        );
-        sign.position.set(0, y + height + 0.5, isValley ? depth/2 + 0.2 : -depth/2 - 0.2);
-        stationGroup.add(sign);
-        
         stationGroup.position.set(x, 0, z);
+        
+        // Station ausrichten, dass sie zur anderen Station zeigt
+        const targetX = isValley ? this.endPos.x : this.startPos.x;
+        const targetZ = isValley ? this.endPos.z : this.startPos.z;
+        stationGroup.lookAt(targetX, 0, targetZ);
+        
         this.group.add(stationGroup);
     }
     
@@ -852,19 +920,24 @@ class SkiLift {
         const poleCount = Math.max(1, Math.floor(this.length / this.config.poleDistance));
         const dx = (this.endPos.x - this.startPos.x) / poleCount;
         const dz = (this.endPos.z - this.startPos.z) / poleCount;
-        const angle = Math.atan2(dx, dz); // Für Ausrichtung quer zur Trasse
+        const angle = Math.atan2(dx, dz);
+        
+        this.poles.push({ x: this.startPos.x, z: this.startPos.z, isStation: true });
         
         for (let i = 1; i < poleCount; i++) {
             const x = this.startPos.x + dx * i;
             const z = this.startPos.z + dz * i;
             const y = this.terrain ? this.terrain.getHeightAt(x, z) : 0;
             
-            const pole = this.createPole();
-            pole.position.set(x, y, z);
-            pole.rotation.y = angle + Math.PI / 2;
+            const { group, topHeight } = this.createPole();
+            group.position.set(x, y, z);
+            group.rotation.y = angle + Math.PI / 2;
             
-            this.group.add(pole);
+            this.group.add(group);
+            this.poles.push({ x, y, z, topHeight: y + topHeight });
         }
+        
+        this.poles.push({ x: this.endPos.x, z: this.endPos.z, isStation: true });
     }
     
     createPole() {
@@ -900,56 +973,58 @@ class SkiLift {
                     new THREE.MeshStandardMaterial({ color: 0x888888 })
                 );
                 wheelAssembly.add(bracket);
-                
-                for (let wz of [-0.4, 0.4]) {
-                    const wheel = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.2, 0.2, 0.15, 12),
-                        new THREE.MeshStandardMaterial({ color: 0x222222 })
-                    );
-                    wheel.rotation.z = Math.PI / 2;
-                    wheel.position.set(0, -0.2, wz);
-                    wheelAssembly.add(wheel);
-                }
                 wheelAssembly.position.set(side, height - 0.5, 0);
                 group.add(wheelAssembly);
             }
         }
-        return group;
+        return { group, topHeight: height - 0.5 };
     }
     
     buildCables() {
         const isSurface = this.config.category === 'surface';
-        const cableHeight = isSurface ? 2 : 10;
-        
-        const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) + cableHeight : cableHeight;
-        const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) + cableHeight : cableHeight;
-        
-        const dx = this.endPos.x - this.startPos.x;
-        const dy = endY - startY;
-        const dz = this.endPos.z - this.startPos.z;
-        const cableLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        
-        const midX = (this.startPos.x + this.endPos.x) / 2;
-        const midZ = (this.startPos.z + this.endPos.z) / 2;
-        const midY = (startY + endY) / 2;
-        
-        const isPendulum = this.config.category === 'tramway' || this.config.category === 'funicular';
+        const isPendulum = this.config.category === 'tramway';
         const gauge = isPendulum ? 0 : isSurface ? 1.5 : (this.config.seats > 4 || this.config.cabinSize > 8 ? 4.5 : 3.5);
-        
-        const endVec = new THREE.Vector3(this.endPos.x, endY, this.endPos.z);
         const offsets = gauge > 0 ? [-gauge/2, gauge/2] : [0];
+        
+        // Pendelbahnen hängen meist ohne Stützen frei (Start zu Ende)
+        if (this.poles.length <= 2 || isPendulum) {
+            const cableHeight = isSurface ? 2 : 10;
+            const startY = (this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0) + cableHeight;
+            const endY = (this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0) + cableHeight;
+            this.drawCableSegment(this.startPos.x, startY, this.startPos.z, this.endPos.x, endY, this.endPos.z, offsets);
+        } else {
+            // Mit Stützen: Kabel von Stütze zu Stütze ziehen
+            for (let i = 0; i < this.poles.length - 1; i++) {
+                const p1 = this.poles[i];
+                const p2 = this.poles[i+1];
+                
+                const y1 = p1.isStation ? (this.terrain ? this.terrain.getHeightAt(p1.x, p1.z) : 0) + (isSurface ? 2 : 10) : p1.topHeight;
+                const y2 = p2.isStation ? (this.terrain ? this.terrain.getHeightAt(p2.x, p2.z) : 0) + (isSurface ? 2 : 10) : p2.topHeight;
+                
+                this.drawCableSegment(p1.x, y1, p1.z, p2.x, y2, p2.z, offsets);
+            }
+        }
+    }
+    
+    drawCableSegment(x1, y1, z1, x2, y2, z2, offsets) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const dz = z2 - z1;
+        const length = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const midZ = (z1 + z2) / 2;
         
         offsets.forEach(offset => {
             const cableGroup = new THREE.Group();
-            
-            const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, cableLength, 8);
+            const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, length, 8);
             const cableMat = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.5 });
             const cable = new THREE.Mesh(cableGeo, cableMat);
             cableGroup.add(cable);
             
             if (['gondola', 'bicable', 'tricable', 'funitel'].includes(this.config.category)) {
                 const haulRope = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.06, 0.06, cableLength, 8),
+                    new THREE.CylinderGeometry(0.06, 0.06, length, 8),
                     new THREE.MeshStandardMaterial({ color: 0x444444, metalness: 0.6 })
                 );
                 haulRope.position.set(0, -0.4, 0);
@@ -957,12 +1032,48 @@ class SkiLift {
             }
             
             cableGroup.position.set(midX, midY, midZ);
-            cableGroup.lookAt(endVec);
+            cableGroup.lookAt(new THREE.Vector3(x2, y2, z2));
             cableGroup.rotateX(Math.PI / 2);
             cableGroup.translateX(offset);
             
             this.group.add(cableGroup);
         });
+    }
+
+    buildRails() {
+        const railCount = 50;
+        const dx = (this.endPos.x - this.startPos.x) / railCount;
+        const dz = (this.endPos.z - this.startPos.z) / railCount;
+        
+        for (let i = 0; i < railCount; i++) {
+            const x = this.startPos.x + dx * i;
+            const z = this.startPos.z + dz * i;
+            const nx = this.startPos.x + dx * (i+1);
+            const nz = this.startPos.z + dz * (i+1);
+            
+            const y = this.terrain ? this.terrain.getHeightAt(x, z) : 0;
+            const ny = this.terrain ? this.terrain.getHeightAt(nx, nz) : 0;
+            
+            // Draw a sleeper (Schwellen)
+            const sleeper = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 0.2, 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x5c4033 })
+            );
+            sleeper.position.set(x, y + 0.1, z);
+            sleeper.lookAt(nx, ny, nz);
+            this.group.add(sleeper);
+            
+            // Left & Right Rails
+            for (let side of [-1, 1]) {
+                const track = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.2, Math.sqrt(dx*dx + dz*dz) + 0.1),
+                    new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 })
+                );
+                track.position.set(x + (dz/Math.sqrt(dx*dx+dz*dz))*side, y + 0.3, z - (dx/Math.sqrt(dx*dx+dz*dz))*side);
+                track.lookAt(nx + (dz/Math.sqrt(dx*dx+dz*dz))*side, ny + 0.3, nz - (dx/Math.sqrt(dx*dx+dz*dz))*side);
+                this.group.add(track);
+            }
+        }
     }
     
     buildCarriers() {
@@ -1002,7 +1113,7 @@ class SkiLift {
             case 'tramway': return LiftModels.createTramway(color, size);
             case 'doubleDecker': return LiftModels.createDoubleDecker(color);
             case 'funicular': case 'underground': return LiftModels.createFunicular(color);
-            case 'elevator': return LiftModels.createElevator(color);
+            case 'elevator': return LiftModels.createFunicular(color);
             case 'chondola': return LiftModels.createChair(color, 6, true);
             default: return LiftModels.createChair(color, 4, false);
         }
@@ -1012,6 +1123,7 @@ class SkiLift {
         const speed = this.config.speed * 0.00001;
         const isPendulum = ['tramway', 'funicular'].includes(this.config.category);
         const isSurface = this.config.category === 'surface';
+        const isFunicular = this.config.category === 'funicular';
         
         this.carriers.forEach(carrier => {
             if (isPendulum) {
@@ -1022,13 +1134,25 @@ class SkiLift {
                 const x = this.startPos.x + (this.endPos.x - this.startPos.x) * carrier.progress;
                 const z = this.startPos.z + (this.endPos.z - this.startPos.z) * carrier.progress;
                 
+                // Get accurate terrain height or use straight line for tramway
                 const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0;
                 const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0;
-                const baseY = startY + (endY - startY) * carrier.progress + 10;
                 
-                const sag = Math.sin(carrier.progress * Math.PI) * 1.5;
-                carrier.mesh.position.set(x, baseY - sag - 2, z);
-                carrier.mesh.rotation.y = Math.atan2(this.endPos.x - this.startPos.x, this.endPos.z - this.startPos.z);
+                if (isFunicular) {
+                    const y = this.terrain.getHeightAt(x, z);
+                    carrier.mesh.position.set(x, y + 0.5, z);
+                    
+                    // Angle match
+                    const nextX = x + (this.endPos.x - this.startPos.x) * 0.01 * carrier.direction;
+                    const nextZ = z + (this.endPos.z - this.startPos.z) * 0.01 * carrier.direction;
+                    const nextY = this.terrain.getHeightAt(nextX, nextZ);
+                    carrier.mesh.lookAt(nextX, nextY + 0.5, nextZ);
+                } else {
+                    const baseY = startY + (endY - startY) * carrier.progress + 10;
+                    const sag = Math.sin(carrier.progress * Math.PI) * 1.5;
+                    carrier.mesh.position.set(x, baseY - sag - 2, z);
+                    carrier.mesh.rotation.y = Math.atan2(this.endPos.x - this.startPos.x, this.endPos.z - this.startPos.z);
+                }
             } else {
                 carrier.progress += speed;
                 if (carrier.progress >= 1) carrier.progress -= 1;
@@ -1039,10 +1163,22 @@ class SkiLift {
                 const x = this.startPos.x + (this.endPos.x - this.startPos.x) * actProgress;
                 const z = this.startPos.z + (this.endPos.z - this.startPos.z) * actProgress;
                 
-                const cableHeight = isSurface ? 2 : 10;
-                const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0;
-                const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0;
-                const baseY = startY + (endY - startY) * actProgress + cableHeight;
+                // Segment-based height mapping
+                let baseY = 0;
+                if (this.poles.length > 2) {
+                    const idx = Math.floor(actProgress * (this.poles.length - 1));
+                    const p1 = this.poles[idx];
+                    const p2 = this.poles[idx + 1];
+                    const localProg = (actProgress * (this.poles.length - 1)) - idx;
+                    const y1 = p1.isStation ? (this.terrain ? this.terrain.getHeightAt(p1.x, p1.z) : 0) + (isSurface ? 2 : 10) : p1.topHeight;
+                    const y2 = p2.isStation ? (this.terrain ? this.terrain.getHeightAt(p2.x, p2.z) : 0) + (isSurface ? 2 : 10) : p2.topHeight;
+                    baseY = y1 + (y2 - y1) * localProg;
+                } else {
+                    const cableHeight = isSurface ? 2 : 10;
+                    const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0;
+                    const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0;
+                    baseY = startY + (endY - startY) * actProgress + cableHeight;
+                }
                 
                 const sag = isSurface ? 0 : Math.sin(actProgress * Math.PI) * 1.5;
                 const y = baseY - sag - (isSurface ? 0.5 : 2);
