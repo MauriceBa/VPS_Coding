@@ -101,13 +101,33 @@ class SkierSystem {
         const jacketColor = this.jacketColors[Math.floor(Math.random() * this.jacketColors.length)];
         const pantsColor = 0x333333; // Dunkle Hose
         
-        // Körper
-        const body = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.25, 0.6, 4, 8),
+        // Körper (Zylinder + Kugeln für Capsule-Look)
+        const bodyGroup = new THREE.Group();
+        
+        const bodyCyl = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.25, 0.25, 0.6, 8),
             new THREE.MeshStandardMaterial({ color: jacketColor })
         );
-        body.position.y = 0.8;
-        group.add(body);
+        bodyCyl.position.y = 0.8;
+        bodyGroup.add(bodyCyl);
+        
+        // Obere Kugel
+        const bodyTop = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 8, 8),
+            new THREE.MeshStandardMaterial({ color: jacketColor })
+        );
+        bodyTop.position.y = 1.1;
+        bodyGroup.add(bodyTop);
+        
+        // Untere Kugel
+        const bodyBottom = new THREE.Mesh(
+            new THREE.SphereGeometry(0.25, 8, 8),
+            new THREE.MeshStandardMaterial({ color: jacketColor })
+        );
+        bodyBottom.position.y = 0.5;
+        bodyGroup.add(bodyBottom);
+        
+        group.add(bodyGroup);
         
         // Kopf
         const head = new THREE.Mesh(
@@ -125,13 +145,31 @@ class SkierSystem {
         hat.position.y = 1.38;
         group.add(hat);
         
-        // Beine/Hose
-        const legs = new THREE.Mesh(
-            new THREE.CapsuleGeometry(0.12, 0.5, 4, 8),
+        // Beine/Hose (Zylinder + Kugeln)
+        const legsGroup = new THREE.Group();
+        
+        const legsCyl = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.12, 0.12, 0.5, 6),
             new THREE.MeshStandardMaterial({ color: pantsColor })
         );
-        legs.position.y = 0.3;
-        group.add(legs);
+        legsCyl.position.y = 0.3;
+        legsGroup.add(legsCyl);
+        
+        const legsTop = new THREE.Mesh(
+            new THREE.SphereGeometry(0.12, 6, 6),
+            new THREE.MeshStandardMaterial({ color: pantsColor })
+        );
+        legsTop.position.y = 0.55;
+        legsGroup.add(legsTop);
+        
+        const legsBottom = new THREE.Mesh(
+            new THREE.SphereGeometry(0.12, 6, 6),
+            new THREE.MeshStandardMaterial({ color: pantsColor })
+        );
+        legsBottom.position.y = 0.05;
+        legsGroup.add(legsBottom);
+        
+        group.add(legsGroup);
         
         // Ski
         const skiGeo = new THREE.BoxGeometry(0.08, 0.02, 1.2);
@@ -168,7 +206,7 @@ class SkierSystem {
         shadow.position.y = 0.01;
         group.add(shadow);
         
-        return { mesh: group, body, head, leftSki, rightSki, leftPole, rightPole };
+        return { mesh: group, body: bodyGroup, head, leftSki, rightSki, leftPole, rightPole };
     }
     
     updateSkier(skier, deltaTime) {
