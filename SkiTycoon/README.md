@@ -1,35 +1,28 @@
-# SkiTycoon V2
+# SkiTycoon V3
 
-Kompletter Rework des bisherigen Prototyps zu einem klaren Ski-Resort-Tycoon.
+Großes Feature-Upgrade des Reworks.
 
-## Enthaltene Systeme
+## Neu in V3
 
-- Mehrere Regionen mit eigenem Profil, Höhenlage und Freischaltkosten
-- Lifte, Infrastruktur und Pisten mit Bauqueue
-- Gäste- und Kapazitätsmodell
-- Wetter, Schneelage und Zufriedenheit
-- Sicherheits- und Komfortsystem
-- Forschung mit echten Freischaltungen
-- Operations-Tab für Personal, Marketing, Präparierung und Safety
-- Regionale Expansion über mehrere Skigebiete
-- Events, Newsfeed, Save/Load, Export/Import
-- Prestige-System als Langzeit-Meta
+- Mehr Regionen mit klaren Rollen: Familie, Sport, Racing, Luxus, Gletscher
+- Viele neue Gebäude: Highspeed-Lift, Funitel, Skischule, Rettungsstation, Werkstatt, Reservoir, Rennzentrum, Event Arena, Luxury Lodge
+- Neue Pistentypen: Freeride, Nachtpiste, Rennstrecke
+- Größerer Forschungsbaum mit echten Freischaltungen
+- Gästesegmente: Familien, Sportfahrer, Luxusgäste, Budgetgäste
+- Saisonpässe als fortlaufende Metawährung
+- Ziele mit claimbaren Rewards
+- Awards / Auszeichnungen für Resort-Schwerpunkte
+- Kredit-System, Notbeschneiung, Festivals, Team-Training
+- Neues Save-Format (V3)
 
-## Dateien
+## Wichtig
 
-- `index.html` – App-Layout
-- `style.css` – neue UI
-- `game.js` – gesamter Game-State, Simulationslogik und Rendering
+V3 verwendet absichtlich ein neues Save-Schema. Alte Saves aus V2 werden nicht übernommen.
 
-## Notizen
-
-Das Rework ist absichtlich als starke V2 gebaut: weniger Genre-Mischmasch, mehr echtes Ski-Resort-Feeling.
-
-Gute nächste Schritte wären:
+## Nächste sinnvolle Schritte
 
 - Karten-/Heatmap-Ansicht
-- Personalrollen statt nur Gesamt-Staff
-- dynamische Ferienkalender
-- Sommerbetrieb
-- Achievements/Quests mit Rewards
-- echtes Regionen-Netzwerk mit Verbundpass
+- echte Personalklassen pro Resort
+- Sommerbetrieb / Bikepark / Wandern
+- Wettbewerber / AI-Resorts
+- Szenarien / Kampagne / Achievements mit Spezialbelohnungen
