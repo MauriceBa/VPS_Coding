@@ -12,6 +12,8 @@ class PlanetSkiGame {
         
         this.terrain = null;
         this.economy = null;
+        this.skierSystem = null;
+        this.slopeSystem = null;
         
         this.lifts = [];
         this.buildings = [];
@@ -23,6 +25,7 @@ class PlanetSkiGame {
         this.selectedSlopeDifficulty = 'blue';
         
         this.liftStartPos = null;
+        this.slopeStartPos = null;
         this.isPlacingLift = false;
         
         this.lastTime = 0;
@@ -90,15 +93,85 @@ class PlanetSkiGame {
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
+        
+        // Cheatcode Listener
+        this.setupCheats();
+    }
+    
+    setupCheats() {
+        let keyBuffer = '';
+        const cheatCode = 'schmachti';
+        
+        window.addEventListener('keydown', (e) => {
+            keyBuffer += e.key.toLowerCase();
+            
+            // Nur die letzten 9 Zeichen behalten (Länge von "schmachti")
+            if (keyBuffer.length > cheatCode.length) {
+                keyBuffer = keyBuffer.slice(-cheatCode.length);
+            }
+            
+            // Cheatcode prüfen
+            if (keyBuffer === cheatCode) {
+                if (this.economy) {
+                    const msg = this.economy.cheatMoney();
+                    this.showNotification(msg, 'success');
+                    this.updateUI();
+                }
+                keyBuffer = '';
+            }
+            
+            // Alternative: F1 für schnellen Cheat
+            if (e.key === 'F1') {
+                e.preventDefault();
+                if (this.economy) {
+                    this.economy.money += 1000000;
+                    this.showNotification('💰 +1.000.000€ (F1)', 'success');
+                    this.updateUI();
+                }
+            }
+            
+            // F2 für verschiedene Map-Größen
+            if (e.key === 'F2') {
+                e.preventDefault();
+                this.cycleMapSize();
+            }
+        });
+    }
+    
+    cycleMapSize() {
+        const sizes = [
+            { name: 'Klein', size: 80 },
+            { name: 'Mittel', size: 120 },
+            { name: 'Groß', size: 200 },
+            { name: 'Extra Groß', size: 300 }
+        ];
+        
+        const currentSize = parseInt(localStorage.getItem('planetski_mapsize')) || 120;
+        const currentIndex = sizes.findIndex(s => s.size === currentSize);
+        const nextIndex = (currentIndex + 1) % sizes.length;
+        const next = sizes[nextIndex];
+        
+        localStorage.setItem('planetski_mapsize', next.size);
+        this.showNotification(`🗺️ Map-Größe: ${next.name} (${next.size}m) - Seite neu laden!`, 'success');
+    }
     }
     
     setupTerrain() {
-        this.terrain = new Terrain(120, this.scene);
+        // Map-Größe aus localStorage oder Standard
+        const mapSize = parseInt(localStorage.getItem('planetski_mapsize')) || 120;
+        this.terrain = new Terrain(mapSize, this.scene);
         this.terrain.createSnowfall();
+        
+        // Slope System
+        this.slopeSystem = new SlopeSystem(this.scene, this.terrain);
     }
     
     setupEconomy() {
         this.economy = new Economy();
+        
+        // Skifahrer-System
+        this.skierSystem = new SkierSystem(this.scene, this.terrain, this.lifts, this.buildings);
+        
         this.updateUI();
     }
     
@@ -311,7 +384,22 @@ class PlanetSkiGame {
     }
     
     handleSlopePlacement(point) {
-        // TODO: Pisten-Platzierung implementieren
+        if (!this.slopeStartPos) {
+            this.slopeStartPos = { x: point.x, z: point.z };
+            this.showNotification('Pisten-Start gesetzt. Klicke für Ende.');
+        } else {
+            if (this.slopeSystem) {
+                this.slopeSystem.createSlope(
+                    this.slopeStartPos.x,
+                    this.slopeStartPos.z,
+                    point.x,
+                    point.z,
+                    this.selectedSlopeDifficulty
+                );
+                this.showNotification(`Piste ${this.selectedSlopeDifficulty.toUpperCase()} erstellt!`);
+            }
+            this.slopeStartPos = null;
+        }
     }
     
     showNotification(text, type = 'info') {
@@ -364,6 +452,11 @@ class PlanetSkiGame {
         
         // Lifte updaten
         this.lifts.forEach(lift => lift.update(deltaTime * 1000));
+        
+        // Skifahrer updaten
+        if (this.skierSystem && this.economy) {
+            this.skierSystem.update(deltaTime, this.economy.visitors);
+        }
         
         // Wirtschaft updaten
         if (this.economy) {

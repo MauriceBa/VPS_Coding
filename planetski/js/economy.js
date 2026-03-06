@@ -168,6 +168,12 @@ class Economy {
     earn(amount) {
         this.money += amount;
     }
+    
+    // Cheatcode: Unendlich Geld
+    cheatMoney() {
+        this.money += 10000000; // 10 Millionen
+        return '💰 CHEAT AKTIVIERT: +10.000.000€!';
+    }
 }
 
 // Export

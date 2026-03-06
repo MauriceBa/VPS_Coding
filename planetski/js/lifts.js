@@ -1109,30 +1109,50 @@ class SkiLift {
     }
     
     buildCables() {
-        const segments = 20;
         const cableHeight = 10;
         
         const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) + cableHeight : cableHeight;
         const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) + cableHeight : cableHeight;
         
+        // Richtungsvektor
+        const dx = this.endPos.x - this.startPos.x;
+        const dy = endY - startY;
+        const dz = this.endPos.z - this.startPos.z;
+        
+        // Berechne Länge entlang der diagonalen
+        const cableLength = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        
         // Hauptseil
-        const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, this.length, 4);
+        const cableGeo = new THREE.CylinderGeometry(0.04, 0.04, cableLength, 8);
         const cableMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
         const cable = new THREE.Mesh(cableGeo, cableMat);
         
-        cable.rotation.z = Math.PI / 2;
-        cable.rotation.y = Math.atan2(this.endPos.z - this.startPos.z, this.endPos.x - this.startPos.x);
-        
+        // Position: Mitte zwischen Start und Ende
         const midX = (this.startPos.x + this.endPos.x) / 2;
         const midZ = (this.startPos.z + this.endPos.z) / 2;
         const midY = (startY + endY) / 2;
-        
-        // Neigung für Höhenunterschied
-        const slope = Math.atan2(endY - startY, this.length);
-        cable.rotation.z += slope;
-        
         cable.position.set(midX, midY, midZ);
+        
+        // Ausrichtung: LookAt von Start zu Ende
+        const startVec = new THREE.Vector3(this.startPos.x, startY, this.startPos.z);
+        const endVec = new THREE.Vector3(this.endPos.x, endY, this.endPos.z);
+        cable.lookAt(endVec);
+        cable.rotateX(Math.PI / 2); // Cylinder steht normalerweise senkrecht
+        
         this.group.add(cable);
+        
+        // Zugseil für Gondeln/Pendelbahnen
+        if (this.config.category === 'gondola' || this.config.category === 'bicable' || 
+            this.config.category === 'tricable' || this.config.category === 'funitel') {
+            const haulRope = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.06, 0.06, cableLength, 8),
+                new THREE.MeshStandardMaterial({ color: 0x666666 })
+            );
+            haulRope.position.set(midX, midY - 0.3, midZ);
+            haulRope.lookAt(endVec);
+            haulRope.rotateX(Math.PI / 2);
+            this.group.add(haulRope);
+        }
     }
     
     buildCarriers() {
