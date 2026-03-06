@@ -240,8 +240,8 @@ const BUILDING_TYPES = {
     }
 };
 
-// Gebäude erstellen
-function createBuilding(type, x, z) {
+// Gebäude erstellen (FIX: y-Parameter hinzugefügt)
+function createBuilding(type, x, y, z) {
     const config = BUILDING_TYPES[type];
     if (!config) return null;
     
@@ -486,7 +486,9 @@ function createBuilding(type, x, z) {
             break;
     }
     
-    group.position.set(x, 0, z);
+    // FIX: Setze Y-Position korrekt auf Terrain-Höhe!
+    group.position.set(x, y, z);
+    
     return {
         mesh: group,
         type: type,

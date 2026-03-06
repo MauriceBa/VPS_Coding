@@ -65,11 +65,14 @@ class SlopeSystem {
             const dx = p2.x - p1.x;
             const dz = p2.z - p1.z;
             const len = Math.sqrt(dx * dx + dz * dz);
+            
+            if (len === 0) continue; // NaN-Guard
+            
             const nx = -dz / len * halfWidth;
             const nz = dx / len * halfWidth;
             
             // Vier Vertices pro Segment
-            const baseIdx = i * 4;
+            const baseIdx = (vertices.length / 3);
             
             // Linker Rand
             vertices.push(p1.x + nx, p1.y, p1.z + nz);
@@ -97,7 +100,8 @@ class SlopeSystem {
         const material = new THREE.MeshStandardMaterial({
             vertexColors: true,
             roughness: 0.4,
-            metalness: 0.1
+            metalness: 0.1,
+            side: THREE.DoubleSide // Fix: Piste von unten sichtbar
         });
         
         const mesh = new THREE.Mesh(geometry, material);

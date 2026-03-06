@@ -190,11 +190,13 @@ class SkierSystem {
         const leftPole = new THREE.Mesh(poleGeo, poleMat);
         leftPole.position.set(-0.35, 0.8, 0.2);
         leftPole.rotation.x = 0.3;
+        leftPole.name = 'leftPole'; // FIX: Name vergeben
         group.add(leftPole);
         
         const rightPole = new THREE.Mesh(poleGeo, poleMat);
         rightPole.position.set(0.35, 0.8, 0.2);
         rightPole.rotation.x = 0.3;
+        rightPole.name = 'rightPole'; // FIX: Name vergeben
         group.add(rightPole);
         
         // Schatten
@@ -260,10 +262,12 @@ class SkierSystem {
         skier.mesh.rotation.z = lean;
         skier.mesh.rotation.y = -skier.direction;
         
-        // Stöcke bewegen
+        // FIX: Stöcke per Name animieren, robuster gegen Kinderzahl-Änderungen
         const poleSwing = Math.sin(skier.animationTime * 3) * 0.3;
-        skier.mesh.children[6].rotation.x = 0.3 + poleSwing;
-        skier.mesh.children[7].rotation.x = 0.3 - poleSwing;
+        const leftPole = skier.mesh.getObjectByName('leftPole');
+        const rightPole = skier.mesh.getObjectByName('rightPole');
+        if (leftPole) leftPole.rotation.x = 0.3 + poleSwing;
+        if (rightPole) rightPole.rotation.x = 0.3 - poleSwing;
         
         // Position updaten
         skier.mesh.position.set(skier.position.x, skier.position.y, skier.position.z);

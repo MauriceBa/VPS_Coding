@@ -369,7 +369,8 @@ class PlanetSkiGame {
         const cost = BUILDING_TYPES[this.selectedBuildingType].cost;
         
         if (this.economy.spend(cost)) {
-            const building = createBuilding(this.selectedBuildingType, point.x, point.z);
+            // FIX: point.y übergeben!
+            const building = createBuilding(this.selectedBuildingType, point.x, point.y, point.z);
             
             if (building) {
                 this.scene.add(building.mesh);
