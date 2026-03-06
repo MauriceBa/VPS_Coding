@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +28,7 @@
             </div>
             <div class="stat">
                 <span class="icon" id="weather">☀️</span>
-                Tag <span id="day">1</span>
+                Day <span id="day">1</span>
             </div>
         </div>
     </div>
@@ -36,42 +36,42 @@
     <!-- Left Sidebar - Tools -->
     <div id="sidebar-left">
         <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="lifts">🚡 Lifte</button>
-            <button class="tab-btn" data-tab="buildings">🏗️ Gebäude</button>
-            <button class="tab-btn" data-tab="slopes">⛷️ Pisten</button>
+            <button class="tab-btn active" data-tab="lifts">🚡 Lifts</button>
+            <button class="tab-btn" data-tab="buildings">🏗️ Buildings</button>
+            <button class="tab-btn" data-tab="slopes">⛷️ Slopes</button>
         </div>
         
         <div id="lift-menu" class="menu-panel active">
             <div class="menu-header">
-                <h3>🚡 Lifte bauen</h3>
-                <p class="hint">Wähle einen Lifttyp und platziere Tal- und Bergstation</p>
+                <h3>🚡 Build Lifts</h3>
+                <p class="hint">Select a lift type and place valley and mountain stations</p>
             </div>
             <!-- Lifte werden per JS geladen -->
         </div>
         
         <div id="building-menu" class="menu-panel">
             <div class="menu-header">
-                <h3>🏗️ Gebäude bauen</h3>
-                <p class="hint">Gastronomie, Unterkünfte und mehr</p>
+                <h3>🏗️ Build Buildings</h3>
+                <p class="hint">Dining, accommodations, and more</p>
             </div>
             <!-- Gebäude werden per JS geladen -->
         </div>
         
         <div id="slope-menu" class="menu-panel">
             <div class="menu-header">
-                <h3>⛷️ Pisten bauen</h3>
-                <p class="hint">Verbinde Berg- und Talstationen</p>
+                <h3>⛷️ Build Slopes</h3>
+                <p class="hint">Connect mountain and valley stations</p>
             </div>
             
             <div class="slope-tools">
                 <button class="slope-btn blue" onclick="game.selectSlopeTool('blue')">
-                    🔵 Blau (leicht)
+                    🔵 Blue (Easy)
                 </button>
                 <button class="slope-btn red" onclick="game.selectSlopeTool('red')">
-                    🔴 Rot (mittel)
+                    🔴 Red (Medium)
                 </button>
                 <button class="slope-btn black" onclick="game.selectSlopeTool('black')">
-                    ⚫ Schwarz (schwer)
+                    ⚫ Black (Hard)
                 </button>
             </div>
         </div>
@@ -83,13 +83,13 @@
             <h3>📊 Resort Info</h3>
             
             <div class="info-section">
-                <h4>Einnahmen/Tag</h4>
+                <h4>Income/Day</h4>
                 <div class="info-row">
-                    <span>🎫 Liftkarten</span>
+                    <span>🎫 Lift Tickets</span>
                     <span id="income-lift">0€</span>
                 </div>
                 <div class="info-row">
-                    <span>🍽️ Gastronomie</span>
+                    <span>🍽️ Dining</span>
                     <span id="income-food">0€</span>
                 </div>
                 <div class="info-row">
@@ -99,34 +99,34 @@
             </div>
             
             <div class="info-section">
-                <h4>Ausgaben/Tag</h4>
+                <h4>Expenses/Day</h4>
                 <div class="info-row">
-                    <span>🔧 Wartung</span>
+                    <span>🔧 Maintenance</span>
                     <span id="expense-maint">0€</span>
                 </div>
                 <div class="info-row">
-                    <span>👷 Personal</span>
+                    <span>👷 Staff</span>
                     <span id="expense-staff">0€</span>
                 </div>
                 <div class="info-row">
-                    <span>⚡ Energie</span>
+                    <span>⚡ Energy</span>
                     <span id="expense-energy">0€</span>
                 </div>
             </div>
         </div>
         
         <div class="quick-actions">
-            <h4>⚡ Schnellzugriff</h4>
+            <h4>⚡ Quick Access</h4>
             
             <button onclick="game.camera.position.set(40, 40, 60); game.controls.target.set(0,0,0);">
-                🏠 Zurück zur Übersicht
+                🏠 Back to Overview
             </button>
             
             <button onclick="togglePause()">
                 ⏸️ Pause
             </button>
             
-            <a href="/" class="home-link">← Zur Startseite</a>
+            <a href="/" class="home-link">← Back to Home</a>
         </div>
     </div>
     
@@ -137,48 +137,48 @@
     <div id="help-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>🎿 Willkommen bei PlanetSki!</h2>
+            <h2>🎿 Welcome to PlanetSki!</h2>
             
             <div class="help-section">
-                <h3>🚡 Lifte bauen</h3>
-                <p>1. Wähle einen Lifttyp aus dem Menü</p>
-                <p>2. Klicke auf das Terrain für die Talstation</p>
-                <p>3. Klicke erneut für die Bergstation</p>
+                <h3>🚡 Building Lifts</h3>
+                <p>1. Select a lift type from the menu</p>
+                <p>2. Click on the terrain for the valley station</p>
+                <p>3. Click again for the mountain station</p>
             </div>
             
             <div class="help-section">
-                <h3>🏗️ Gebäude bauen</h3>
-                <p>Wähle ein Gebäude und klicke auf das Terrain.</p>
-                <p>Hotels und Hütten generieren Einnahmen!</p>
+                <h3>🏗️ Building Buildings</h3>
+                <p>Select a building and click on the terrain.</p>
+                <p>Hotels and huts generate income!</p>
             </div>
             
             <div class="help-section">
-                <h3>💰 Wirtschaft</h3>
-                <p>• Liftkarten bringen Geld</p>
-                <p>• Bessere Lifte = mehr Besucher</p>
-                <p>• Aber: Wartung und Personal kosten auch!</p>
+                <h3>💰 Economy</h3>
+                <p>• Lift tickets bring money</p>
+                <p>• Better lifts = more visitors</p>
+                <p>• But: Maintenance and staff also cost money!</p>
             </div>
             
             <div class="help-section">
-                <h3>🎮 Steuerung</h3>
-                <p><b>Linksklick + Ziehen:</b> Kamera drehen</p>
-                <p><b>Rechtsklick + Ziehen:</b> Verschieben</p>
-                <p><b>Scrollen:</b> Zoomen</p>
+                <h3>🎮 Controls</h3>
+                <p><b>Left Click + Drag:</b> Rotate Camera</p>
+                <p><b>Right Click + Drag:</b> Pan</p>
+                <p><b>Scroll:</b> Zoom</p>
             </div>
 
             <div class="help-section">
                 <h3>💰 Cheats</h3>
-                <p><b>"schmachti" tippen:</b> +10.000.000€</p>
-                <p><b>F1:</b> +1.000.000€</p>
-                <p><b>F2:</b> Map-Größe wechseln</p>
+                <p><b>Type "schmachti":</b> +10,000,000€</p>
+                <p><b>F1:</b> +1,000,000€</p>
+                <p><b>F2:</b> Change map size</p>
             </div>
 
             <div class="help-section">
-                <h3>🗺️ Map-Größen</h3>
-                <p><b>Klein (80m):</b> Für schnelle Spiele</p>
-                <p><b>Mittel (120m):</b> Standard-Größe</p>
-                <p><b>Groß (200m):</b> Mehr Platz für Lifte</p>
-                <p><b>Extra Groß (300m):</b> Riesiges Skigebiet</p>
+                <h3>🗺️ Map Sizes</h3>
+                <p><b>Small (80m):</b> For quick games</p>
+                <p><b>Medium (120m):</b> Standard size</p>
+                <p><b>Large (200m):</b> More space for lifts</p>
+                <p><b>Extra Large (300m):</b> Huge ski resort</p>
             </div>
         </div>
     </div>

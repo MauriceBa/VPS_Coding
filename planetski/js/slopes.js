@@ -11,9 +11,9 @@ class SlopeSystem {
         this.slopeMeshes = [];
         
         this.difficulties = {
-            blue: { color: 0x4169E1, width: 12, name: 'Blau' },
-            red: { color: 0xDC143C, width: 10, name: 'Rot' },
-            black: { color: 0x1a1a1a, width: 8, name: 'Schwarz' }
+            blue: { color: 0x4169E1, width: 12, name: 'Blue' },
+            red: { color: 0xDC143C, width: 10, name: 'Red' },
+            black: { color: 0x1a1a1a, width: 8, name: 'Black' }
         };
     }
     
@@ -101,7 +101,7 @@ class SlopeSystem {
             vertexColors: true,
             roughness: 0.4,
             metalness: 0.1,
-            side: THREE.DoubleSide // Fix: Piste von unten sichtbar
+            side: THREE.DoubleSide
         });
         
         const mesh = new THREE.Mesh(geometry, material);

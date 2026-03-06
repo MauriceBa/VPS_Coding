@@ -172,7 +172,7 @@ class Economy {
     // Cheatcode: Unendlich Geld
     cheatMoney() {
         this.money += 10000000; // 10 Millionen
-        return '💰 CHEAT AKTIVIERT: +10.000.000€!';
+        return '💰 CHEAT ACTIVATED: +10,000,000€!';
     }
 }
 

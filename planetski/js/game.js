@@ -125,7 +125,7 @@ class PlanetSkiGame {
                 e.preventDefault();
                 if (this.economy) {
                     this.economy.money += 1000000;
-                    this.showNotification('💰 +1.000.000€ (F1)', 'success');
+                    this.showNotification('💰 +1,000,000€ (F1)', 'success');
                     this.updateUI();
                 }
             }
@@ -140,10 +140,10 @@ class PlanetSkiGame {
     
     cycleMapSize() {
         const sizes = [
-            { name: 'Klein', size: 80 },
-            { name: 'Mittel', size: 120 },
-            { name: 'Groß', size: 200 },
-            { name: 'Extra Groß', size: 300 }
+            { name: 'Small', size: 80 },
+            { name: 'Medium', size: 120 },
+            { name: 'Large', size: 200 },
+            { name: 'Extra Large', size: 300 }
         ];
         
         const currentSize = parseInt(localStorage.getItem('planetski_mapsize')) || 120;
@@ -152,7 +152,7 @@ class PlanetSkiGame {
         const next = sizes[nextIndex];
         
         localStorage.setItem('planetski_mapsize', next.size);
-        this.showNotification(`🗺️ Map-Größe: ${next.name} (${next.size}m) - Seite neu laden!`, 'success');
+        this.showNotification(`🗺️ Map size: ${next.name} (${next.size}m) - Reload page!`, 'success');
     }
     
     setupTerrain() {
@@ -215,9 +215,9 @@ class PlanetSkiGame {
         // Gebäude ins Menü laden
         const buildingMenu = document.getElementById('building-menu');
         const buildingCats = {
-            infrastructure: '🏗️ Infrastruktur',
-            service: '🍽️ Gastronomie & Service',
-            accommodation: '🏨 Unterkünfte'
+            infrastructure: '🏗️ Infrastructure',
+            service: '🍽️ Dining & Service',
+            accommodation: '🏨 Accommodation'
         };
         
         Object.entries(buildingCats).forEach(([cat, label]) => {
@@ -252,7 +252,7 @@ class PlanetSkiGame {
         document.querySelectorAll('.lift-btn, .building-btn').forEach(b => b.classList.remove('selected'));
         document.querySelector(`[data-type="${type}"]`)?.classList.add('selected');
         
-        this.showNotification(`${LIFT_TYPES[type].name} ausgewählt. Klicke für Talstation.`);
+        this.showNotification(`${LIFT_TYPES[type].name} selected. Click for valley station.`);
     }
     
     selectBuildingType(type) {
@@ -263,7 +263,7 @@ class PlanetSkiGame {
         document.querySelectorAll('.lift-btn, .building-btn').forEach(b => b.classList.remove('selected'));
         document.querySelector(`[data-type="${type}"]`)?.classList.add('selected');
         
-        this.showNotification(`${BUILDING_TYPES[type].name} ausgewählt. Klicke zum Platzieren.`);
+        this.showNotification(`${BUILDING_TYPES[type].name} selected. Click to place.`);
     }
     
     selectSlopeTool(difficulty) {
@@ -271,7 +271,7 @@ class PlanetSkiGame {
         this.selectedSlopeDifficulty = difficulty;
         this.isPlacingLift = false;
         
-        this.showNotification(`Piste ${difficulty.toUpperCase()} ausgewählt.`);
+        this.showNotification(`Slope ${difficulty.toUpperCase()} selected.`);
     }
     
     setupInput() {
@@ -338,7 +338,7 @@ class PlanetSkiGame {
         if (!this.liftStartPos) {
             // Erster Klick = Talstation
             this.liftStartPos = { x: point.x, z: point.z };
-            this.showNotification('Talstation gesetzt. Klicke für Bergstation.');
+            this.showNotification('Valley station placed. Click for mountain station.');
         } else {
             // Zweiter Klick = Bergstation
             const cost = LIFT_TYPES[this.selectedLiftType].cost;
@@ -355,10 +355,10 @@ class PlanetSkiGame {
                 );
                 
                 this.lifts.push(lift);
-                this.showNotification(`${LIFT_TYPES[this.selectedLiftType].name} gebaut!`);
+                this.showNotification(`${LIFT_TYPES[this.selectedLiftType].name} built!`);
                 this.updateUI();
             } else {
-                this.showNotification('Nicht genug Geld!', 'error');
+                this.showNotification('Not enough money!', 'error');
             }
             
             this.liftStartPos = null;
@@ -369,24 +369,23 @@ class PlanetSkiGame {
         const cost = BUILDING_TYPES[this.selectedBuildingType].cost;
         
         if (this.economy.spend(cost)) {
-            // FIX: point.y übergeben!
             const building = createBuilding(this.selectedBuildingType, point.x, point.y, point.z);
             
             if (building) {
                 this.scene.add(building.mesh);
                 this.buildings.push(building);
-                this.showNotification(`${BUILDING_TYPES[this.selectedBuildingType].name} gebaut!`);
+                this.showNotification(`${BUILDING_TYPES[this.selectedBuildingType].name} built!`);
                 this.updateUI();
             }
         } else {
-            this.showNotification('Nicht genug Geld!', 'error');
+            this.showNotification('Not enough money!', 'error');
         }
     }
     
     handleSlopePlacement(point) {
         if (!this.slopeStartPos) {
             this.slopeStartPos = { x: point.x, z: point.z };
-            this.showNotification('Pisten-Start gesetzt. Klicke für Ende.');
+            this.showNotification('Slope start placed. Click for end.');
         } else {
             if (this.slopeSystem) {
                 this.slopeSystem.createSlope(
@@ -396,7 +395,7 @@ class PlanetSkiGame {
                     point.z,
                     this.selectedSlopeDifficulty
                 );
-                this.showNotification(`Piste ${this.selectedSlopeDifficulty.toUpperCase()} erstellt!`);
+                this.showNotification(`Slope ${this.selectedSlopeDifficulty.toUpperCase()} created!`);
             }
             this.slopeStartPos = null;
         }
