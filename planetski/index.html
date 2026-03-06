@@ -3,499 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PlanetSki | 3D City Builder</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
-            background: #1a1a2e;
-        }
-        #canvas-container {
-            width: 100vw;
-            height: 100vh;
-        }
-        #ui {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 20px;
-            border-radius: 12px;
-            color: white;
-            z-index: 100;
-            min-width: 200px;
-        }
-        #ui h1 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #4ecca3;
-        }
-        .building-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            background: #2d3748;
-            border: 2px solid #4a5568;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
-        .building-btn:hover {
-            background: #4a5568;
-            border-color: #4ecca3;
-        }
-        .building-btn.active {
-            background: #4ecca3;
-            border-color: #4ecca3;
-            color: #1a1a2e;
-        }
-        #info {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-        #stats {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            padding: 15px 20px;
-            border-radius: 12px;
-            color: white;
-            text-align: right;
-        }
-        .stat {
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .stat-value {
-            color: #4ecca3;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        #home-link {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-        #home-link:hover {
-            background: #4ecca3;
-            color: #1a1a2e;
-        }
-    </style>
+    <title>PlanetSki | 3D Ski Resort Builder</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- 3D Canvas -->
     <div id="canvas-container"></div>
     
-    <div id="ui">
-        <h1>🏗️ Baumenü</h1>
-        <button class="building-btn active" data-type="house">🏠 Haus (10€)</button>
-        <button class="building-btn" data-type="factory">🏭 Fabrik (50€)</button>
-        <button class="building-btn" data-type="tower">🗼 Turm (100€)</button>
-        <button class="building-btn" data-type="tree">🌳 Baum (5€)</button>
-        <button class="building-btn" style="background:#e53e3e; margin-top:15px;" onclick="clearAll()">🗑️ Alles löschen</button>
+    <!-- Top Bar mit Stats -->
+    <div id="top-bar">
+        <div id="logo">🏔️ PlanetSki</div>
+        
+        <div id="stats-bar">
+            <div class="stat">
+                <div class="stat-value" id="stat-money">10.000€</div>
+                <div class="stat-label">Kontostand</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-visitors">0</div>
+                <div class="stat-label">Gäste</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-reputation">50%</div>
+                <div class="stat-label">Reputation</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-day">Tag 1</div>
+                <div class="stat-label">Spieltag</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="stat-time">8:00</div>
+                <div class="stat-label">Uhrzeit</div>
+            </div>
+        </div>
+        
+        <div id="time-controls">
+            <button id="speed-btn">⏩ 1x</button>
+        </div>
     </div>
     
-    <div id="stats">
-        <div class="stat">💰 Geld: <span class="stat-value" id="money">200</span>€</div>
-        <div class="stat">🏘️ Gebäude: <span class="stat-value" id="buildings">0</span></div>
-        <div class="stat">📈 Einkommen: <span class="stat-value" id="income">0</span>€/s</div>
+    <!-- Linke Sidebar - Tools -->
+    <div id="sidebar">
+        <button class="tool-btn" data-tool="lift" title="Lift bauen">🚡</button>
+        <button class="tool-btn" data-tool="building" title="Gebäude bauen">🏗️</button>
+        <button class="tool-btn" data-tool="slope" title="Piste anlegen">⛷️</button>
+        <div class="tool-divider"></div>
+        <button class="tool-btn" data-tool="delete" title="Löschen">🗑️</button>
+        <button class="tool-btn" data-tool="info" title="Information">ℹ️</button>
     </div>
     
-    <div id="info">
-        🖱️ <b>Linksklick</b> = Bauen | <b>Rechtsklick + Ziehen</b> = Kamera drehen | <b>Scrollen</b> = Zoomen
+    <!-- Rechte Sidebar - Details Panel -->
+    <div id="details-panel">
+        
+        <!-- Lift Panel -->
+        <div id="lift-panel" class="tool-panel" style="display:none;">
+            <div class="panel-header">🚡 Lift auswählen</div>
+            
+            <div class="lift-option" data-lift="tbar">
+                <div class="lift-name">🎿 Bügellift</div>
+                <div class="lift-stats">
+                    <span>📊 800 Pers./h</span>
+                    <span>📏 max 500m</span>
+                </div>
+                <div class="lift-cost">5.000€</div>
+            </div>
+            
+            <div class="lift-option" data-lift="chair2">
+                <div class="lift-name">🪑 2er Sessellift</div>
+                <div class="lift-stats">
+                    <span>📊 1.200 Pers./h</span>
+                    <span>📏 max 1.500m</span>
+                </div>
+                <div class="lift-cost">15.000€</div>
+            </div>
+            
+            <div class="lift-option" data-lift="chair4">
+                <div class="lift-name">🪑🪑 4er Sessellift</div>
+                <div class="lift-stats">
+                    <span>📊 2.400 Pers./h</span>
+                    <span>📏 max 2.500m</span>
+                </div>
+                <div class="lift-cost">35.000€</div>
+            </div>
+            
+            <div class="lift-option" data-lift="chair6">
+                <div class="lift-name">🪑🪑🪑 6er Sessellift</div>
+                <div class="lift-stats">
+                    <span>📊 3.200 Pers./h</span>
+                    <span>📏 max 3.000m</span>
+                </div>
+                <div class="lift-cost">60.000€</div>
+            </div>
+            
+            <div class="lift-option" data-lift="gondola">
+                <div class="lift-name">🚠 Gondelbahn</div>
+                <div class="lift-stats">
+                    <span>📊 2.000 Pers./h</span>
+                    <span>📏 max 4.000m</span>
+                </div>
+                <div class="lift-cost">80.000€</div>
+            </div>
+            
+            <div class="lift-option" data-lift="cableCar">
+                <div class="lift-name">🚡 Pendelbahn</div>
+                <div class="lift-stats">
+                    <span>📊 800 Pers./h</span>
+                    <span>📏 max 5.000m</span>
+                </div>
+                <div class="lift-cost">150.000€</div>
+            </div>
+            
+            <p style="margin-top:20px;color:var(--text-muted);font-size:13px;">
+                💡 <b>Hinweis:</b> Klicke zweimal auf die Karte – erst für die Talstation, dann für die Bergstation.
+            </p>
+        </div>
+        
+        <!-- Building Panel -->
+        <div id="building-panel" class="tool-panel" style="display:none;">
+            <div class="panel-header">🏗️ Gebäude bauen</div>
+            
+            <div class="building-grid">
+                <div class="building-card" data-building="valleyStation">
+                    <div class="building-icon">🏠</div>
+                    <div class="building-name">Talstation</div>
+                    <div class="building-cost">3.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="mountainStation">
+                    <div class="building-icon">🏔️</div>
+                    <div class="building-name">Bergstation</div>
+                    <div class="building-cost">5.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="hut">
+                    <div class="building-icon">🍽️</div>
+                    <div class="building-name">Skihütte</div>
+                    <div class="building-cost">8.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="restaurant">
+                    <div class="building-icon">🍕</div>
+                    <div class="building-name">Restaurant</div>
+                    <div class="building-cost">15.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="parking">
+                    <div class="building-icon">🅿️</div>
+                    <div class="building-name">Parkplatz</div>
+                    <div class="building-cost">2.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="snowCannon">
+                    <div class="building-icon">❄️</div>
+                    <div class="building-name">Schneekanone</div>
+                    <div class="building-cost">3.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="hostel">
+                    <div class="building-icon">🛏️</div>
+                    <div class="building-name">Jugendherberge</div>
+                    <div class="building-cost">15.000€</div>
+                </div>
+                
+                <div class="building-card" data-building="hotel">
+                    <div class="building-icon">🏨</div>
+                    <div class="building-name">Hotel</div>
+                    <div class="building-cost">50.000€</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slope Panel -->
+        <div id="slope-panel" class="tool-panel" style="display:none;">
+            <div class="panel-header">⛷️ Pisten-Schwierigkeit</div>
+            
+            <div class="slope-options">
+                <button class="slope-btn" data-slope="blue">
+                    🔵 Leicht
+                </button>
+                <button class="slope-btn" data-slope="red">
+                    🔴 Mittel
+                </button>
+                <button class="slope-btn" data-slope="black">
+                    ⚫ Schwer
+                </button>
+            </div>
+            
+            <p style="margin-top:30px;color:var(--text-muted);font-size:13px;">
+                💡 <b>So legst du eine Piste an:</b><br><br>
+                1. Wähle die Schwierigkeit<br>
+                2. Klicke auf den <b>Startpunkt</b> (oben)<br>
+                3. Klicke auf den <b>Endpunkt</b> (unten)<br><br>
+                Die Piste verläuft dann automatisch den Hang hinunter.
+            </p>
+        </div>
     </div>
     
-    <a href="/" id="home-link">← Zurück zur Startseite</a>
+    <!-- Bottom Bar -->
+    <div id="bottom-bar">
+        <span>🖱️ <b>Linksklick</b> = Bauen</span>
+        <span>🖱️ <b>Rechtsklick + Ziehen</b> = Kamera</span>
+        <span>🔍 <b>Scrollen</b> = Zoomen</span>
+        <span>❌ <b>Rechtsklick</b> = Abbrechen</span>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification"></div>
+    
+    <!-- Finanz-Panel -->
+    <div id="finance-panel">
+        <div class="panel-header">💰 Finanzen</div>
+        
+        <div class="finance-row">
+            <span>🎫 Liftkarten</span>
+            <span id="income-tickets">+0€</span>
+        </div>
+        
+        <div class="finance-row">
+            <span>🍽️ Gastronomie</span>
+            <span id="income-food">+0€</span>
+        </div>
+        
+        <div class="finance-row">
+            <span>🏨 Übernachtung</span>
+            <span id="income-hotel">+0€</span>
+        </div>
+        
+        <div class="finance-row positive">
+            <span>📈 Einnahmen</span>
+            <span id="stat-income">+0€</span>
+        </div>
+        
+        <div class="finance-row negative">
+            <span>📉 Ausgaben</span>
+            <span id="stat-expenses">-0€</span>
+        </div>
+    </div>
 
-    <!-- Three.js von CDN -->
+    <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     
-    <script>
-        // Spiel-Status
-        let money = 200;
-        let buildings = [];
-        let selectedBuilding = 'house';
-        let incomePerSecond = 0;
-        
-        // Gebäude-Kosten und Einkommen
-        const buildingTypes = {
-            house: { cost: 10, income: 1, color: 0x8B4513, height: 1.5 },
-            factory: { cost: 50, income: 5, color: 0x4a5568, height: 2.5 },
-            tower: { cost: 100, income: 10, color: 0x2d3748, height: 4 },
-            tree: { cost: 5, income: 0, color: 0x228B22, height: 1 }
-        };
-        
-        // Three.js Setup
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x1a1a2e);
-        scene.fog = new THREE.Fog(0x1a1a2e, 20, 60);
-        
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(15, 15, 15);
-        
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
-        
-        // Controls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxPolarAngle = Math.PI / 2.2;
-        controls.minDistance = 5;
-        controls.maxDistance = 40;
-        
-        // Licht
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
-        scene.add(ambientLight);
-        
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(10, 20, 10);
-        directionalLight.castShadow = true;
-        directionalLight.shadow.camera.left = -20;
-        directionalLight.shadow.camera.right = 20;
-        directionalLight.shadow.camera.top = 20;
-        directionalLight.shadow.camera.bottom = -20;
-        directionalLight.shadow.mapSize.width = 2048;
-        directionalLight.shadow.mapSize.height = 2048;
-        scene.add(directionalLight);
-        
-        // Boden/Grid
-        const gridSize = 12;
-        const cellSize = 2;
-        const occupied = new Map();
-        
-        // Boden-Geometrie
-        const groundGeometry = new THREE.PlaneGeometry(gridSize * cellSize, gridSize * cellSize);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x2d3748,
-            roughness: 0.8
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-        
-        // Grid-Linien
-        const gridHelper = new THREE.GridHelper(gridSize * cellSize, gridSize, 0x4ecca3, 0x4a5568);
-        gridHelper.position.y = 0.01;
-        scene.add(gridHelper);
-        
-        // Highlight-Box (zeigt an, wo gebaut wird)
-        const highlightGeometry = new THREE.BoxGeometry(cellSize * 0.9, 0.1, cellSize * 0.9);
-        const highlightMaterial = new THREE.MeshBasicMaterial({ 
-            color: 0x4ecca3, 
-            transparent: true, 
-            opacity: 0.5 
-        });
-        const highlightBox = new THREE.Mesh(highlightGeometry, highlightMaterial);
-        highlightBox.visible = false;
-        scene.add(highlightBox);
-        
-        // Vorschau-Gebäude
-        let previewMesh = null;
-        
-        function createPreviewBuilding(type) {
-            if (previewMesh) {
-                scene.remove(previewMesh);
-            }
-            
-            const config = buildingTypes[type];
-            const geometry = new THREE.BoxGeometry(1.5, config.height, 1.5);
-            const material = new THREE.MeshBasicMaterial({ 
-                color: config.color,
-                transparent: true,
-                opacity: 0.5
-            });
-            previewMesh = new THREE.Mesh(geometry, material);
-            previewMesh.position.y = config.height / 2;
-            previewMesh.visible = false;
-            scene.add(previewMesh);
-        }
-        
-        createPreviewBuilding('house');
-        
-        // Gebäude erstellen
-        function createBuilding(type, x, z) {
-            const config = buildingTypes[type];
-            
-            // Hauptgebäude
-            let geometry, material, mesh;
-            
-            if (type === 'tree') {
-                // Baum-Stamm
-                geometry = new THREE.CylinderGeometry(0.2, 0.3, 0.8, 8);
-                material = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-                mesh = new THREE.Mesh(geometry, material);
-                mesh.position.y = 0.4;
-                
-                // Baum-Krone
-                const crownGeometry = new THREE.ConeGeometry(0.8, 1.5, 8);
-                const crownMaterial = new THREE.MeshStandardMaterial({ color: config.color });
-                const crown = new THREE.Mesh(crownGeometry, crownMaterial);
-                crown.position.y = 1.2;
-                mesh.add(crown);
-            } else if (type === 'tower') {
-                // Turm-Basis
-                geometry = new THREE.BoxGeometry(1.2, 3, 1.2);
-                material = new THREE.MeshStandardMaterial({ color: config.color });
-                mesh = new THREE.Mesh(geometry, material);
-                mesh.position.y = 1.5;
-                
-                // Turm-Spitze
-                const roofGeometry = new THREE.ConeGeometry(0.8, 1, 4);
-                const roofMaterial = new THREE.MeshStandardMaterial({ color: 0xe53e3e });
-                const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-                roof.position.y = 2;
-                roof.rotation.y = Math.PI / 4;
-                mesh.add(roof);
-            } else if (type === 'factory') {
-                // Fabrik-Halle
-                geometry = new THREE.BoxGeometry(1.8, 1.5, 1.8);
-                material = new THREE.MeshStandardMaterial({ color: config.color });
-                mesh = new THREE.Mesh(geometry, material);
-                mesh.position.y = 0.75;
-                
-                // Schornstein
-                const chimneyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 8);
-                const chimneyMaterial = new THREE.MeshStandardMaterial({ color: 0x718096 });
-                const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
-                chimney.position.set(0.5, 1.5, 0.5);
-                mesh.add(chimney);
-            } else {
-                // Standard-Haus
-                geometry = new THREE.BoxGeometry(1.5, config.height, 1.5);
-                material = new THREE.MeshStandardMaterial({ color: config.color });
-                mesh = new THREE.Mesh(geometry, material);
-                mesh.position.y = config.height / 2;
-                
-                // Dach
-                const roofGeometry = new THREE.ConeGeometry(1.2, 0.8, 4);
-                const roofMaterial = new THREE.MeshStandardMaterial({ color: 0x2d3748 });
-                const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-                roof.position.y = config.height / 2 + 0.4;
-                roof.rotation.y = Math.PI / 4;
-                mesh.add(roof);
-            }
-            
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            mesh.position.x = x;
-            mesh.position.z = z;
-            
-            // Animation beim Platzieren
-            mesh.scale.set(0, 0, 0);
-            scene.add(mesh);
-            
-            // Pop-in Animation
-            let scale = 0;
-            const animateScale = () => {
-                scale += 0.1;
-                if (scale <= 1) {
-                    mesh.scale.set(scale, scale, scale);
-                    requestAnimationFrame(animateScale);
-                }
-            };
-            animateScale();
-            
-            buildings.push({ mesh, type, x, z, income: config.income });
-            occupied.set(`${x},${z}`, true);
-            
-            // Geld abziehen
-            money -= config.cost;
-            updateUI();
-            
-            // Partikel-Effekt
-            createParticles(x, z);
-        }
-        
-        // Partikel-Effekt beim Bauen
-        function createParticles(x, z) {
-            const particleCount = 10;
-            const particles = [];
-            
-            for (let i = 0; i < particleCount; i++) {
-                const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-                const material = new THREE.MeshBasicMaterial({ color: 0x4ecca3 });
-                const particle = new THREE.Mesh(geometry, material);
-                particle.position.set(x, 1, z);
-                particle.velocity = {
-                    x: (Math.random() - 0.5) * 0.2,
-                    y: Math.random() * 0.3,
-                    z: (Math.random() - 0.5) * 0.2
-                };
-                scene.add(particle);
-                particles.push(particle);
-            }
-            
-            // Partikel-Animation
-            let frames = 0;
-            const animateParticles = () => {
-                frames++;
-                particles.forEach(p => {
-                    p.position.x += p.velocity.x;
-                    p.position.y += p.velocity.y;
-                    p.position.z += p.velocity.z;
-                    p.velocity.y -= 0.01; // Schwerkraft
-                    p.rotation.x += 0.1;
-                    p.rotation.y += 0.1;
-                    p.scale.multiplyScalar(0.95);
-                });
-                
-                if (frames < 60) {
-                    requestAnimationFrame(animateParticles);
-                } else {
-                    particles.forEach(p => scene.remove(p));
-                }
-            };
-            animateParticles();
-        }
-        
-        // Raycaster für Maus-Interaktion
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let hoveredCell = null;
-        
-        function getGridPosition(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(ground);
-            
-            if (intersects.length > 0) {
-                const point = intersects[0].point;
-                const x = Math.round(point.x / cellSize) * cellSize;
-                const z = Math.round(point.z / cellSize) * cellSize;
-                return { x, z };
-            }
-            return null;
-        }
-        
-        // Maus-Events
-        window.addEventListener('mousemove', (e) => {
-            const pos = getGridPosition(e);
-            if (pos) {
-                hoveredCell = pos;
-                highlightBox.position.set(pos.x, 0.05, pos.z);
-                highlightBox.visible = true;
-                
-                if (previewMesh) {
-                    previewMesh.position.x = pos.x;
-                    previewMesh.position.z = pos.z;
-                    previewMesh.visible = true;
-                    
-                    // Farbe ändern wenn nicht genug Geld oder belegt
-                    const key = `${pos.x},${pos.z}`;
-                    const cost = buildingTypes[selectedBuilding].cost;
-                    if (occupied.has(key) || money < cost) {
-                        previewMesh.material.color.setHex(0xe53e3e);
-                    } else {
-                        previewMesh.material.color.setHex(buildingTypes[selectedBuilding].color);
-                    }
-                }
-            } else {
-                highlightBox.visible = false;
-                if (previewMesh) previewMesh.visible = false;
-            }
-        });
-        
-        window.addEventListener('mousedown', (e) => {
-            if (e.button === 0 && hoveredCell) { // Linksklick
-                const key = `${hoveredCell.x},${hoveredCell.z}`;
-                const cost = buildingTypes[selectedBuilding].cost;
-                
-                if (!occupied.has(key) && money >= cost) {
-                    createBuilding(selectedBuilding, hoveredCell.x, hoveredCell.z);
-                }
-            }
-        });
-        
-        // UI-Events
-        document.querySelectorAll('.building-btn[data-type]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.building-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedBuilding = btn.dataset.type;
-                createPreviewBuilding(selectedBuilding);
-            });
-        });
-        
-        function clearAll() {
-            buildings.forEach(b => scene.remove(b.mesh));
-            buildings = [];
-            occupied.clear();
-            money = 200;
-            updateUI();
-        }
-        
-        function updateUI() {
-            document.getElementById('money').textContent = money;
-            document.getElementById('buildings').textContent = buildings.length;
-            
-            incomePerSecond = buildings.reduce((sum, b) => sum + b.income, 0);
-            document.getElementById('income').textContent = incomePerSecond;
-            
-            // Button-Status aktualisieren
-            document.querySelectorAll('.building-btn[data-type]').forEach(btn => {
-                const type = btn.dataset.type;
-                const cost = buildingTypes[type].cost;
-                if (money < cost) {
-                    btn.style.opacity = '0.5';
-                } else {
-                    btn.style.opacity = '1';
-                }
-            });
-        }
-        
-        // Einkommen alle paar Sekunden
-        setInterval(() => {
-            if (incomePerSecond > 0) {
-                money += incomePerSecond;
-                updateUI();
-            }
-        }, 1000);
-        
-        // Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        
-        animate();
-        updateUI();
-    </script>
+    <!-- Game Modules -->
+    <script src="js/buildings.js"></script>
+    <script src="js/lifts.js"></script>
+    <script src="js/terrain.js"></script>
+    <script src="js/economy.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>

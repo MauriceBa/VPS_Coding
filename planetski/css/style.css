@@ -1,0 +1,431 @@
+/**
+ * PlanetSki - Haupt-Styling
+ */
+
+:root {
+    --bg-dark: #1a1a2e;
+    --bg-panel: rgba(0, 0, 0, 0.85);
+    --accent: #4ecca3;
+    --accent-hover: #3db892;
+    --danger: #e53e3e;
+    --warning: #f6ad55;
+    --info: #4299e1;
+    --text: #ffffff;
+    --text-muted: #a0aec0;
+    --border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    background: var(--bg-dark);
+    color: var(--text);
+    user-select: none;
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* === TOP BAR === */
+#top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 100;
+}
+
+#logo {
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), #fff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#stats-bar {
+    display: flex;
+    gap: 30px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+#time-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#speed-btn {
+    background: var(--accent);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    color: var(--bg-dark);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#speed-btn:hover {
+    background: var(--accent-hover);
+}
+
+/* === LEFT SIDEBAR - TOOLS === */
+#sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    width: 70px;
+    bottom: 0;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 15px 10px;
+    gap: 10px;
+    z-index: 100;
+}
+
+.tool-btn {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tool-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.tool-btn.active {
+    border-color: var(--accent);
+    background: rgba(78, 204, 163, 0.2);
+}
+
+.tool-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 5px 0;
+}
+
+/* === RIGHT SIDEBAR - DETAILS === */
+#details-panel {
+    position: fixed;
+    top: 60px;
+    right: -350px;
+    width: 350px;
+    bottom: 0;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border-left: 1px solid var(--border);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 100;
+    transition: right 0.3s ease;
+}
+
+#details-panel.open {
+    right: 0;
+}
+
+.panel-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* Lift-Auswahl */
+.lift-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lift-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.lift-option.active {
+    border-color: var(--accent);
+    background: rgba(78, 204, 163, 0.1);
+}
+
+.lift-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.lift-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.lift-cost {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Building-Auswahl */
+.building-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.building-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.building-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.building-card.active {
+    border-color: var(--accent);
+    background: rgba(78, 204, 163, 0.1);
+}
+
+.building-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.building-name {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.building-cost {
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 5px;
+}
+
+/* Pisten-Auswahl */
+.slope-options {
+    display: flex;
+    gap: 10px;
+}
+
+.slope-btn {
+    flex: 1;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.slope-btn[data-slope="blue"] {
+    background: rgba(65, 105, 225, 0.2);
+}
+
+.slope-btn[data-slope="red"] {
+    background: rgba(220, 20, 60, 0.2);
+}
+
+.slope-btn[data-slope="black"] {
+    background: rgba(30, 30, 30, 0.5);
+}
+
+.slope-btn.active {
+    border-color: currentColor;
+    box-shadow: 0 0 10px currentColor;
+}
+
+/* === BOTTOM INFO === */
+#bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 70px;
+    right: 0;
+    height: 40px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    z-index: 100;
+}
+
+#bottom-bar span {
+    margin-right: 20px;
+}
+
+#bottom-bar b {
+    color: var(--text);
+}
+
+/* === NOTIFICATION === */
+#notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--accent);
+    color: var(--bg-dark);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 200;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+#notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* === FINANZ-PANEL === */
+#finance-panel {
+    position: fixed;
+    bottom: 50px;
+    right: 20px;
+    width: 300px;
+    background: var(--bg-panel);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    z-index: 100;
+}
+
+.finance-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+.finance-row.positive {
+    color: var(--accent);
+}
+
+.finance-row.negative {
+    color: var(--danger);
+}
+
+.finance-total {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 10px;
+    font-weight: 700;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1200px) {
+    #details-panel {
+        width: 300px;
+    }
+    
+    #finance-panel {
+        width: 250px;
+    }
+}
+
+@media (max-width: 900px) {
+    #sidebar {
+        width: 60px;
+    }
+    
+    #bottom-bar {
+        left: 60px;
+    }
+    
+    .tool-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}
+
+/* === ANIMATIONS === */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.slide-in {
+    animation: slideIn 0.3s ease;
+}
