@@ -11,15 +11,18 @@ class SlopeSystem {
         this.slopeMeshes = [];
         
         this.difficulties = {
+            green: { color: 0x228B22, width: 14, name: 'Green' },
             blue: { color: 0x4169E1, width: 12, name: 'Blue' },
             red: { color: 0xDC143C, width: 10, name: 'Red' },
-            black: { color: 0x1a1a1a, width: 8, name: 'Black' }
+            black: { color: 0x1a1a1a, width: 8, name: 'Black' },
+            doubleBlack: { color: 0x050505, width: 6, name: 'Double Black' },
+            snowpark: { color: 0xFF8C00, width: 15, name: 'Snowpark' }
         };
     }
     
     // Piste von Start zu Ende zeichnen
     createSlope(startX, startZ, endX, endZ, difficulty = 'blue') {
-        const config = this.difficulties[difficulty];
+        const config = this.difficulties[difficulty] || this.difficulties['blue'];
         
         // Berechne Kontrollpunkte für eine natürliche Pisten-Kurve
         const midX = (startX + endX) / 2;
@@ -107,6 +110,11 @@ class SlopeSystem {
         const mesh = new THREE.Mesh(geometry, material);
         mesh.receiveShadow = true;
         this.scene.add(mesh);
+
+        // Snowpark Features
+        if (difficulty === 'snowpark') {
+            this.createSnowparkFeatures(points);
+        }
         
         // Pisten-Schilder
         this.createSlopeSigns(startX, startZ, endX, endZ, difficulty);
@@ -128,20 +136,17 @@ class SlopeSystem {
     }
     
     createSlopeSigns(startX, startZ, endX, endZ, difficulty) {
-        const colors = {
-            blue: 0x4169E1,
-            red: 0xDC143C,
-            black: 0x1a1a1a
-        };
+        const config = this.difficulties[difficulty] || this.difficulties['blue'];
+        const color = config.color;
         
         const startY = this.terrain.getHeightAt(startX, startZ);
         const endY = this.terrain.getHeightAt(endX, endZ);
         
         // Schild am Start
-        this.createSign(startX, startY, startZ, colors[difficulty], true);
+        this.createSign(startX, startY, startZ, color, true);
         
         // Schild am Ende
-        this.createSign(endX, endY, endZ, colors[difficulty], false);
+        this.createSign(endX, endY, endZ, color, false);
     }
     
     createSign(x, y, z, color, isStart) {
@@ -169,6 +174,42 @@ class SlopeSystem {
         
         group.position.set(x - 2, y, z);
         this.scene.add(group);
+    }
+
+    createSnowparkFeatures(points) {
+        // Platziere ein paar Kicker / Rails entlang der Piste
+        const numFeatures = 3;
+        const step = Math.floor(points.length / (numFeatures + 1));
+        
+        for(let i=1; i<=numFeatures; i++) {
+            const p = points[i * step];
+            
+            const feature = new THREE.Group();
+            
+            // Ein Kicker (Rampe)
+            const kickerGeo = new THREE.BoxGeometry(3, 1.5, 4);
+            // Schräge den Kicker an
+            const positions = kickerGeo.attributes.position.array;
+            for(let j=0; j<positions.length; j+=3) {
+                if(positions[j+2] > 0 && positions[j+1] > 0) {
+                    positions[j+1] -= 1.5; // Vorne runterziehen
+                }
+            }
+            kickerGeo.computeVertexNormals();
+            
+            const kicker = new THREE.Mesh(
+                kickerGeo,
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 })
+            );
+            feature.add(kicker);
+            
+            feature.position.set(p.x, p.y + 0.2, p.z);
+            // Finde die Richtung der Piste an diesem Punkt
+            const pNext = points[i * step + 1];
+            feature.lookAt(pNext.x, pNext.y, pNext.z);
+            
+            this.scene.add(feature);
+        }
     }
     
     // Finde Pisten-Nähe für Skifahrer
