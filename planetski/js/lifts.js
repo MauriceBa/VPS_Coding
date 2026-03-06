@@ -1,6 +1,6 @@
 /**
  * PlanetSki - 3D Ski Resort Builder
- * Modul: Alle Lifte (realistische Skilift-Typen)
+ * Modul: Alle Lifte (realistische Skilift-Typen & Modelle)
  */
 
 const LIFT_TYPES = {
@@ -323,7 +323,7 @@ const LIFT_TYPES = {
         speed: 28,
         maxLength: 8000,
         maxHeight: 2500,
-        description: 'Tricable gondola (35P)',
+        description: 'Tricable gondola (35P) Symphony Style',
         color: 0x8E44AD,
         poleDistance: 200,
         cabinSize: 35,
@@ -465,7 +465,7 @@ const LIFT_TYPES = {
     }
 };
 
-// Verbesserte, runde Modelle
+// Verbesserte reale Modelle (CWA Omega V, D-Line)
 const LiftModels = {
     // Utility für runde Kabinen
     createRoundedShape: (width, height, radius) => {
@@ -483,7 +483,6 @@ const LiftModels = {
         return shape;
     },
 
-    // Surface Lifts
     createConveyor: (color) => {
         const group = new THREE.Group();
         const belt = new THREE.Mesh(
@@ -499,15 +498,6 @@ const LiftModels = {
         );
         mat.position.y = 0.65;
         group.add(mat);
-        
-        for (let side of [-1.2, 1.2]) {
-            const rail = new THREE.Mesh(
-                new THREE.BoxGeometry(0.1, 1.2, 6),
-                new THREE.MeshStandardMaterial({ color: 0x666666 })
-            );
-            rail.position.set(side, 1, 0);
-            group.add(rail);
-        }
         return group;
     },
     
@@ -520,12 +510,6 @@ const LiftModels = {
         handle.rotation.z = Math.PI / 2;
         handle.position.y = -0.8;
         group.add(handle);
-        
-        const rope = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.02, 0.02, 2, 4),
-            new THREE.MeshStandardMaterial({ color: 0x444444 })
-        );
-        group.add(rope);
         return group;
     },
     
@@ -567,134 +551,161 @@ const LiftModels = {
         return group;
     },
     
-    // Modern Chairlifts
+    // Modern Doppelmayr D-Line Chairlift
     createChair: (color, seats, hasBubble) => {
         const group = new THREE.Group();
         const seatWidth = seats * 0.55;
         
-        // Curved frame pipe
-        const frame = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.04, 0.04, 2.2, 8),
-            new THREE.MeshStandardMaterial({ color: 0x444444 })
-        );
-        frame.position.y = -1;
-        group.add(frame);
+        // Modern bent hanger arm (D-Line style)
+        const hangerGroup = new THREE.Group();
+        const upperHanger = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+        upperHanger.position.set(0, -0.6, 0);
+        const lowerHanger = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 8), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+        lowerHanger.position.set(-0.2, -1.8, 0);
+        lowerHanger.rotation.z = Math.PI / 8; // Bent arm
+        hangerGroup.add(upperHanger, lowerHanger);
+        group.add(hangerGroup);
         
-        // Seat & Backrest
-        const seat = new THREE.Mesh(
-            new THREE.BoxGeometry(seatWidth, 0.08, 0.5),
-            new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
+        // Seat Base (Black Frame)
+        const seatBase = new THREE.Mesh(
+            new THREE.BoxGeometry(seatWidth, 0.1, 0.6),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
         );
-        seat.position.set(0, -2.1, 0.1);
-        group.add(seat);
+        seatBase.position.set(0, -2.4, 0.1);
+        group.add(seatBase);
+
+        // Comfortable Two-Tone Padding
+        const padding = new THREE.Mesh(
+            new THREE.BoxGeometry(seatWidth - 0.1, 0.12, 0.5),
+            new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 })
+        );
+        padding.position.set(0, -2.35, 0.1);
+        group.add(padding);
         
+        // Backrest
         const back = new THREE.Mesh(
-            new THREE.BoxGeometry(seatWidth, 0.5, 0.08),
-            new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
+            new THREE.BoxGeometry(seatWidth, 0.6, 0.1),
+            new THREE.MeshStandardMaterial({ color: 0x111111 })
         );
-        back.position.set(0, -1.8, -0.15);
+        back.position.set(0, -2.0, -0.2);
         group.add(back);
+
+        const backPadding = new THREE.Mesh(
+            new THREE.BoxGeometry(seatWidth - 0.1, 0.5, 0.12),
+            new THREE.MeshStandardMaterial({ color: color, roughness: 0.9 })
+        );
+        backPadding.position.set(0, -2.0, -0.15);
+        group.add(backPadding);
         
         // Safety bar
-        const safetyBar = new THREE.Group();
-        const bar = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.02, 0.02, seatWidth, 8),
-            new THREE.MeshStandardMaterial({ color: 0x888888 })
+        const safetyBar = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.03, 0.03, seatWidth, 8),
+            new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8 })
         );
-        bar.rotation.z = Math.PI / 2;
-        bar.position.set(0, -1.7, 0.35); // closed state
-        safetyBar.add(bar);
+        safetyBar.rotation.z = Math.PI / 2;
+        safetyBar.position.set(0, -1.9, 0.4); 
+        group.add(safetyBar);
         
         // Footrests
         for (let i = 0; i < seats; i++) {
             const skiRest = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.015, 0.015, 0.4, 8),
-                new THREE.MeshStandardMaterial({ color: 0x888888 })
+                new THREE.CylinderGeometry(0.015, 0.015, 0.5, 8),
+                new THREE.MeshStandardMaterial({ color: 0x222222 })
             );
-            skiRest.rotation.z = Math.PI / 2;
-            skiRest.position.set(-seatWidth/2 + 0.275 + i*0.55, -2.25, 0.35);
-            safetyBar.add(skiRest);
+            skiRest.rotation.x = Math.PI / 6;
+            skiRest.position.set(-seatWidth/2 + 0.275 + i*0.55, -2.5, 0.35);
+            group.add(skiRest);
         }
-        group.add(safetyBar);
         
+        // D-Line Bubble (Tinted glass)
         if (hasBubble) {
             const dome = new THREE.Mesh(
-                new THREE.SphereGeometry(seatWidth * 0.5, 16, 16, 0, Math.PI * 2, 0, Math.PI/2),
+                new THREE.SphereGeometry(seatWidth * 0.52, 16, 16, 0, Math.PI * 2, 0, Math.PI/2),
                 new THREE.MeshPhysicalMaterial({ 
-                    color: 0xFFAA00,
+                    color: color, 
                     transparent: true,
-                    opacity: 0.3,
-                    transmission: 0.9,
+                    opacity: 0.5,
                     roughness: 0.1,
-                    thickness: 0.05,
+                    metalness: 0.5,
                     side: THREE.DoubleSide
                 })
             );
-            dome.position.set(0, -1.8, 0.1);
-            dome.rotation.x = -Math.PI / 8; // Half closed
+            dome.scale.z = 0.7; // Flattened front
+            dome.position.set(0, -1.9, 0.1);
+            dome.rotation.x = -Math.PI / 8; // Closed over riders
             group.add(dome);
         }
         return group;
     },
     
-    // Rounded Gondolas
+    // CWA Omega V Style Gondola (Flush panoramic windows)
     createGondola: (color, size) => {
         const group = new THREE.Group();
         const scales = { 4: 1, 6: 1.2, 8: 1.4, 10: 1.6, 12: 1.8, 18: 2.2, 35: 3 };
         const scale = scales[size] || 1;
         
-        const hanger = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.04, 0.04, 1.5, 8),
-            new THREE.MeshStandardMaterial({ color: 0x444444 })
-        );
-        hanger.position.y = -0.5;
-        group.add(hanger);
+        const hangerGrp = new THREE.Group();
+        const hangerV = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.8*scale, 8), new THREE.MeshStandardMaterial({ color: 0x444444 }));
+        hangerV.position.y = -0.9*scale;
+        const hangerH = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.8*scale, 8), new THREE.MeshStandardMaterial({ color: 0x444444 }));
+        hangerH.rotation.z = Math.PI/2;
+        hangerH.position.set(-0.4*scale, -1.8*scale, 0);
+        hangerGrp.add(hangerV, hangerH);
+        group.add(hangerGrp);
         
-        // Rounded Cabin
-        const width = 1.6 * scale, height = 2.0 * scale, depth = 1.4 * scale, radius = 0.3 * scale;
+        // Cabin Body
+        const width = 1.6 * scale, height = 2.1 * scale, depth = 1.4 * scale, radius = 0.35 * scale;
         const shape = LiftModels.createRoundedShape(width, height, radius);
-        const cabinGeo = new THREE.ExtrudeGeometry(shape, { depth: depth, bevelEnabled: false });
+        const cabinGeo = new THREE.ExtrudeGeometry(shape, { depth: depth, bevelEnabled: true, bevelThickness: 0.05 });
         cabinGeo.center();
         
         const cabin = new THREE.Mesh(
             cabinGeo,
             new THREE.MeshStandardMaterial({ color: color, roughness: 0.3, metalness: 0.2 })
         );
-        cabin.position.y = -1.8 * scale;
+        cabin.position.y = -2.2 * scale;
         cabin.castShadow = true;
         group.add(cabin);
         
-        // Window wrap
-        const winShape = LiftModels.createRoundedShape(width * 0.95, height * 0.45, radius * 0.8);
-        const winGeo = new THREE.ExtrudeGeometry(winShape, { depth: depth * 1.05, bevelEnabled: false });
+        // Seamless panoramic windows
+        const winWidth = width * 1.02, winHeight = height * 0.55, winDepth = depth * 1.02;
+        const winShape = LiftModels.createRoundedShape(winWidth, winHeight, radius * 0.9);
+        const winGeo = new THREE.ExtrudeGeometry(winShape, { depth: winDepth, bevelEnabled: false });
         winGeo.center();
         const windowBand = new THREE.Mesh(
             winGeo,
-            new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.7, transmission: 0.5 })
+            new THREE.MeshPhysicalMaterial({ color: 0x050505, transparent: true, opacity: 0.85, roughness: 0.1, metalness: 0.8 })
         );
-        windowBand.position.y = -1.6 * scale;
+        windowBand.position.y = -2.1 * scale;
         group.add(windowBand);
         
         return group;
     },
     
+    // CWA Symphony 3S / 2S Style
     createBigGondola: (color, size) => {
         const group = LiftModels.createGondola(color, size);
-        // Add double suspension arms
-        const crossbar = new THREE.Mesh(
-            new THREE.BoxGeometry(2, 0.1, 0.3),
-            new THREE.MeshStandardMaterial({ color: 0x333333 })
+        
+        // Huge 3S Carriage (Laufwerk)
+        const carriage = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.4, 1.2),
+            new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.6 })
         );
-        crossbar.position.y = -0.3;
-        group.add(crossbar);
+        carriage.position.y = -0.2;
+        group.add(carriage);
+
         return group;
     },
     
     createFunitel: (color, size) => {
         const group = LiftModels.createGondola(color, 15);
-        const upper = LiftModels.createGondola(color, 15);
-        upper.position.y = 2.5;
-        group.add(upper);
+        // Double hanger for dual ropes
+        const crossbar = new THREE.Mesh(
+            new THREE.BoxGeometry(2.5, 0.1, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x333333 })
+        );
+        crossbar.position.y = -0.2;
+        group.add(crossbar);
         return group;
     },
     
@@ -703,29 +714,36 @@ const LiftModels = {
         const scales = { 50: 2, 100: 3, 150: 3.5, 200: 4 };
         const scale = scales[size] || 2;
         
-        // Huge hanger
-        const hanger = new THREE.Mesh(
-            new THREE.BoxGeometry(0.2, 3, 0.2),
-            new THREE.MeshStandardMaterial({ color: 0x444444 })
+        // Massive carriage
+        const carriage = new THREE.Mesh(
+            new THREE.BoxGeometry(4, 0.5, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.7 })
         );
-        hanger.position.y = -1;
+        carriage.position.y = -0.2;
+        group.add(carriage);
+
+        const hanger = new THREE.Mesh(
+            new THREE.BoxGeometry(0.3, 3.5, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0x555555 })
+        );
+        hanger.position.y = -1.5;
         group.add(hanger);
 
-        // Body
-        const width = 3 * scale;
+        // Aerodynamic Body
+        const width = 3.5 * scale;
         const height = 2.2 * scale;
-        const depth = 2 * scale;
+        const depth = 2.2 * scale;
         const cabin = new THREE.Mesh(
             new THREE.BoxGeometry(width, height, depth),
             new THREE.MeshStandardMaterial({ color: color })
         );
-        cabin.position.y = -2.5 - height/2;
+        cabin.position.y = -3.2 - height/2;
         group.add(cabin);
 
         // Windows
         const windows = new THREE.Mesh(
-            new THREE.BoxGeometry(width + 0.1, height * 0.4, depth + 0.1),
-            new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.6 })
+            new THREE.BoxGeometry(width + 0.05, height * 0.4, depth + 0.05),
+            new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.7 })
         );
         windows.position.y = cabin.position.y + height * 0.1;
         group.add(windows);
@@ -737,10 +755,10 @@ const LiftModels = {
         const group = new THREE.Group();
         // VANOISE EXPRESS STYLE
         const hanger = new THREE.Mesh(
-            new THREE.CylinderGeometry(0.2, 0.2, 4, 8),
+            new THREE.CylinderGeometry(0.3, 0.3, 5, 8),
             new THREE.MeshStandardMaterial({ color: 0x333333 })
         );
-        hanger.position.y = -1;
+        hanger.position.y = -1.5;
         group.add(hanger);
         
         const width = 12;
@@ -754,7 +772,7 @@ const LiftModels = {
         body.position.y = -6;
         group.add(body);
         
-        // Color accents
+        // Red accent stripes
         const stripeGeo = new THREE.BoxGeometry(width + 0.1, 1, depth + 0.1);
         const stripeMat = new THREE.MeshStandardMaterial({ color: 0xe53e3e });
         const stripe1 = new THREE.Mesh(stripeGeo, stripeMat);
@@ -779,11 +797,10 @@ const LiftModels = {
     createFunicular: (color) => {
         const group = new THREE.Group();
         // Sloped carriage for funicular
-        const length = 10;
-        const width = 3;
-        const height = 3;
+        const length = 12;
+        const width = 3.5;
+        const height = 3.5;
         
-        // Create a staircase-like base
         const bodyGeo = new THREE.BoxGeometry(width, height, length);
         const body = new THREE.Mesh(
             bodyGeo,
@@ -795,10 +812,10 @@ const LiftModels = {
         body.rotation.x = Math.PI / 8;
         group.add(body);
         
-        // Windows
+        // Continuous windows
         const windows = new THREE.Mesh(
-            new THREE.BoxGeometry(width + 0.2, height * 0.4, length * 0.9),
-            new THREE.MeshPhysicalMaterial({ color: 0x222222, transparent: true, opacity: 0.7 })
+            new THREE.BoxGeometry(width + 0.2, height * 0.45, length * 0.95),
+            new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.8, metalness: 0.6 })
         );
         windows.position.y = 2.5;
         windows.rotation.x = Math.PI / 8;
@@ -829,7 +846,6 @@ class SkiLift {
     }
     
     build() {
-        // Stationen aufbauen (sie zeigen automatisch aufeinander)
         this.buildStation(this.startPos.x, this.startPos.z, true);
         this.buildStation(this.endPos.x, this.endPos.z, false);
         
@@ -849,66 +865,137 @@ class SkiLift {
     buildStation(x, z, isValley) {
         const stationGroup = new THREE.Group();
         const y = this.terrain ? this.terrain.getHeightAt(x, z) : 0;
+        const cat = this.config.category;
         
-        const isBigStation = ['tramway', 'bicable', 'tricable', 'funitel', 'funicular'].includes(this.config.category);
-        const isSurface = this.config.category === 'surface';
-        
-        const width = isBigStation ? 12 : isSurface ? 4 : 8;
-        const depth = isBigStation ? 14 : isSurface ? 6 : 10;
-        const height = isValley ? 4 : 5;
-        
-        // Base Platform
-        const platform = new THREE.Mesh(
-            new THREE.BoxGeometry(width, 1, depth),
-            new THREE.MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.9 })
-        );
-        platform.position.y = y + 0.5;
-        platform.receiveShadow = true;
-        stationGroup.add(platform);
-        
-        if (!isSurface) {
-            // Modern rounded roof
-            const roofShape = new THREE.Shape();
-            roofShape.absarc(0, 0, width/2, 0, Math.PI, false);
+        const isDetachable = ['detachable', 'gondola', 'chondola', 'bicable', 'tricable', 'funitel'].includes(cat);
+        const isFixed = cat === 'fixed';
+        const isPendulum = cat === 'tramway';
+        const isFunicular = cat === 'funicular';
+        const isSurface = cat === 'surface';
+
+        if (isDetachable) {
+            // Doppelmayr D-Line / UNI-G Style Terminal
+            const width = 8;
+            const length = 18;
+            const height = 5;
             
-            const roofGeo = new THREE.ExtrudeGeometry(roofShape, {
-                depth: depth,
-                bevelEnabled: false,
-                curveSegments: 16
-            });
-            roofGeo.center();
-            
-            const roof = new THREE.Mesh(
-                roofGeo,
-                new THREE.MeshStandardMaterial({ color: 0x223344, metalness: 0.3, roughness: 0.6 })
+            // Terminal base frame
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(width - 1, 1, length - 2),
+                new THREE.MeshStandardMaterial({ color: 0x333333 })
             );
-            roof.position.set(0, y + height, 0);
-            stationGroup.add(roof);
+            base.position.set(0, y + 0.5, 0);
+            stationGroup.add(base);
+
+            // Sleek Polycarbonate/Fiberglass rounded shell
+            const shellShape = new THREE.Shape();
+            shellShape.moveTo(-width/2, 0);
+            shellShape.lineTo(-width/2, length/2 - 2);
+            shellShape.quadraticCurveTo(-width/2, length/2, 0, length/2);
+            shellShape.quadraticCurveTo(width/2, length/2, width/2, length/2 - 2);
+            shellShape.lineTo(width/2, -length/2 + 2);
+            shellShape.quadraticCurveTo(width/2, -length/2, 0, -length/2);
+            shellShape.quadraticCurveTo(-width/2, -length/2, -width/2, -length/2 + 2);
+
+            const shellGeo = new THREE.ExtrudeGeometry(shellShape, { depth: height, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.5 });
+            shellGeo.rotateX(Math.PI / 2);
+            const shellMat = new THREE.MeshStandardMaterial({ color: this.config.color || 0x223344, roughness: 0.2, metalness: 0.4 });
+            const shell = new THREE.Mesh(shellGeo, shellMat);
+            shell.position.set(0, y + height + 1, 0);
+            stationGroup.add(shell);
+
+            // Side glass panoramic windows of terminal
+            const glassGeo = new THREE.ExtrudeGeometry(shellShape, { depth: height * 0.4, bevelEnabled: false });
+            glassGeo.rotateX(Math.PI / 2);
+            const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x111111, transparent: true, opacity: 0.8 });
+            const glass = new THREE.Mesh(glassGeo, glassMat);
+            glass.position.set(0, y + height - 0.5, 0);
+            glass.scale.set(1.02, 1, 1.02);
+            stationGroup.add(glass);
+
+            // Bullwheel inside (semi-visible)
+            const bullwheel = new THREE.Mesh(
+                new THREE.CylinderGeometry(width/2 - 0.5, width/2 - 0.5, 0.4, 32),
+                new THREE.MeshStandardMaterial({ color: 0x992222, metalness: 0.7 })
+            );
+            bullwheel.position.set(0, y + height - 0.5, isValley ? length/4 : -length/4);
+            stationGroup.add(bullwheel);
             
-            // Support Pillars
-            for (let px of [-width/2 + 0.5, width/2 - 0.5]) {
-                for (let pz of [-depth/2 + 1, depth/2 - 1]) {
-                    const pillar = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.3, 0.3, height - 0.5, 8),
-                        new THREE.MeshStandardMaterial({ color: 0x555555 })
-                    );
-                    pillar.position.set(px, y + height/2 + 0.25, pz);
-                    stationGroup.add(pillar);
-                }
-            }
+            // Concrete Pillars
+            const pillar1 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, height, 16), new THREE.MeshStandardMaterial({ color: 0x777777 }));
+            pillar1.position.set(0, y + height/2, length/4);
+            stationGroup.add(pillar1);
+
+        } else if (isFixed) {
+            // Classic fixed grip open terminal
+            const pillar = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.0, 1.4, 6, 16),
+                new THREE.MeshStandardMaterial({ color: 0x666666 }) // massive concrete pillar
+            );
+            pillar.position.set(0, y + 3, 0);
+            stationGroup.add(pillar);
+
+            const bullwheel = new THREE.Mesh(
+                new THREE.CylinderGeometry(3.5, 3.5, 0.5, 32),
+                new THREE.MeshStandardMaterial({ color: 0x8B0000, metalness: 0.5 }) // Red drive wheel
+            );
+            bullwheel.position.set(0, y + 6, 0);
+            stationGroup.add(bullwheel);
+
+            // Operator hut
+            const hut = new THREE.Mesh(
+                new THREE.BoxGeometry(3, 3, 3),
+                new THREE.MeshStandardMaterial({ color: 0x8B4513 }) // Wooden
+            );
+            hut.position.set(4, y + 1.5, 0);
+            stationGroup.add(hut);
+
+        } else if (isPendulum || isFunicular) {
+            // Large concrete bunker station
+            const width = 14;
+            const length = 20;
+            const height = 12;
+
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(width, height, length),
+                new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.9 })
+            );
+            base.position.set(0, y + height/2, 0);
+            stationGroup.add(base);
+
+            // Large portal for tram
+            const portal = new THREE.Mesh(
+                new THREE.BoxGeometry(width * 0.6, height * 0.7, length + 0.5),
+                new THREE.MeshStandardMaterial({ color: 0x111111 }) 
+            );
+            portal.position.set(0, y + height * 0.35, 0);
+            stationGroup.add(portal);
+
+        } else if (isSurface) {
+            // Small drive box
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(4, 1, 6),
+                new THREE.MeshStandardMaterial({ color: 0xCCCCCC })
+            );
+            base.position.set(0, y + 0.5, 0);
+            stationGroup.add(base);
+
+            const motor = new THREE.Mesh(
+                new THREE.BoxGeometry(2, 2.5, 3),
+                new THREE.MeshStandardMaterial({ color: 0x3355cc })
+            );
+            motor.position.set(0, y + 2, 0);
+            stationGroup.add(motor);
+
+            const bullwheel = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.5, 1.5, 0.2, 16),
+                new THREE.MeshStandardMaterial({ color: 0x555555 })
+            );
+            bullwheel.position.set(0, y + 2.5, isValley ? 2 : -2);
+            stationGroup.add(bullwheel);
         }
-        
-        // Drive Wheel
-        const driveWheel = new THREE.Mesh(
-            new THREE.CylinderGeometry(isBigStation ? 3 : 2, isBigStation ? 3 : 2, 0.4, 32),
-            new THREE.MeshStandardMaterial({ color: 0x992222, metalness: 0.6, roughness: 0.4 })
-        );
-        driveWheel.position.set(0, y + height - 1, isValley ? depth/2 - 2 : -depth/2 + 2);
-        stationGroup.add(driveWheel);
-        
+
         stationGroup.position.set(x, 0, z);
-        
-        // Station ausrichten, dass sie zur anderen Station zeigt
         const targetX = isValley ? this.endPos.x : this.startPos.x;
         const targetZ = isValley ? this.endPos.z : this.startPos.z;
         stationGroup.lookAt(targetX, 0, targetZ);
@@ -948,7 +1035,7 @@ class SkiLift {
         const height = baseHeight + Math.random() * 2;
         
         const pole = new THREE.Mesh(
-            new THREE.CylinderGeometry(this.config.category === 'surface' ? 0.15 : 0.3, 0.4, height, 8),
+            new THREE.CylinderGeometry(this.config.category === 'surface' ? 0.15 : 0.4, 0.5, height, 8),
             new THREE.MeshStandardMaterial({ color: 0x718096, metalness: 0.4 })
         );
         pole.position.y = height / 2;
@@ -960,19 +1047,32 @@ class SkiLift {
         
         if (gauge > 0) {
             const arm = new THREE.Mesh(
-                new THREE.BoxGeometry(gauge + 1.0, 0.2, 0.2),
+                new THREE.BoxGeometry(gauge + 1.5, 0.3, 0.4),
                 new THREE.MeshStandardMaterial({ color: 0x4a5568 })
             );
             arm.position.y = height - 0.5;
             group.add(arm);
             
+            // Sheave trains (Rollenbatterien)
             for (let side of [-gauge/2, gauge/2]) {
                 const wheelAssembly = new THREE.Group();
                 const bracket = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.1, 0.3, 1.2),
-                    new THREE.MeshStandardMaterial({ color: 0x888888 })
+                    new THREE.BoxGeometry(0.1, 0.4, 1.8),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
                 );
                 wheelAssembly.add(bracket);
+                
+                // Add small rolls
+                for (let r of [-0.6, -0.2, 0.2, 0.6]) {
+                    const roll = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.2, 0.2, 0.15, 16),
+                        new THREE.MeshStandardMaterial({ color: 0x111111 })
+                    );
+                    roll.rotation.z = Math.PI/2;
+                    roll.position.set(0, 0.2, r);
+                    wheelAssembly.add(roll);
+                }
+                
                 wheelAssembly.position.set(side, height - 0.5, 0);
                 group.add(wheelAssembly);
             }
@@ -986,14 +1086,12 @@ class SkiLift {
         const gauge = isPendulum ? 0 : isSurface ? 1.5 : (this.config.seats > 4 || this.config.cabinSize > 8 ? 4.5 : 3.5);
         const offsets = gauge > 0 ? [-gauge/2, gauge/2] : [0];
         
-        // Pendelbahnen hängen meist ohne Stützen frei (Start zu Ende)
         if (this.poles.length <= 2 || isPendulum) {
             const cableHeight = isSurface ? 2 : 10;
             const startY = (this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0) + cableHeight;
             const endY = (this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0) + cableHeight;
             this.drawCableSegment(this.startPos.x, startY, this.startPos.z, this.endPos.x, endY, this.endPos.z, offsets);
         } else {
-            // Mit Stützen: Kabel von Stütze zu Stütze ziehen
             for (let i = 0; i < this.poles.length - 1; i++) {
                 const p1 = this.poles[i];
                 const p2 = this.poles[i+1];
@@ -1054,7 +1152,6 @@ class SkiLift {
             const y = this.terrain ? this.terrain.getHeightAt(x, z) : 0;
             const ny = this.terrain ? this.terrain.getHeightAt(nx, nz) : 0;
             
-            // Draw a sleeper (Schwellen)
             const sleeper = new THREE.Mesh(
                 new THREE.BoxGeometry(3, 0.2, 0.5),
                 new THREE.MeshStandardMaterial({ color: 0x5c4033 })
@@ -1063,7 +1160,6 @@ class SkiLift {
             sleeper.lookAt(nx, ny, nz);
             this.group.add(sleeper);
             
-            // Left & Right Rails
             for (let side of [-1, 1]) {
                 const track = new THREE.Mesh(
                     new THREE.BoxGeometry(0.2, 0.2, Math.sqrt(dx*dx + dz*dz) + 0.1),
@@ -1134,7 +1230,6 @@ class SkiLift {
                 const x = this.startPos.x + (this.endPos.x - this.startPos.x) * carrier.progress;
                 const z = this.startPos.z + (this.endPos.z - this.startPos.z) * carrier.progress;
                 
-                // Get accurate terrain height or use straight line for tramway
                 const startY = this.terrain ? this.terrain.getHeightAt(this.startPos.x, this.startPos.z) : 0;
                 const endY = this.terrain ? this.terrain.getHeightAt(this.endPos.x, this.endPos.z) : 0;
                 
@@ -1142,13 +1237,12 @@ class SkiLift {
                     const y = this.terrain.getHeightAt(x, z);
                     carrier.mesh.position.set(x, y + 0.5, z);
                     
-                    // Angle match
                     const nextX = x + (this.endPos.x - this.startPos.x) * 0.01 * carrier.direction;
                     const nextZ = z + (this.endPos.z - this.startPos.z) * 0.01 * carrier.direction;
                     const nextY = this.terrain.getHeightAt(nextX, nextZ);
                     carrier.mesh.lookAt(nextX, nextY + 0.5, nextZ);
                 } else {
-                    const baseY = startY + (endY - startY) * carrier.progress + 10;
+                    const baseY = startY + (endY - startY) * carrier.progress + 12;
                     const sag = Math.sin(carrier.progress * Math.PI) * 1.5;
                     carrier.mesh.position.set(x, baseY - sag - 2, z);
                     carrier.mesh.rotation.y = Math.atan2(this.endPos.x - this.startPos.x, this.endPos.z - this.startPos.z);
@@ -1163,7 +1257,6 @@ class SkiLift {
                 const x = this.startPos.x + (this.endPos.x - this.startPos.x) * actProgress;
                 const z = this.startPos.z + (this.endPos.z - this.startPos.z) * actProgress;
                 
-                // Segment-based height mapping
                 let baseY = 0;
                 if (this.poles.length > 2) {
                     const idx = Math.floor(actProgress * (this.poles.length - 1));

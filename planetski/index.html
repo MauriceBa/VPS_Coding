@@ -36,9 +36,10 @@
     <!-- Left Sidebar - Tools -->
     <div id="sidebar-left">
         <div class="tab-buttons">
-            <button class="tab-btn active" data-tab="lifts">🚡 Lifts</button>
-            <button class="tab-btn" data-tab="buildings">🏗️ Buildings</button>
-            <button class="tab-btn" data-tab="slopes">⛷️ Slopes</button>
+            <!-- FIXED: Changed data-tab to match the div IDs perfectly -->
+            <button class="tab-btn active" data-tab="lift">🚡 Lifts</button>
+            <button class="tab-btn" data-tab="building">🏗️ Buildings</button>
+            <button class="tab-btn" data-tab="slope">⛷️ Slopes</button>
         </div>
         
         <div id="lift-menu" class="menu-panel active">
@@ -213,7 +214,14 @@
                 document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
                 
                 btn.classList.add('active');
-                document.getElementById(btn.dataset.tab + '-menu').classList.add('active');
+                // The dataset-tab matches exactly the HTML ids now (lift-menu, building-menu, slope-menu)
+                const menuId = btn.dataset.tab + '-menu';
+                const menuElement = document.getElementById(menuId);
+                if (menuElement) {
+                    menuElement.classList.add('active');
+                } else {
+                    console.error("Menu element not found:", menuId);
+                }
             });
         });
         
