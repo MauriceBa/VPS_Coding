@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SkiTycoon</title>
+  <title>SkiTycoon V3 - Epic Overhaul</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">SkiTycoon</p>
+        <p class="eyebrow">SkiTycoon V3</p>
         <h1>Alpen-Resort-Gruppe</h1>
         <p id="headline-status" class="muted">Baue dein Skigebiets-Imperium auf.</p>
       </div>
       <div class="topbar-actions">
-        <button class="ghost-btn" data-action="speed" data-speed="1">1x</button>
-        <button class="ghost-btn" data-action="speed" data-speed="3">3x</button>
-        <button class="ghost-btn" data-action="save">Speichern</button>
+        <button class="ghost-btn" data-action="speed" data-speed="1">▶ 1x</button>
+        <button class="ghost-btn" data-action="speed" data-speed="3">▶▶ 3x</button>
+        <button class="primary-btn" data-action="save">💾 Speichern</button>
       </div>
     </header>
 
@@ -25,12 +26,12 @@
 
     <nav class="tabs">
       <button class="tab active" data-action="tab" data-tab="overview">Übersicht</button>
-      <button class="tab" data-action="tab" data-tab="build">Bauen</button>
+      <button class="tab" data-action="tab" data-tab="build">Bauen & Erweitern</button>
       <button class="tab" data-action="tab" data-tab="research">Forschung</button>
-      <button class="tab" data-action="tab" data-tab="operations">Betrieb</button>
+      <button class="tab" data-action="tab" data-tab="operations">Betrieb & Personal</button>
       <button class="tab" data-action="tab" data-tab="regions">Gebiete</button>
-      <button class="tab" data-action="tab" data-tab="events">Events</button>
-      <button class="tab" data-action="tab" data-tab="settings">Settings</button>
+      <button class="tab" data-action="tab" data-tab="events">Ziele & Events</button>
+      <button class="tab" data-action="tab" data-tab="settings">Einstellungen</button>
     </nav>
 
     <main id="view" class="view"></main>
