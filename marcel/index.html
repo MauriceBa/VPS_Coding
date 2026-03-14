@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcel Memes 💪🍺</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .meme-container {
+            position: relative;
+            max-width: 600px;
+            width: 100%;
+            background: #222;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .meme-image {
+            width: 100%;
+            display: block;
+        }
+        /* ECHTE MEME TEXT STYLING */
+        .meme-text {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95%;
+            text-align: center;
+            font-family: Impact, 'Arial Black', sans-serif;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.2;
+            /* Der klassische Meme-Outline-Effekt */
+            text-shadow: 
+                3px 3px 0 #000,
+                -3px -3px 0 #000,
+                3px -3px 0 #000,
+                -3px 3px 0 #000,
+                3px 0 0 #000,
+                -3px 0 0 #000,
+                0 3px 0 #000,
+                0 -3px 0 #000,
+                2px 2px 0 #000,
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000;
+            pointer-events: none;
+        }
+        .top-text {
+            top: 20px;
+        }
+        .bottom-text {
+            bottom: 20px;
+        }
+        .refresh-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.3rem;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            border: none;
+            border-radius: 50px;
+            color: #1a1a2e;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255,107,107,0.3);
+        }
+        .refresh-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255,107,107,0.4);
+        }
+        .refresh-btn:active {
+            transform: translateY(-1px);
+        }
+        .marcel-facts {
+            margin-top: 40px;
+            text-align: center;
+            max-width: 600px;
+        }
+        .facts-title {
+            font-size: 1.5rem;
+            color: #ffd93d;
+            margin-bottom: 15px;
+        }
+        .fact {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            .meme-text {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔥 MARCEL MEMES 🔥</h1>
+    <p class="subtitle">Die legendärste Meme-Sammlung des Internets</p>
+    
+    <div class="meme-container">
+        <img id="memeImage" class="meme-image" src="" alt="Marcel Meme">
+        <div id="topText" class="meme-text top-text"></div>
+        <div id="bottomText" class="meme-text bottom-text"></div>
+    </div>
+    
+    <button class="refresh-btn" onclick="generateMeme()">🔄 Neues Meme</button>
+    
+    <div class="marcel-facts">
+        <h2 class="facts-title">💪 Coo Marcel Fakten</h2>
+        <div id="marcelFact" class="fact"></div>
+    </div>
+    
+    <footer>Made with ❤️ for Marcel</footer>
+
+    <script>
+        // Liste aller Bilder
+        const images = [
+            "memes/1531797_666533286744592_1075500039_o.jpg",
+            "memes/20180113_014919.jpg",
+            "memes/IMG-20150104-WA0002.jpg",
+            "memes/IMG-20190706-WA0022.jpg",
+            "memes/IMG-20210207-WA0004.jpg",
+            "memes/IMG-20220508-WA0001.jpg",
+            "memes/IMG-20220813-WA0001.jpg",
+            "memes/IMG-20230506-WA0043.jpg",
+            "memes/IMG-20230618-WA0023.jpg",
+            "memes/IMG-20240112-WA0002.jpg",
+            "memes/IMG-20240601-WA0008.jpg",
+            "memes/IMG-20250426-WA0004.jpg",
+            "memes/IMG-20250628-WA0019.jpeg",
+            "memes/IMG20200626225748.jpg",
+            "memes/IMG20200926222148.jpg",
+            "memes/IMG20210924231821.jpg",
+            "memes/IMG20220115214416.jpg",
+            "memes/IMG_185366496761542.jpeg",
+            "memes/IMG_188049141476535.jpeg",
+            "memes/IMG_188141466562801.jpeg",
+            "memes/IMG_20190615_204932.jpg",
+            "memes/IMG_20190824_214856.jpg",
+            "memes/IMG_20191004_214244.jpg",
+            "memes/MVIMG_20260110_164632.jpg",
+            "memes/MVIMG_20260110_170304.jpg"
+        ];
+
+        // MEME TEMPLATES - Top Text + Bottom Text
+        const memeTemplates = [
+            { top: "WHEN YOU SEE", bottom: "MARCEL ENTER THE GYM" },
+            { top: "NOBODY:", bottom: "MARCEL AT 3AM PUMPING IRON" },
+            { top: "ME: I SHOULD STOP DRINKING", bottom: "MARCEL: ONE MORE WON'T HURT" },
+            { top: "LEG DAY?", bottom: "I THOUGHT YOU SAID KEG DAY" },
+            { top: "MARCEL'S BICEPS", bottom: "HAVE THEIR OWN ZIP CODE" },
+            { top: "WHEN THE BARTENDER ASKS", bottom: "'HOW MANY BEERS?'" },
+            { top: "PROTEIN SHAKE?", bottom: "NAH, PILSNER SHAKE" },
+            { top: "EVERYDAY IS", bottom: "FLEX FRIDAY" },
+            { top: "THE DOCTOR SAID", bottom: "'THAT'S NOT HEALTHY'" },
+            { top: "MARCEL DOESN'T SKIP LEG DAY", bottom: "LEG DAY SKIPS ITSELF" },
+            { top: "WHEN YOU REALIZE", bottom: "IT'S HAPPY HOUR" },
+            { top: "MY BICEPS AREN'T BIG", bottom: "YOUR EYES ARE TOO SMALL" },
+            { top: "PUMPING IRON", bottom: "UNTIL THE SUN COMES UP" },
+            { top: "DRINKING BEER", bottom: "UNTIL THE SUN GOES DOWN" },
+            { top: "MARCEL DOESN'T LIFT WEIGHTS", bottom: "HE LIFTS THE MOOD" },
+            { top: "ONE BEER PER SET", bottom: "THAT'S HOW YOU BUILD MUSCLE" },
+            { top: "WHEN MARCEL OPENS A BEER", bottom: "THE UNIVERSE OPENS TOO" },
+            { top: "NO PAIN", bottom: "NO CHAMPAGNE" },
+            { top: "MARCEL'S SIX PACK", bottom: "HAS MORE DEFINITION THAN MY RESUME" },
+            { top: "BEER BELLY?", bottom: "THOSE ARE RESERVE MUSCLES" },
+            { top: "I'M NOT DRUNK", bottom: "I'M POWERLIFTING" },
+            { top: "THE WEIGHTS DON'T LIFT YOU", bottom: "YOU LIFT THE WEIGHTS" },
+            { top: "GYM IS CLOSED?", bottom: "MARCEL CREATES HIS OWN GYM" },
+            { top: "WHEN MARCEL LAUGHS", bottom: "THE WEIGHTS SHAKE" },
+            { top: "BEER BEFORE GYM", bottom: "ALWAYS A GOOD IDEA" }
+        ];
+
+        // Coo Marcel Fakten
+        const facts = [
+            "Marcel kann mit seinen Bizeps Wasserflaschen öffnen 💪",
+            "Er hat einmal ein Bier nur durch Anschauen gekühlt 🍺",
+            "Sein Bench Press PR ist das Gewicht von 3 Erwachsenen",
+            "Marcel's Anwesenheit allein steigert die Gym-Motivation um 300%",
+            "Er trinkt sein Protein aus einem Bierkrug",
+            "Sein Spitzname in der Fitness-Community lautet 'The German Tank'",
+            "Marcel macht kein Cardio - das Universum läuft um ihn herum",
+            "Er hat mehr Muskeln als ein durchschnittlicher Comic-Superheld",
+            "Sein Bizeps-Umfang wird in Metern gemessen",
+            "Wenn Marcel 'Prost' sagt, antwortet das ganze Gym"
+        ];
+
+        function getRandomItem(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateMeme() {
+            // Zufälliges Bild
+            const randomImage = getRandomItem(images);
+            document.getElementById('memeImage').src = randomImage;
+            
+            // Zufälliges Meme Template (Top + Bottom)
+            const randomMeme = getRandomItem(memeTemplates);
+            document.getElementById('topText').textContent = randomMeme.top;
+            document.getElementById('bottomText').textContent = randomMeme.bottom;
+            
+            // Zufälliger Fakt
+            const randomFact = getRandomItem(facts);
+            document.getElementById('marcelFact').textContent = randomFact;
+        }
+
+        // Beim Laden der Seite direkt ein Meme generieren
+        generateMeme();
+    </script>
+</body>
+</html>
