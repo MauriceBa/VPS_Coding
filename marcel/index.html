@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marcel Memes 💪🍺</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -22,17 +18,25 @@
         }
         h1 {
             font-size: 3rem;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
             background: linear-gradient(45deg, #ff6b6b, #ffd93d);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            cursor: pointer;
+            user-select: none;
         }
         .subtitle {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #888;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
+        }
+        .counter-bar {
+            font-size: 0.95rem;
+            color: #ffd93d;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
         }
         .meme-container {
             position: relative;
@@ -42,12 +46,16 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
         }
+        .meme-container:hover { transform: scale(1.01); }
         .meme-image {
             width: 100%;
             display: block;
+            min-height: 200px;
+            object-fit: cover;
         }
-        /* ECHTE MEME TEXT STYLING */
+        /* Classic meme text: Impact, ALL CAPS, white + black stroke */
         .meme-text {
             position: absolute;
             left: 50%;
@@ -55,14 +63,15 @@
             width: 95%;
             text-align: center;
             font-family: Impact, 'Arial Black', sans-serif;
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 2.4rem;
+            font-weight: 900;
             color: white;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            line-height: 1.2;
-            /* Der klassische Meme-Outline-Effekt */
-            text-shadow: 
+            letter-spacing: 1px;
+            line-height: 1.15;
+            -webkit-text-stroke: 2px black;
+            paint-order: stroke fill;
+            text-shadow:
                 3px 3px 0 #000,
                 -3px -3px 0 #000,
                 3px -3px 0 #000,
@@ -70,23 +79,49 @@
                 3px 0 0 #000,
                 -3px 0 0 #000,
                 0 3px 0 #000,
-                0 -3px 0 #000,
-                2px 2px 0 #000,
-                -2px -2px 0 #000,
-                2px -2px 0 #000,
-                -2px 2px 0 #000;
+                0 -3px 0 #000;
             pointer-events: none;
         }
-        .top-text {
-            top: 20px;
+        .top-text { top: 12px; }
+        .bottom-text { bottom: 12px; }
+        .reaction-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
-        .bottom-text {
-            bottom: 20px;
+        .reaction-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 30px;
+            padding: 8px 18px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .reaction-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
+        .reaction-btn.popped { animation: pop 0.3s ease; }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1); }
+        }
+        .reaction-count { font-size: 0.95rem; min-width: 16px; }
+        .btn-row {
+            display: flex;
+            gap: 15px;
+            margin-top: 22px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .refresh-btn {
-            margin-top: 30px;
-            padding: 15px 40px;
-            font-size: 1.3rem;
+            padding: 13px 35px;
+            font-size: 1.2rem;
             background: linear-gradient(45deg, #ff6b6b, #ffd93d);
             border: none;
             border-radius: 50px;
@@ -96,64 +131,137 @@
             transition: all 0.3s ease;
             box-shadow: 0 10px 30px rgba(255,107,107,0.3);
         }
-        .refresh-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(255,107,107,0.4);
+        .refresh-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 40px rgba(255,107,107,0.4); }
+        .refresh-btn:active { transform: translateY(-1px); }
+        .share-btn {
+            padding: 13px 25px;
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        .refresh-btn:active {
-            transform: translateY(-1px);
-        }
-        .marcel-facts {
+        .share-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .facts-section {
             margin-top: 40px;
-            text-align: center;
             max-width: 600px;
+            width: 100%;
         }
         .facts-title {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             color: #ffd93d;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            text-align: center;
         }
         .fact {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 10px 0;
+            background: rgba(255,255,255,0.07);
+            border-left: 4px solid #ff6b6b;
+            padding: 14px 18px;
+            border-radius: 0 10px 10px 0;
             font-style: italic;
+            font-size: 1rem;
+            line-height: 1.5;
+            transition: all 0.4s;
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #ffd93d;
+            color: #1a1a2e;
+            padding: 12px 28px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.4s cubic-bezier(.175,.885,.32,1.275);
+            z-index: 999;
+            pointer-events: none;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        /* Easter egg overlay */
+        #easterEgg {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-size: 2rem;
+            text-align: center;
+            padding: 30px;
+        }
+        #easterEgg.show { display: flex; }
+        #easterEgg button {
+            margin-top: 25px;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 30px;
+            background: #ffd93d;
+            color: #1a1a2e;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
         }
         footer {
-            margin-top: auto;
+            margin-top: 50px;
             padding: 20px;
-            color: #666;
-            font-size: 0.9rem;
+            color: #444;
+            font-size: 0.85rem;
         }
-        @media (max-width: 600px) {
-            .meme-text {
-                font-size: 1.8rem;
-            }
+        @media (max-width: 500px) {
+            h1 { font-size: 2rem; }
+            .meme-text { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-    <h1>🔥 MARCEL MEMES 🔥</h1>
+
+    <h1 id="title" title="Klick mich...">🔥 MARCEL MEMES 🔥</h1>
     <p class="subtitle">Die legendärste Meme-Sammlung des Internets</p>
-    
+    <p class="counter-bar">🎲 Meme #<span id="memeCount">1</span> von <span id="totalMemes">?</span> &nbsp;|&nbsp; 👀 <span id="viewCount">0</span> gesehen</p>
+
     <div class="meme-container">
         <img id="memeImage" class="meme-image" src="" alt="Marcel Meme">
         <div id="topText" class="meme-text top-text"></div>
         <div id="bottomText" class="meme-text bottom-text"></div>
     </div>
-    
-    <button class="refresh-btn" onclick="generateMeme()">🔄 Neues Meme</button>
-    
-    <div class="marcel-facts">
-        <h2 class="facts-title">💪 Coo Marcel Fakten</h2>
+
+    <div class="reaction-bar">
+        <button class="reaction-btn" onclick="react('fire')" id="btn-fire">🔥 <span class="reaction-count" id="cnt-fire">0</span></button>
+        <button class="reaction-btn" onclick="react('lol')" id="btn-lol">😂 <span class="reaction-count" id="cnt-lol">0</span></button>
+        <button class="reaction-btn" onclick="react('skull')" id="btn-skull">💀 <span class="reaction-count" id="cnt-skull">0</span></button>
+        <button class="reaction-btn" onclick="react('muscle')" id="btn-muscle">💪 <span class="reaction-count" id="cnt-muscle">0</span></button>
+        <button class="reaction-btn" onclick="react('beer')" id="btn-beer">🍺 <span class="reaction-count" id="cnt-beer">0</span></button>
+    </div>
+
+    <div class="btn-row">
+        <button class="refresh-btn" onclick="generateMeme()">🔄 Neues Meme</button>
+        <button class="share-btn" onclick="shareMeme()">📋 Caption kopieren</button>
+    </div>
+
+    <div class="facts-section">
+        <h2 class="facts-title">💪 Marcel Fakten</h2>
         <div id="marcelFact" class="fact"></div>
     </div>
-    
-    <footer>Made with ❤️ for Marcel</footer>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Easter Egg Overlay -->
+    <div id="easterEgg">
+        <div>🏳️‍🌈💪🍺</div>
+        <div style="font-size:1.3rem; margin-top:15px; color:#ffd93d;">Du hast Marcels Geheimnis entdeckt...</div>
+        <div style="font-size:1rem; margin-top:10px; color:#aaa;">Er trainiert für das Leben, trinkt für den Spaß,<br>und liebt jeden so wie er ist. 🫶</div>
+        <button onclick="document.getElementById('easterEgg').classList.remove('show')">Schließen</button>
+    </div>
+
+    <footer>Made with ❤️ for Marcel &nbsp;|&nbsp; <span id="footerCount">0</span> Reaktionen insgesamt</footer>
 
     <script>
-        // Liste aller Bilder
         const images = [
             "memes/1531797_666533286744592_1075500039_o.jpg",
             "memes/20180113_014919.jpg",
@@ -182,70 +290,119 @@
             "memes/MVIMG_20260110_170304.jpg"
         ];
 
-        // MEME TEMPLATES - Top Text + Bottom Text
-        const memeTemplates = [
-            { top: "WHEN YOU SEE", bottom: "MARCEL ENTER THE GYM" },
-            { top: "NOBODY:", bottom: "MARCEL AT 3AM PUMPING IRON" },
-            { top: "ME: I SHOULD STOP DRINKING", bottom: "MARCEL: ONE MORE WON'T HURT" },
-            { top: "LEG DAY?", bottom: "I THOUGHT YOU SAID KEG DAY" },
-            { top: "MARCEL'S BICEPS", bottom: "HAVE THEIR OWN ZIP CODE" },
-            { top: "WHEN THE BARTENDER ASKS", bottom: "'HOW MANY BEERS?'" },
-            { top: "PROTEIN SHAKE?", bottom: "NAH, PILSNER SHAKE" },
-            { top: "EVERYDAY IS", bottom: "FLEX FRIDAY" },
-            { top: "THE DOCTOR SAID", bottom: "'THAT'S NOT HEALTHY'" },
-            { top: "MARCEL DOESN'T SKIP LEG DAY", bottom: "LEG DAY SKIPS ITSELF" },
-            { top: "WHEN YOU REALIZE", bottom: "IT'S HAPPY HOUR" },
-            { top: "MY BICEPS AREN'T BIG", bottom: "YOUR EYES ARE TOO SMALL" },
-            { top: "PUMPING IRON", bottom: "UNTIL THE SUN COMES UP" },
-            { top: "DRINKING BEER", bottom: "UNTIL THE SUN GOES DOWN" },
-            { top: "MARCEL DOESN'T LIFT WEIGHTS", bottom: "HE LIFTS THE MOOD" },
-            { top: "ONE BEER PER SET", bottom: "THAT'S HOW YOU BUILD MUSCLE" },
-            { top: "WHEN MARCEL OPENS A BEER", bottom: "THE UNIVERSE OPENS TOO" },
-            { top: "NO PAIN", bottom: "NO CHAMPAGNE" },
-            { top: "MARCEL'S SIX PACK", bottom: "HAS MORE DEFINITION THAN MY RESUME" },
-            { top: "BEER BELLY?", bottom: "THOSE ARE RESERVE MUSCLES" },
-            { top: "I'M NOT DRUNK", bottom: "I'M POWERLIFTING" },
-            { top: "THE WEIGHTS DON'T LIFT YOU", bottom: "YOU LIFT THE WEIGHTS" },
-            { top: "GYM IS CLOSED?", bottom: "MARCEL CREATES HIS OWN GYM" },
-            { top: "WHEN MARCEL LAUGHS", bottom: "THE WEIGHTS SHAKE" },
-            { top: "BEER BEFORE GYM", bottom: "ALWAYS A GOOD IDEA" }
-        ];
-
-        // Coo Marcel Fakten
         const facts = [
             "Marcel kann mit seinen Bizeps Wasserflaschen öffnen 💪",
             "Er hat einmal ein Bier nur durch Anschauen gekühlt 🍺",
             "Sein Bench Press PR ist das Gewicht von 3 Erwachsenen",
             "Marcel's Anwesenheit allein steigert die Gym-Motivation um 300%",
             "Er trinkt sein Protein aus einem Bierkrug",
-            "Sein Spitzname in der Fitness-Community lautet 'The German Tank'",
-            "Marcel macht kein Cardio - das Universum läuft um ihn herum",
+            "Sein Spitzname in der Fitness-Community: 'The German Tank'",
+            "Marcel macht kein Cardio – das Universum läuft um ihn herum",
             "Er hat mehr Muskeln als ein durchschnittlicher Comic-Superheld",
             "Sein Bizeps-Umfang wird in Metern gemessen",
-            "Wenn Marcel 'Prost' sagt, antwortet das ganze Gym"
+            "Wenn Marcel 'Prost' sagt, antwortet das ganze Gym",
+            "Marcel's Playlist im Gym: 50% Rammstein, 50% ABBA",
+            "Er braucht keine Ammoniak-Riechsalze – er riecht an Bier",
+            "Marcel hat einmal eine Langhantel verbogen – mit dem Blick",
+            "Sein Arzt hat aufgehört, ihn zu behandeln. Aus Respekt.",
+            "Marcel zählt Bier als Elektrolyte. Die Wissenschaft hat das noch nicht widerlegt."
         ];
+
+        let captions = [];
+        let viewCount = 0;
+        let titleClicks = 0;
+        const reactions = { fire: 0, lol: 0, skull: 0, muscle: 0, beer: 0 };
+        let usedIndices = [];
+
+        // Load captions from txt file
+        async function loadCaptions() {
+            try {
+                const res = await fetch('captions.txt');
+                const text = await res.text();
+                captions = text.split('\n')
+                    .map(l => l.trim())
+                    .filter(l => l.includes('|'))
+                    .map(l => {
+                        const [top, bottom] = l.split('|');
+                        return { top: top.trim(), bottom: bottom.trim() };
+                    });
+                document.getElementById('totalMemes').textContent = captions.length;
+            } catch(e) {
+                captions = [{ top: "MARCEL", bottom: "THE LEGEND" }];
+            }
+            generateMeme();
+        }
 
         function getRandomItem(array) {
             return array[Math.floor(Math.random() * array.length)];
         }
 
         function generateMeme() {
-            // Zufälliges Bild
-            const randomImage = getRandomItem(images);
-            document.getElementById('memeImage').src = randomImage;
-            
-            // Zufälliges Meme Template (Top + Bottom)
-            const randomMeme = getRandomItem(memeTemplates);
-            document.getElementById('topText').textContent = randomMeme.top;
-            document.getElementById('bottomText').textContent = randomMeme.bottom;
-            
-            // Zufälliger Fakt
-            const randomFact = getRandomItem(facts);
-            document.getElementById('marcelFact').textContent = randomFact;
+            if (captions.length === 0) return;
+
+            // Reset used list when all seen
+            if (usedIndices.length >= captions.length) usedIndices = [];
+
+            let idx;
+            do { idx = Math.floor(Math.random() * captions.length); }
+            while (usedIndices.includes(idx));
+            usedIndices.push(idx);
+
+            const cap = captions[idx];
+            document.getElementById('topText').textContent = cap.top;
+            document.getElementById('bottomText').textContent = cap.bottom;
+            document.getElementById('memeImage').src = getRandomItem(images);
+            document.getElementById('memeCount').textContent = idx + 1;
+
+            viewCount++;
+            document.getElementById('viewCount').textContent = viewCount;
+            document.getElementById('marcelFact').textContent = getRandomItem(facts);
         }
 
-        // Beim Laden der Seite direkt ein Meme generieren
-        generateMeme();
+        function react(type) {
+            reactions[type]++;
+            document.getElementById('cnt-' + type).textContent = reactions[type];
+            const btn = document.getElementById('btn-' + type);
+            btn.classList.remove('popped');
+            void btn.offsetWidth;
+            btn.classList.add('popped');
+            const total = Object.values(reactions).reduce((a,b)=>a+b,0);
+            document.getElementById('footerCount').textContent = total;
+
+            // Easter egg: 10 beer reactions
+            if (reactions.beer >= 10) showEasterEgg();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2500);
+        }
+
+        function shareMeme() {
+            const top = document.getElementById('topText').textContent;
+            const bottom = document.getElementById('bottomText').textContent;
+            const text = top + ' / ' + bottom;
+            navigator.clipboard.writeText(text).then(() => showToast('📋 Caption kopiert!'));
+        }
+
+        function showEasterEgg() {
+            document.getElementById('easterEgg').classList.add('show');
+        }
+
+        // Easter egg: klick 7x auf den Titel
+        document.getElementById('title').addEventListener('click', () => {
+            titleClicks++;
+            if (titleClicks === 7) {
+                showEasterEgg();
+                titleClicks = 0;
+            } else {
+                showToast(['💪','🍺','👀','🔥','😏','🌈','...'][titleClicks - 1]);
+            }
+        });
+
+        loadCaptions();
     </script>
 </body>
 </html>
