@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🍺 Beer & Cider Style Explorer</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <span class="logo">🍺</span>
+      <h1>Beer &amp; Cider Style Explorer</h1>
+      <p class="subtitle">Based on Brewers Association 2026 Guidelines &amp; World Beer Cup Categories</p>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="explorer">Style Explorer</button>
+    <button class="tab-btn" data-tab="compare">Compare Styles</button>
+    <button class="tab-btn" data-tab="recipe">Recipe Builder</button>
+    <button class="tab-btn" data-tab="drift">Style Drift Analyzer</button>
+  </nav>
+
+  <!-- STYLE EXPLORER TAB -->
+  <section id="tab-explorer" class="tab-content active">
+    <div class="filters">
+      <label>Category:
+        <select id="filter-category">
+          <option value="all">All</option>
+          <option value="ipa">IPA</option>
+          <option value="stout">Stout</option>
+          <option value="lager">Lager</option>
+          <option value="mixed">Mixed Fermentation</option>
+          <option value="cider">Cider</option>
+        </select>
+      </label>
+      <label>Max IBU: <input type="range" id="filter-ibu" min="0" max="120" value="120" /> <span id="ibu-val">120</span></label>
+      <label>Max ABV %: <input type="range" id="filter-abv" min="0" max="16" step="0.5" value="16" /> <span id="abv-val">16</span></label>
+    </div>
+    <div id="style-grid" class="style-grid"></div>
+  </section>
+
+  <!-- COMPARE TAB -->
+  <section id="tab-compare" class="tab-content">
+    <div class="compare-controls">
+      <label>Style A: <select id="compare-a"></select></label>
+      <label>Style B: <select id="compare-b"></select></label>
+      <button id="btn-compare" class="btn-primary">Compare</button>
+    </div>
+    <div id="compare-result" class="compare-result"></div>
+    <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+  </section>
+
+  <!-- RECIPE BUILDER TAB -->
+  <section id="tab-recipe" class="tab-content">
+    <div class="recipe-layout">
+      <div class="recipe-form">
+        <h2>Recipe Parameters</h2>
+        <label>Beer Name: <input type="text" id="r-name" value="My Brew" /></label>
+        <label>Target Style:
+          <select id="r-style"></select>
+        </label>
+        <label>Batch Size (L): <input type="number" id="r-batch" value="20" min="1" /></label>
+        <label>Target OG: <input type="number" id="r-og" value="1.065" step="0.001" min="1.000" max="1.200" /></label>
+        <label>Target FG: <input type="number" id="r-fg" value="1.012" step="0.001" min="0.990" max="1.100" /></label>
+        <label>Target IBU: <input type="number" id="r-ibu" value="45" min="0" max="120" /></label>
+        <label>Target Color (SRM): <input type="number" id="r-srm" value="6" min="1" max="40" /></label>
+        <button id="btn-build" class="btn-primary">Generate Recipe</button>
+        <button id="btn-export" class="btn-secondary">⬇ Download Excel</button>
+      </div>
+      <div id="recipe-output" class="recipe-output">
+        <p class="placeholder">👈 Fill in parameters and click "Generate Recipe"</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DRIFT ANALYZER TAB -->
+  <section id="tab-drift" class="tab-content">
+    <h2>Style Drift Analyzer</h2>
+    <p class="hint">Enter your current recipe metrics — the tool scores how close you are to each style and suggests adjustments.</p>
+    <div class="drift-form">
+      <label>ABV (%): <input type="number" id="d-abv" value="6.5" step="0.1" /></label>
+      <label>IBU: <input type="number" id="d-ibu" value="55" /></label>
+      <label>SRM (Color): <input type="number" id="d-srm" value="5" /></label>
+      <label>OG: <input type="number" id="d-og" value="1.065" step="0.001" /></label>
+      <label>FG: <input type="number" id="d-fg" value="1.010" step="0.001" /></label>
+      <label>Fermentation Type:
+        <select id="d-ferm">
+          <option value="ale">Top-Fermented (Ale)</option>
+          <option value="lager">Bottom-Fermented (Lager)</option>
+          <option value="mixed">Mixed / Wild</option>
+          <option value="kveik">Kveik</option>
+        </select>
+      </label>
+      <button id="btn-drift" class="btn-primary">Analyze Drift</button>
+    </div>
+    <div id="drift-result"></div>
+    <div class="chart-wrap"><canvas id="driftChart"></canvas></div>
+  </section>
+
+  <footer>
+    <p>Data based on Brewers Association Beer Style Guidelines 2026 &amp; World Beer Cup 2026 categories. For educational use.</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
