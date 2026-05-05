@@ -3,6 +3,7 @@ import os
 import math
 import time
 import datetime
+import logging
 from zoneinfo import ZoneInfo
 
 from telegram import Update
@@ -10,6 +11,64 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from FlightRadar24 import FlightRadar24API
+
+# Logging konfigurieren
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('ballon_bot.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Versuche staticmap zu importieren (für Karten-Generierung)
+try:
+    from staticmap import StaticMap, CircleMarker
+    STATICMAP_AVAILABLE = True
+except ImportError:
+    STATICMAP_AVAILABLE = False
+    logger.warning("staticmap nicht installiert. Karten-Funktion deaktiviert.")
+
+def generate_balloon_map(home_lat, home_lon, balloon_lat, balloon_lon):
+    """Generiert eine statische Karte mit Heimatort und Ballon-Position."""
+    if not STATICMAP_AVAILABLE:
+        return None
+    try:
+        m = StaticMap(600, 400)
+        # Heimatort (blau)
+        m.add_marker(CircleMarker((home_lon, home_lat), 'blue', 10))
+        # Ballon (rot)
+        m.add_marker(CircleMarker((balloon_lon, balloon_lat), 'red', 10))
+        image = m.render()
+        map_path = '/tmp/balloon_map.png'
+        image.save(map_path)
+        return map_path
+    except Exception as e:
+        logger.error(f"Fehler bei Kartengenerierung: {e}")
+        return None
+
+def get_balloon_photo(callsign, registration):
+    """Sucht ein Foto des Ballons über die Wikipedia API."""
+    query = callsign.strip() if callsign else registration.strip()
+    if not query:
+        return None
+    try:
+        import urllib.parse
+        import urllib.request
+        import json
+        query_encoded = urllib.parse.quote(query)
+        url = f"https://en.wikipedia.org/w/api.php?action=query&titles={query_encoded}&prop=pageimages&format=json&pithumbsize=400"
+        with urllib.request.urlopen(url, timeout=5) as response:
+            data = json.loads(response.read())
+            pages = data.get('query', {}).get('pages', {})
+            for page_id, page in pages.items():
+                if 'thumbnail' in page:
+                    return page['thumbnail']['source']
+    except Exception as e:
+        logger.error(f"Fehler bei Wikipedia-Suche: {e}")
+    return None
 
 # --- EINSTELLUNGEN ---
 TELEGRAM_TOKEN = "8745987610:AAGg7mDIT4vKMV-_uV8YvUk46lUBQaSy27U"
@@ -98,6 +157,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>/now</b> - Führt sofort einen Scan nach Ballons im aktuellen Radius aus\n"
         "<b>/flugzeuge</b> - Sucht sofort nach den 5 Flugzeugen, die dir am nächsten sind\n"
         "<b>/alltime</b> - Zeigt eine Gesamtstatistik aller bisher gefundenen Ballons\n"
+        "<b>/weekly</b> - Zeigt die Ballon-Statistik der letzten 7 Tage\n"
+        "<b>/monthly</b> - Zeigt die Ballon-Statistik der letzten 30 Tage\n"
     )
     await update.message.reply_text(msg, parse_mode="HTML")
 
@@ -164,7 +225,8 @@ async def now(update: Update, context: ContextTypes.DEFAULT_TYPE):
         flights = fr_api.get_flights(bounds=bounds)
         balloons = [f for f in flights if is_balloon(f)]
     except Exception as e:
-        await update.message.reply_text("❌ Fehler beim Abrufen der Flightradar-Daten.")
+        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in /now: {e}")
+        await update.message.reply_text("❌ Fehler beim Abrufen der Flightradar-Daten. Details wurden geloggt.")
         return
 
     found_in_radius = []
@@ -195,6 +257,24 @@ async def now(update: Update, context: ContextTypes.DEFAULT_TYPE):
                f"<b>Speed:</b> {b.ground_speed} kts\n"
                f"<b>Callsign/Reg:</b> {b.callsign} / {b.registration}\n\n"
                f"📍 https://www.flightradar24.com/{b.id}")
+        
+        # Karte generieren und senden
+        map_path = generate_balloon_map(active_lat, active_lon, b.latitude, b.longitude)
+        if map_path:
+            try:
+                with open(map_path, 'rb') as photo:
+                    await update.message.reply_photo(photo=photo)
+            except Exception as e:
+                logger.error(f"Fehler beim Senden der Karte: {e}")
+        
+        # Foto suchen und senden (Wikipedia)
+        photo_url = get_balloon_photo(b.callsign, b.registration)
+        if photo_url:
+            try:
+                await update.message.reply_photo(photo=photo_url)
+            except Exception as e:
+                logger.error(f"Fehler beim Senden des Fotos: {e}")
+        
         await update.message.reply_text(msg, parse_mode="HTML")
         
         # In die Liste aufnehmen, damit der 5-Minuten-Job danach nicht sofort nochmal warnt
@@ -219,7 +299,8 @@ async def flugzeuge(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         flights = fr_api.get_flights(bounds=bounds)
     except Exception as e:
-        await update.message.reply_text("❌ Fehler beim Abrufen der Flightradar-Daten.")
+        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in /flugzeuge: {e}")
+        await update.message.reply_text("❌ Fehler beim Abrufen der Flightradar-Daten. Details wurden geloggt.")
         return
 
     if not flights:
@@ -273,6 +354,73 @@ async def alltime(update: Update, context: ContextTypes.DEFAULT_TYPE):
            f"📍 Innerhalb 1000 km: <b>{len(all_1000)}</b>")
     await update.message.reply_text(msg, parse_mode="HTML")
 
+# --- NEUE STATISTIK-BEFEHLE ---
+
+async def weekly(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Statistik der letzten 7 Tage"""
+    stats = {}
+    if os.path.exists(STATS_FILE):
+        with open(STATS_FILE, "r") as f:
+            stats = json.load(f)
+    
+    today = datetime.date.today()
+    week_ago = today - datetime.timedelta(days=7)
+    
+    all_10 = set()
+    all_50 = set()
+    all_100 = set()
+    all_500 = set()
+    all_1000 = set()
+    
+    for i in range(7):
+        day = (week_ago + datetime.timedelta(days=i)).isoformat()
+        if day in stats:
+            all_10.update(stats[day].get("10", []))
+            all_50.update(stats[day].get("50", []))
+            all_100.update(stats[day].get("100", []))
+            all_500.update(stats[day].get("500", []))
+            all_1000.update(stats[day].get("1000", []))
+    
+    msg = (f"📊 <b>Wochenstatistik (letzte 7 Tage):</b>\n\n"
+           f"📍 Innerhalb 10 km: <b>{len(all_10)}</b>\n"
+           f"📍 Innerhalb 50 km: <b>{len(all_50)}</b>\n"
+           f"📍 Innerhalb 100 km: <b>{len(all_100)}</b>\n"
+           f"📍 Innerhalb 500 km: <b>{len(all_500)}</b>\n"
+           f"📍 Innerhalb 1000 km: <b>{len(all_1000)}</b>")
+    await update.message.reply_text(msg, parse_mode="HTML")
+
+async def monthly(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Statistik der letzten 30 Tage"""
+    stats = {}
+    if os.path.exists(STATS_FILE):
+        with open(STATS_FILE, "r") as f:
+            stats = json.load(f)
+    
+    today = datetime.date.today()
+    month_ago = today - datetime.timedelta(days=30)
+    
+    all_10 = set()
+    all_50 = set()
+    all_100 = set()
+    all_500 = set()
+    all_1000 = set()
+    
+    for i in range(30):
+        day = (month_ago + datetime.timedelta(days=i)).isoformat()
+        if day in stats:
+            all_10.update(stats[day].get("10", []))
+            all_50.update(stats[day].get("50", []))
+            all_100.update(stats[day].get("100", []))
+            all_500.update(stats[day].get("500", []))
+            all_1000.update(stats[day].get("1000", []))
+    
+    msg = (f"📈 <b>Monatsstatistik (letzte 30 Tage):</b>\n\n"
+           f"📍 Innerhalb 10 km: <b>{len(all_10)}</b>\n"
+           f"📍 Innerhalb 50 km: <b>{len(all_50)}</b>\n"
+           f"📍 Innerhalb 100 km: <b>{len(all_100)}</b>\n"
+           f"📍 Innerhalb 500 km: <b>{len(all_500)}</b>\n"
+           f"📍 Innerhalb 1000 km: <b>{len(all_1000)}</b>")
+    await update.message.reply_text(msg, parse_mode="HTML")
 
 # --- HINTERGRUND-TASKS ---
 
@@ -296,7 +444,8 @@ async def check_hourly_stats_job(context: ContextTypes.DEFAULT_TYPE):
     try:
         flights = fr_api.get_flights(bounds=bounds)
         balloons = [f for f in flights if is_balloon(f)]
-    except Exception:
+    except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in check_hourly_stats_job: {e}")
         return
 
     for b in balloons:
@@ -341,6 +490,7 @@ async def check_balloons_job(context: ContextTypes.DEFAULT_TYPE):
         flights = fr_api.get_flights(bounds=bounds)
         balloons = [f for f in flights if is_balloon(f)]
     except Exception as e:
+        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in check_balloons_job: {e}")
         return
 
     known_balloons = []
@@ -365,6 +515,23 @@ async def check_balloons_job(context: ContextTypes.DEFAULT_TYPE):
                        f"<b>Speed:</b> {b.ground_speed} kts\n"
                        f"<b>Callsign/Reg:</b> {b.callsign} / {b.registration}\n\n"
                        f"📍 https://www.flightradar24.com/{b.id}")
+                
+                # Karte generieren und senden
+                map_path = generate_balloon_map(active_lat, active_lon, b.latitude, b.longitude)
+                if map_path:
+                    try:
+                        with open(map_path, 'rb') as photo:
+                            await context.bot.send_photo(chat_id=config["chat_id"], photo=photo)
+                    except Exception as e:
+                        logger.error(f"Fehler beim Senden der Karte: {e}")
+                
+                # Foto suchen und senden (Wikipedia)
+                photo_url = get_balloon_photo(b.callsign, b.registration)
+                if photo_url:
+                    try:
+                        await context.bot.send_photo(chat_id=config["chat_id"], photo=photo_url)
+                    except Exception as e:
+                        logger.error(f"Fehler beim Senden des Fotos: {e}")
                 
                 await context.bot.send_message(chat_id=config["chat_id"], text=msg, parse_mode="HTML")
 
@@ -431,6 +598,8 @@ def main():
     app.add_handler(CommandHandler("now", now))  # NEU HINZUGEFÜGT
     app.add_handler(CommandHandler("flugzeuge", flugzeuge))
     app.add_handler(CommandHandler("alltime", alltime))
+    app.add_handler(CommandHandler("weekly", weekly))
+    app.add_handler(CommandHandler("monthly", monthly))
 
     job_queue = app.job_queue
     job_queue.run_repeating(check_balloons_job, interval=300, first=10, job_kwargs={'misfire_grace_time': 60})
