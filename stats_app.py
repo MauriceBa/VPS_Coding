@@ -3,13 +3,22 @@ from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 import psutil
 import time
-import os
+import collections
+import json
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-# Speicher für Netzwerk-Geschwindigkeitsberechnung
-last_net_bytes = {"sent": 0, "recv": 0, "time": 0}
+# Historie für Zeitreihen (max 24h bei 5s Intervall = 17280 Einträge)
+MAX_HISTORY = 17280  # 24h * 3600s / 5s
+cpu_history = collections.deque(maxlen=MAX_HISTORY)
+ram_history = collections.deque(maxlen=MAX_HISTORY)
+net_history = collections.deque(maxlen=MAX_HISTORY)
+timestamps = collections.deque(maxlen=MAX_HISTORY)
+
+# Netzwerk-Initialisierung
+last_net = psutil.net_io_counters()
+last_net_time = time.time()
 
 @app.route('/')
 def serve_index():
@@ -21,33 +30,35 @@ def serve_static(path):
 
 @app.route('/api/stats')
 def get_stats():
-    global last_net_bytes
+    global last_net, last_net_time
     
-    # CPU Auslastung (1 Sekunde messen)
-    cpu_total = psutil.cpu_percent(interval=1)
-    cpu_per_core = psutil.cpu_percent(interval=0.5, percpu=True)
-    
-    # RAM Auslastung
-    ram = psutil.virtual_memory()
-    
-    # Netzwerk Statistiken (Geschwindigkeit berechnen)
-    net = psutil.net_io_counters()
     current_time = time.time()
     
+    # CPU
+    cpu_total = psutil.cpu_percent(interval=0.5)
+    cpu_per_core = psutil.cpu_percent(interval=0.3, percpu=True)
+    
+    # RAM
+    ram = psutil.virtual_memory()
+    
+    # Netzwerk
+    net = psutil.net_io_counters()
     dl_speed = 0
     ul_speed = 0
     
-    if last_net_bytes["time"] > 0:
-        time_diff = current_time - last_net_bytes["time"]
-        if time_diff > 0:
-            dl_speed = (net.bytes_recv - last_net_bytes["recv"]) / time_diff / 1024  # KB/s
-            ul_speed = (net.bytes_sent - last_net_bytes["sent"]) / time_diff / 1024  # KB/s
+    time_diff = current_time - last_net_time
+    if time_diff > 0:
+        dl_speed = (net.bytes_recv - last_net.bytes_recv) / time_diff / 1024  # KB/s
+        ul_speed = (net.bytes_sent - last_net.bytes_sent) / time_diff / 1024  # KB/s
     
-    last_net_bytes = {
-        "sent": net.bytes_sent,
-        "recv": net.bytes_recv,
-        "time": current_time
-    }
+    last_net = net
+    last_net_time = current_time
+    
+    # Historie speichern
+    cpu_history.append(cpu_total)
+    ram_history.append(ram.percent)
+    net_history.append({"dl": dl_speed, "ul": ul_speed})
+    timestamps.append(current_time)
     
     return jsonify({
         "cpu": {
@@ -63,6 +74,38 @@ def get_stats():
             "dl_speed_kbs": round(dl_speed, 2),
             "ul_speed_kbs": round(ul_speed, 2)
         }
+    })
+
+@app.route('/api/history/<period>')
+def get_history(period):
+    """Zeitreihen für verschiedene Zeiträume: '1m', '1h', '24h'"""
+    now = time.time()
+    
+    if period == '1m':
+        seconds = 60
+    elif period == '1h':
+        seconds = 3600
+    elif period == '24h':
+        seconds = 86400
+    else:
+        return jsonify({"error": "Invalid period. Use: 1m, 1h, 24h"}), 400
+    
+    # Daten filtern
+    cutoff = now - seconds
+    filtered_data = []
+    
+    for i, ts in enumerate(timestamps):
+        if ts >= cutoff:
+            filtered_data.append({
+                "timestamp": ts,
+                "cpu": cpu_history[i] if i < len(cpu_history) else None,
+                "ram": ram_history[i] if i < len(ram_history) else None,
+                "net": net_history[i] if i < len(net_history) else None
+            })
+    
+    return jsonify({
+        "period": period,
+        "data": filtered_data
     })
 
 if __name__ == '__main__':
