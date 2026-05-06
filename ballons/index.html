@@ -135,8 +135,8 @@
         
         <!-- 2D/3D Toggle -->
         <div class="map-toggle">
-            <button class="map-toggle-btn active" id="btn3D" onclick="switchTo3D()">🌐 3D Globus</button>
-            <button class="map-toggle-btn" id="btn2D" onclick="switchTo2D()">🗺️ 2D Karte</button>
+            <button class="map-toggle-btn" id="btn3D" onclick="switchTo3D()">🌐 3D Globus</button>
+            <button class="map-toggle-btn active" id="btn2D" onclick="switchTo2D()">🗺️ 2D Karte</button>
         </div>
         
         <div class="day-selector">
@@ -209,12 +209,12 @@
     </div>
     
     <!-- Map Container (wie slopes: separate Divs, display none/block) -->
-    <div class="map-container">
-        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Vollbild</button>
-        <div id="cesiumContainer" class="map-div active"></div>
-        <div id="leafletContainer" class="map-div"></div>
-        <!-- Kein Loading-Div wie auf slopes-Seite -->
-    </div>
+        <div class="map-container">
+            <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Vollbild</button>
+            <div id="cesiumContainer" class="map-div"></div>
+            <div id="leafletContainer" class="map-div active"></div>
+            <!-- Kein Loading-Div wie auf slopes-Seite -->
+        </div>
 
     <script>
         // Cesium Token
