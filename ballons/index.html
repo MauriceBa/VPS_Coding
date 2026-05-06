@@ -35,27 +35,34 @@
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+               background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
         
         /* Sidebar */
-        .sidebar { width: 340px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .sidebar { width: 340px; background: var(--surface); border-right: 1px solid var(--border); 
+                   padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
         .sidebar h2 { font-size: 1.3rem; margin-bottom: 8px; }
         .sidebar h3 { font-size: 1rem; color: var(--muted); margin-bottom: 8px; }
         
-        /* 2D/3D Toggle */
+        /* 2D/3D Toggle (wie slopes) */
         .map-toggle { display: flex; background: var(--surface2); border-radius: 8px; padding: 4px; margin-bottom: 8px; }
-        .map-toggle-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--muted); cursor: pointer; border-radius: 6px; font-size: 0.9rem; transition: all 0.2s; }
+        .map-toggle-btn { flex: 1; padding: 8px; border: none; background: transparent; 
+                         color: var(--muted); cursor: pointer; border-radius: 6px; font-size: 0.9rem; 
+                         transition: all 0.2s; }
         .map-toggle-btn.active { background: var(--accent); color: white; }
         
         /* Tag-Auswahl */
         .day-selector { display: flex; flex-direction: column; gap: 8px; }
         .day-actions { display: flex; gap: 8px; margin-bottom: 12px; }
-        .btn-day { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .btn-day { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); 
+                    background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; 
+                    transition: all 0.2s; }
         .btn-day:hover { background: var(--accent); color: white; }
         .btn-day.active { background: var(--accent); color: white; }
         
         .day-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
-        .day-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; background: var(--surface2); cursor: pointer; transition: all 0.2s; }
+        .day-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; 
+                     background: var(--surface2); cursor: pointer; transition: all 0.2s; }
         .day-item:hover { background: var(--border); }
         .day-item input { cursor: pointer; }
         .day-item label { cursor: pointer; flex: 1; font-size: 0.9rem; }
@@ -65,46 +72,55 @@
         .filters { background: var(--surface2); padding: 12px; border-radius: 8px; }
         .filter-group { margin-bottom: 10px; }
         .filter-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
-        .filter-group input, .filter-group select { width: 100%; padding: 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; }
+        .filter-group input, .filter-group select { width: 100%; padding: 6px; border-radius: 4px; 
+                                                border: 1px solid var(--border); background: var(--bg); 
+                                                color: var(--text); font-size: 0.85rem; }
         .filter-range { display: flex; gap: 8px; align-items: center; }
         .filter-range input { flex: 1; }
         
         /* Playback */
         .playback { background: var(--surface2); padding: 12px; border-radius: 8px; }
         .playback-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-        .btn-play { padding: 8px 16px; border-radius: 6px; border: none; background: var(--accent); color: white; cursor: pointer; font-size: 0.9rem; }
+        .btn-play { padding: 8px 16px; border-radius: 6px; border: none; background: var(--accent); 
+                     color: white; cursor: pointer; font-size: 0.9rem; }
         .btn-play:hover { opacity: 0.9; }
         .timeline { width: 100%; }
         .time-display { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 4px; }
         
-        /* Map Container */
+        /* Map Container (wie slopes) */
         .map-container { flex: 1; position: relative; }
-        #cesiumContainer, #leafletContainer { width: 100%; height: 100%; display: none; }
-        #cesiumContainer.active, #leafletContainer.active { display: block; }
+        .map-div { width: 100%; height: 100%; display: none; }
+        .map-div.active { display: block; }
         
         /* Stats */
         .stats { background: var(--surface2); padding: 12px; border-radius: 8px; margin-top: auto; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
         
         /* Loading */
-        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text); font-size: 1.2rem; z-index: 1000; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 12px; }
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                    color: var(--text); font-size: 1.2rem; z-index: 1000; background: rgba(0,0,0,0.7); 
+                    padding: 20px; border-radius: 12px; }
         
         /* Features */
         .features { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-        .feature-tag { padding: 4px 10px; border-radius: 12px; background: var(--surface2); font-size: 0.8rem; color: var(--muted); }
+        .feature-tag { padding: 4px 10px; border-radius: 12px; background: var(--surface2); 
+                      font-size: 0.8rem; color: var(--muted); }
         .feature-tag.active { background: var(--accent); color: white; }
         
-        /* Altitude Profile */
+        /* Altitude Chart */
         .altitude-chart { height: 150px; margin-top: 12px; }
         
         /* Popup */
-        .balloon-popup { padding: 12px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); max-width: 300px; }
+        .balloon-popup { padding: 12px; background: var(--surface); border-radius: 8px; 
+                          border: 1px solid var(--border); max-width: 300px; }
         .balloon-popup h4 { margin-bottom: 8px; color: var(--accent); }
         .balloon-popup p { margin-bottom: 4px; font-size: 0.9rem; }
         .balloon-popup img { max-width: 100%; border-radius: 4px; margin-top: 8px; }
         
         /* Fullscreen */
-        .fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; padding: 8px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; }
+        .fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; 
+                          padding: 8px 16px; background: var(--surface); border: 1px solid var(--border); 
+                          border-radius: 6px; color: var(--text); cursor: pointer; }
         
         /* Color Legend */
         .legend { background: var(--surface2); padding: 8px; border-radius: 6px; margin-top: 8px; }
@@ -138,11 +154,11 @@
         <div class="filters">
             <h3>🔍 Erweiterte Filter</h3>
             <div class="filter-group">
-                <label>Min Höhe (ft):</label>
+                <label>Min Höhe (m):</label>
                 <div class="filter-range">
                     <input type="number" id="minAlt" value="0" onchange="updateVisualization()">
                     <span>bis</span>
-                    <input type="number" id="maxAlt" value="10000" onchange="updateVisualization()">
+                    <input type="number" id="maxAlt" value="3048" onchange="updateVisualization()">
                 </div>
             </div>
             <div class="filter-group">
@@ -186,7 +202,7 @@
             <h3>📊 Statistik</h3>
             <div class="stat-row"><span>Gefundene Ballons:</span><span id="totalBalloons">0</span></div>
             <div class="stat-row"><span>Ausgewählte Tage:</span><span id="selectedDays">0</span></div>
-            <div class="stat-row"><span>Durchschn. Höhe:</span><span id="avgAltitude">0 ft</span></div>
+            <div class="stat-row"><span>Durchschn. Höhe:</span><span id="avgAltitude">0 m</span></div>
             <div class="stat-row"><span>Live-Ballons:</span><span id="liveCount">0</span></div>
         </div>
         
@@ -195,11 +211,11 @@
         </div>
     </div>
     
-    <!-- Map Containers -->
+    <!-- Map Container (wie slopes: separate Divs, display none/block) -->
     <div class="map-container">
         <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Vollbild</button>
-        <div id="cesiumContainer" class="active"></div>
-        <div id="leafletContainer"></div>
+        <div id="cesiumContainer" class="map-div active"></div>
+        <div id="leafletContainer" class="map-div"></div>
         <div class="loading" id="loading">Karte wird geladen...</div>
     </div>
 
@@ -216,9 +232,12 @@
         let currentPlaybackIndex = 0;
         let colorMap = {};
         const colors = ['#58a6ff', '#22c55e', '#ef4444', '#fbbf24', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
-        let currentMode = '3D'; // '3D' or '2D'
+        let currentMode = '3D';
         
-        // Cesium Viewer
+        // FT to M conversion
+        const FT_TO_M = 0.3048;
+        
+        // Cesium Viewer (sofort initialisieren wie slopes)
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrainProvider: Cesium.createWorldTerrain(),
             baseLayerPicker: false,
@@ -233,19 +252,19 @@
         viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0d1117');
         viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#161b22');
         
-        // Leaflet Map
-        const leafletMap = L.map('leafletContainer').setView([50.77, 7.08], 8);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; OpenStreetMap contributors & CartoDB',
-            subdomains: 'abcd'
-        }).addTo(leafletMap);
-        
-        // Remove loading text once Cesium is ready
+        // Remove loading text once Cesium is ready (wie slopes)
         viewer.scene.globe.tileLoadProgressEvent.addEventListener(function(remaining) {
             if (remaining === 0) {
                 document.getElementById('loading').style.display = 'none';
             }
         });
+        
+        // Leaflet Map (sofort initialisieren wie slopes)
+        const leafletMap = L.map('leafletContainer').setView([50.77, 7.08], 8);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> & CartoDB',
+            subdomains: 'abcd'
+        }).addTo(leafletMap);
         
         // Flugdaten laden
         async function loadFlightData() {
@@ -258,12 +277,11 @@
                 checkLiveBalloons();
             } catch (error) {
                 console.error('Fehler beim Laden der Flugdaten:', error);
-                // Even if no data, hide loading
                 document.getElementById('loading').style.display = 'none';
             }
         }
         
-        // 2D/3D Switch
+        // 2D/3D Switch (wie slopes tabs)
         function switchTo3D() {
             currentMode = '3D';
             document.getElementById('cesiumContainer').classList.add('active');
@@ -333,10 +351,10 @@
             updateVisualization();
         }
         
-        // Filter
+        // Filter (Höhe jetzt in m)
         function applyFilters(flights) {
-            const minAlt = parseInt(document.getElementById('minAlt').value) || 0;
-            const maxAlt = parseInt(document.getElementById('maxAlt').value) || 10000;
+            const minAlt = (parseInt(document.getElementById('minAlt').value) || 0) / FT_TO_M; // Convert m to ft for comparison
+            const maxAlt = (parseInt(document.getElementById('maxAlt').value) || 3048) / FT_TO_M;
             const minSpeed = parseInt(document.getElementById('minSpeed').value) || 0;
             const typeFilter = document.getElementById('balloonType').value;
             
@@ -353,7 +371,7 @@
             });
         }
         
-        // Visualization
+        // Visualization (Höhen in m)
         function updateVisualization() {
             // Clear both maps
             viewer.entities.removeAll();
@@ -382,29 +400,40 @@
             
             // Draw on both maps
             Object.entries(flightsByBalloon).forEach(([id, flights]) => {
-                if (flights.length < 1) return; // Changed from < 2 to show single points
+                if (flights.length < 1) return;
                 
                 flights.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                 
-                // 3D Cesium
+                // 3D Cesium (Höhe in m umrechnen)
                 if (currentMode === '3D') {
-                    const positions = flights.map(f => Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048));
+                    const positions = flights.map(f => 
+                        Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * FT_TO_M));
                     const color = Cesium.Color.fromCssColorString(colorMap[id] || '#58a6ff').withAlpha(0.8);
                     
                     if (positions.length >= 2) {
-                        viewer.entities.add({ polyline: { positions: positions, width: 3, material: color } });
+                        viewer.entities.add({ 
+                            polyline: { positions: positions, width: 3, material: color } 
+                        });
                     }
                     
                     flights.forEach(f => {
                         viewer.entities.add({
-                            position: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048),
+                            position: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * FT_TO_M),
                             point: { pixelSize: 8, color: Cesium.Color.fromCssColorString('#22c55e') },
-                            label: { text: f.callsign || f.registration || 'B', font: '10px sans-serif', fillColor: Cesium.Color.WHITE, outlineColor: Cesium.Color.BLACK, outlineWidth: 2, style: Cesium.LabelStyle.FILL_AND_OUTLINE, verticalOrigin: Cesium.VerticalOrigin.BOTTOM }
+                            label: { 
+                                text: f.callsign || f.registration || 'B', 
+                                font: '10px sans-serif', 
+                                fillColor: Cesium.Color.WHITE, 
+                                outlineColor: Cesium.Color.BLACK, 
+                                outlineWidth: 2, 
+                                style: Cesium.LabelStyle.FILL_AND_OUTLINE, 
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM 
+                            }
                         });
                     });
                 }
                 
-                // 2D Leaflet
+                // 2D Leaflet (Höhe in m anzeigen)
                 if (currentMode === '2D') {
                     const latlngs = flights.map(f => [f.lat, f.lon]);
                     const color = colorMap[id] || '#58a6ff';
@@ -420,7 +449,8 @@
                             <div class="balloon-popup">
                                 <h4>🎈 ${f.callsign || f.registration || 'Unbekannt'}</h4>
                                 <p><b>Datum:</b> ${f.date}</p>
-                                <p><b>Höhe:</b> ${f.altitude} ft</p>
+                                <p><b>Höhe:</b> ${Math.round(f.altitude * FT_TO_M)} m</p>
+                                <p><b>Speed:</b> ${f.ground_speed} kts</p>
                                 <div id="photo-${f.id}">Lade Foto...</div>
                             </div>
                         `);
@@ -484,8 +514,13 @@
                 if (currentPlaybackIndex >= filtered.length) { stopPlayback(); return; }
                 const f = filtered[currentPlaybackIndex];
                 if (currentMode === '3D') {
-                    viewer.entities.add({ position: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048), point: { pixelSize: 12, color: Cesium.Color.fromCssColorString('#ef4444') } });
-                    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048 + 1000) });
+                    viewer.entities.add({ 
+                        position: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * FT_TO_M), 
+                        point: { pixelSize: 12, color: Cesium.Color.fromCssColorString('#ef4444') } 
+                    });
+                    viewer.camera.flyTo({ 
+                        destination: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * FT_TO_M + 1000) 
+                    });
                 } else {
                     L.marker([f.lat, f.lon]).addTo(leafletMap);
                     leafletMap.panTo([f.lat, f.lon]);
@@ -504,7 +539,7 @@
         
         function updatePlaybackPosition() { /* Placeholder */ }
         
-        // Stats & Charts
+        // Stats (Höhen in m)
         function updateStats(flights) {
             document.getElementById('totalBalloons').textContent = flights.length;
             document.getElementById('selectedDays').textContent = selectedDays.size || 'Alle';
@@ -514,28 +549,49 @@
             if (altitudeChart) altitudeChart.destroy();
             const sorted = flights.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
             const labels = sorted.map(f => new Date(f.timestamp).toLocaleTimeString());
-            const altitudes = sorted.map(f => f.altitude);
+            const altitudes = sorted.map(f => Math.round(f.altitude * FT_TO_M)); // Convert to m
             const ctx = document.getElementById('altitudeChart').getContext('2d');
             altitudeChart = new Chart(ctx, {
                 type: 'line',
-                data: { labels: labels, datasets: [{ label: 'Höhe (ft)', data: altitudes, borderColor: '#58a6ff', backgroundColor: 'rgba(88, 166, 255, 0.1)', fill: true }] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { display: true, title: { display: true, text: 'Höhe (ft)' } } } }
+                data: { 
+                    labels: labels, 
+                    datasets: [{ 
+                        label: 'Höhe (m)', 
+                        data: altitudes, 
+                        borderColor: '#58a6ff', 
+                        backgroundColor: 'rgba(88, 166, 255, 0.1)', 
+                        fill: true 
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        x: { display: false }, 
+                        y: { display: true, title: { display: true, text: 'Höhe (m)' } } 
+                    } 
+                }
             });
             const avg = altitudes.length > 0 ? Math.round(altitudes.reduce((a, b) => a + b, 0) / altitudes.length) : 0;
-            document.getElementById('avgAltitude').textContent = `${avg} ft`;
+            document.getElementById('avgAltitude').textContent = `${avg} m`;
         }
         
         function updateLegend() {
             const legend = document.getElementById('legend');
             const entries = Object.entries(colorMap).slice(0, 8);
             let html = '<h3 style="font-size: 0.9rem; margin-bottom: 8px;">🎨 Farblegende</h3>';
-            entries.forEach(([key, color]) => { html += `<div class="legend-item"><div class="legend-color" style="background: ${color}"></div><span>${key.substring(0, 8)}...</span></div>`; });
+            entries.forEach(([key, color]) => { 
+                html += `<div class="legend-item">
+                            <div class="legend-color" style="background: ${color}"></div>
+                            <span>${key.substring(0, 8)}...</span>
+                          </div>`; 
+            });
             legend.innerHTML = html;
         }
         
         function toggleFullscreen() {
-            const container = document.getElementById('cesiumContainer');
-            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } else { document.exitFullscreen(); }
+            if (!document.fullscreenElement) { document.documentElement.requestFullscreen(); } 
+            else { document.exitFullscreen(); }
         }
         
         // PWA
@@ -543,17 +599,38 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); deferredPrompt = e;
             const pwaTag = document.querySelectorAll('.feature-tag')[5];
-            if (pwaTag) { pwaTag.style.cursor = 'pointer'; pwaTag.onclick = () => { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); } }; }
+            if (pwaTag) { 
+                pwaTag.style.cursor = 'pointer'; 
+                pwaTag.onclick = () => { 
+                    if (deferredPrompt) { 
+                        deferredPrompt.prompt(); 
+                        deferredPrompt.userChoice.then(() => { deferredPrompt = null; }); 
+                    } 
+                }; 
+            }
         });
         
-        // Init
+        // Init (wie slopes: sofort laden)
         loadFlightData();
         setInterval(loadFlightData, 300000);
     </script>
     
     <!-- PWA Manifest -->
     <script>
-        const manifest = { name: 'Ballon Tracker', short_name: 'Ballon Tracker', description: '3D Ballon-Tracking', start_url: '/ballons/', display: 'standalone', background_color: '#0d1117', theme_color: '#0d1117', icons: [{ src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎈</text></svg>', sizes: 'any', type: 'image/svg+xml' }] };
+        const manifest = { 
+            name: 'Ballon Tracker', 
+            short_name: 'Ballon Tracker', 
+            description: '3D Ballon-Tracking mit CesiumJS', 
+            start_url: '/ballons/', 
+            display: 'standalone', 
+            background_color: '#0d1117', 
+            theme_color: '#0d1117', 
+            icons: [{ 
+                src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎈</text></svg>', 
+                sizes: 'any', 
+                type: 'image/svg+xml' 
+            }] 
+        };
         const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
         const manifestURL = URL.createObjectURL(manifestBlob);
         document.querySelector('link[rel="manifest"]').href = manifestURL;
