@@ -3,7 +3,7 @@
 Kombinierter Server für mauricefun.lol:
 - Bedient statische Dateien (inkl. Unterordner wie /ballons/, /plan-des-pistes/ etc.)
 - API-Endpunkte: /api/stats und /api/history/<period>
-- Reverse Proxy für thesis.mauricefun.lol -> Streamlit (Port 8501)
+- Reverse Proxy für /thesis/ -> Streamlit (Port 8501) MIT Websocket-Support
 """
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
@@ -15,6 +15,8 @@ import re
 import urllib.request
 import urllib.error
 import socket
+import threading
+import select
 
 # === Stats-Historie ===
 MAX_HISTORY = 17280  # 24h bei 5s Intervall
@@ -31,9 +33,8 @@ class CombinedHandler(BaseHTTPRequestHandler):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
         
-        # Reverse Proxy für thesis.mauricefun.lol -> Streamlit Port 8501
-        host = self.headers.get('Host', '')
-        if 'thesis.mauricefun.lol' in host:
+        # Reverse Proxy für /thesis/ -> Streamlit Port 8501
+        if path.startswith('/thesis/') or path == '/thesis':
             self._proxy_to_streamlit()
             return
         
@@ -135,24 +136,29 @@ class CombinedHandler(BaseHTTPRequestHandler):
         self._serve_static_file(path)
     
     def _proxy_to_streamlit(self):
-        """Einfacher Reverse Proxy zu Streamlit auf Port 8501"""
+        """Proxy zu Streamlit mit Websocket-Support"""
+        # Prüfen, ob Websocket-Upgrade
+        if self.headers.get('Upgrade', '').lower() == 'websocket':
+            self._proxy_websocket()
+        else:
+            self._proxy_http()
+    
+    def _proxy_http(self):
+        """HTTP-Proxy zu Streamlit"""
         try:
-            # Anfrage an Streamlit weiterleiten
             streamlit_url = f"http://127.0.0.1:8501{self.path}"
             
             req = urllib.request.Request(streamlit_url, headers=dict(self.headers))
-            req.headers['Host'] = '127.0.0.1:8501'  # Host für Streamlit korrigieren
+            req.headers['Host'] = '127.0.0.1:8501'
             
             response = urllib.request.urlopen(req, timeout=10)
             
-            # Antwort-Header senden
             self.send_response(response.status)
             for header, value in response.headers.items():
                 if header.lower() not in ['transfer-encoding', 'connection']:
                     self.send_header(header, value)
             self.end_headers()
             
-            # Antwort-Body senden
             self.wfile.write(response.read())
             
         except urllib.error.HTTPError as e:
@@ -160,19 +166,87 @@ class CombinedHandler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_error(502, f"Proxy Error: {str(e)}")
     
+    def _proxy_websocket(self):
+        """Websocket-Proxy zu Streamlit"""
+        try:
+            # Verbindung zu Streamlit herstellen
+            streamlit_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            streamlit_sock.connect(('127.0.0.1', 8501))
+            
+            # HTTP-Upgrade-Request an Streamlit senden
+            upgrade_request = f"GET {self.path} HTTP/1.1\r\n"
+            upgrade_request += f"Host: 127.0.0.1:8501\r\n"
+            
+            # Alle relevanten Header kopieren
+            for header, value in self.headers.items():
+                if header.lower() not in ['host', 'connection']:
+                    upgrade_request += f"{header}: {value}\r\n"
+            upgrade_request += "Connection: Upgrade\r\n"
+            upgrade_request += "\r\n"
+            
+            streamlit_sock.sendall(upgrade_request.encode())
+            
+            # Antwort von Streamlit lesen (Upgrade bestätigen)
+            response = b""
+            while b"\r\n\r\n" not in response:
+                response += streamlit_sock.recv(4096)
+            
+            # Antwort an Client weiterleiten
+            self.wfile.write(response)
+            self.wfile.flush()
+            
+            # Jetzt bidirektionalen Websocket-Tunnel aufbauen
+            self._tunnel_websocket(streamlit_sock)
+            
+        except Exception as e:
+            self.send_error(502, f"Websocket Proxy Error: {str(e)}")
+    
+    def _tunnel_websocket(self, streamlit_sock):
+        """Bidirektionaler Tunnel für Websocket-Daten"""
+        client_sock = self.connection
+        
+        def forward(source, destination):
+            try:
+                while True:
+                    data = source.recv(4096)
+                    if not data:
+                        break
+                    destination.sendall(data)
+            except:
+                pass
+            finally:
+                try:
+                    source.close()
+                except:
+                    pass
+                try:
+                    destination.close()
+                except:
+                    pass
+        
+        # Zwei Threads für bidirektionale Kommunikation
+        t1 = threading.Thread(target=forward, args=(client_sock, streamlit_sock))
+        t2 = threading.Thread(target=forward, args=(streamlit_sock, client_sock))
+        
+        t1.daemon = True
+        t2.daemon = True
+        t1.start()
+        t2.start()
+        
+        # Warten bis Verbindung beendet
+        t1.join()
+        t2.join()
+    
     def _serve_static_file(self, path):
         """Statische Dateien ausliefern"""
         try:
-            # Sicherheitscheck: Pfad bereinigen
             from os.path import realpath, join, isfile
             from os import getcwd
             
-            # Erlaubte Verzeichnisse
             allowed_dirs = [realpath(getcwd()), realpath('/home/ubuntu/VPS_Coding_full')]
             
             full_path = realpath(join(getcwd(), path.lstrip('/')))
             
-            # Prüfen, ob Pfad in erlaubten Verzeichnissen liegt
             if not any(full_path.startswith(d) for d in allowed_dirs):
                 self.send_error(403, "Forbidden")
                 return
@@ -181,11 +255,9 @@ class CombinedHandler(BaseHTTPRequestHandler):
                 self.send_error(404, "File not found")
                 return
             
-            # Datei lesen und senden
             with open(full_path, 'rb') as f:
                 content = f.read()
             
-            # Content-Type bestimmen
             content_type = 'text/html'
             if full_path.endswith('.css'):
                 content_type = 'text/css'
@@ -208,12 +280,11 @@ class CombinedHandler(BaseHTTPRequestHandler):
             self.send_error(500, f"Internal Server Error: {str(e)}")
     
     def log_message(self, format, *args):
-        # Weniger Logging für bessere Performance
         pass
 
 if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', 8080), CombinedHandler)
     print('Kombinierter Server läuft auf Port 8080...')
     print('Statische Dateien + API (/api/stats, /api/history/*)')
-    print('Reverse Proxy für thesis.mauricefun.lol -> Streamlit Port 8501')
+    print('Reverse Proxy für /thesis/ -> Streamlit Port 8501 (mit Websocket-Support)')
     server.serve_forever()
