@@ -87,8 +87,8 @@
         .timeline { width: 100%; }
         .time-display { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 4px; }
         
-        /* Map Container (wie slopes, aber flex-kompatibel) */
-        .map-container { flex: 1; position: relative; }
+        /* Map Container (wie slopes, aber sicherheitshalber mit min-height) */
+        .map-container { flex: 1; position: relative; min-height: 70vh; }
         .map-div { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; }
         .map-div.active { display: block; }
         
