@@ -391,6 +391,7 @@
         
         // Visualization (Höhen in m)
         function updateVisualization() {
+            if (!viewer) return; // Guard: Viewer noch nicht bereit
             // Clear both maps
             viewer.entities.removeAll();
             leafletMap.eachLayer(layer => {
