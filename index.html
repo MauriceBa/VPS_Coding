@@ -335,49 +335,6 @@
             background: linear-gradient(135deg, #0284c7, #38bdf8);
         }
 
-        /* === BOTTOM SERVER STATS TERMINAL === */
-        .server-status-bar {
-            background: radial-gradient(circle at top left, #0b1120, #020617 60%);
-            border: 1px solid var(--terminal-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
-            font-size: 0.9rem;
-            color: #22c55e;
-            text-align: left;
-            margin-top: 5rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
-            animation: slideUp 0.8s ease-out backwards;
-        }
-        .terminal-header {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            margin-bottom: 1rem;
-        }
-        .dot { width: 10px; height: 10px; border-radius: 999px; }
-        .dot.red { background: #ef4444; }
-        .dot.yellow { background: #facc15; }
-        .dot.green { background: #22c55e; }
-        .terminal-title {
-            margin-left: 0.8rem;
-            color: #64748b;
-            font-size: 0.8rem;
-        }
-        .terminal-line { white-space: pre-wrap; line-height: 1.8; }
-        .terminal-cursor { display: inline-block; width: 8px; height: 1em; background: #22c55e; vertical-align: baseline; margin-left: 4px; animation: blink 1s step-end infinite; }
-        .terminal-meta { 
-            margin-top: 1rem; 
-            padding-top: 0.75rem; 
-            border-top: 1px solid rgba(255,255,255,0.05); 
-            font-size: 0.75rem; 
-            color: #475569; 
-            display: flex; 
-            justify-content: space-between; 
-        }
-
         /* === BACK TO TOP === */
         #back-to-top {
             position: fixed;
@@ -458,6 +415,7 @@
                 <span id="w-temp" class="weather-temp">Lade...</span>
                 <span class="weather-loc">Aachen</span>
             </div>
+            <a href="/ballons/" class="nav-link">🎈 Ballon Tracker</a>
             <a href="/plan-des-pistes/" class="nav-link">🎿 Pistenpläne</a>
             <a href="/untappd/" class="nav-link">🍺 Bier</a>
             <a href="/btd6/" class="nav-link">🎈 BTD6</a>
@@ -586,25 +544,9 @@
             </a>
         </section>
 
-        <!-- SERVER STATUS WIDE TERMINAL -->
-        <div class="server-status-bar">
-            <div class="terminal-header">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-                <span class="terminal-title">maurice@vps:~ $ ./live-metrics.sh</span>
-            </div>
-            <div class="terminal-body">
-                <div class="terminal-line" id="server-line-2">fetching live server metrics...</div>
-                <div class="terminal-line"><span id="server-line-3"></span><span class="terminal-cursor"></span></div>
-            </div>
-            <div class="terminal-meta">
-                <span id="server-host">host: offline</span>
-                <span id="server-updated">updated: --:--:--</span>
-            </div>
-        </div>
-    </main>
-
+        <!-- SERVER STATS DASHBOARD (Neues Design) -->
+        </main>
+        
     <footer>
         <div class="footer-links">
             <a href="https://github.com/MauriceBa" target="_blank" class="footer-link">🐙 GitHub</a>
@@ -735,41 +677,6 @@
         }
         updateWeather();
         setInterval(updateWeather, 600000);
-
-        // === SERVER STATS FETCH ===
-        function formatTime(date){
-            const pad = n => String(n).padStart(2, '0');
-            return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-        }
-
-        async function fetchServerStats(){
-            try {
-                const res = await fetch('/data/server_stats.json?ts=' + Date.now());
-                if(!res.ok) return;
-                const s = await res.json();
-
-                const load1 = s.load?.['1m'] ?? 0;
-                const load5 = s.load?.['5m'] ?? 0;
-                const mem   = s.memory || {};
-                const disk  = s.disk_root || {};
-
-                const line2 = `CPU load: ${load1.toFixed(2)} (1m), ${load5.toFixed(2)} (5m)`;
-                const line3 = `RAM: ${mem.percent ?? 0}%  ${(mem.used_gb ?? 0).toFixed(2)}/${(mem.total_gb ?? 0).toFixed(2)} GB)  |  SSD: ${disk.percent ?? 0}%  ${(disk.used_gb ?? 0).toFixed(1)}/${(disk.total_gb ?? 0).toFixed(1)} GB)`;
-
-                document.getElementById('server-line-2').textContent = line2;
-                document.getElementById('server-line-3').textContent = line3;
-
-                document.getElementById('server-host').textContent = `host: ${s.hostname || 'vps'}`;
-                const ts = s.timestamp ? new Date(s.timestamp) : new Date();
-                document.getElementById('server-updated').textContent = `updated: ${formatTime(ts)}`;
-            } catch(e) {
-                document.getElementById('server-line-2').textContent = 'error: cannot read /data/server_stats.json';
-                document.getElementById('server-line-3').textContent = 'waiting for cronjob...';
-            }
-        }
-
-        fetchServerStats();
-        setInterval(fetchServerStats, 10000);
 
         // === PARTICLE BACKGROUND ===
         const canvas = document.getElementById('bg-canvas');
