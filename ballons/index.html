@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1117">
+    <title>Ballon Tracker 3D | mauricefun.lol</title>
+    
+    <!-- CesiumJS -->
+    <script src="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Cesium.js"></script>
+    <link href="https://cesium.com/downloads/cesiumjs/releases/1.114/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    
+    <!-- Chart.js für Höhenprofil -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --surface2: #21262d;
+            --border: #30363d;
+            --accent: #58a6ff;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --green: #22c55e;
+            --red: #ef4444;
+            --yellow: #fbbf24;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 340px; background: var(--surface); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+        .sidebar h2 { font-size: 1.3rem; margin-bottom: 8px; }
+        .sidebar h3 { font-size: 1rem; color: var(--muted); margin-bottom: 8px; }
+        
+        /* Tag-Auswahl */
+        .day-selector { display: flex; flex-direction: column; gap: 8px; }
+        .day-actions { display: flex; gap: 8px; margin-bottom: 12px; }
+        .btn-day { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+        .btn-day:hover { background: var(--accent); color: white; }
+        .btn-day.active { background: var(--accent); color: white; }
+        
+        .day-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; }
+        .day-item { display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 6px; background: var(--surface2); cursor: pointer; transition: all 0.2s; }
+        .day-item:hover { background: var(--border); }
+        .day-item input { cursor: pointer; }
+        .day-item label { cursor: pointer; flex: 1; font-size: 0.9rem; }
+        .day-item .count { color: var(--muted); font-size: 0.8rem; }
+        
+        /* Filter */
+        .filters { background: var(--surface2); padding: 12px; border-radius: 8px; }
+        .filter-group { margin-bottom: 10px; }
+        .filter-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+        .filter-group input, .filter-group select { width: 100%; padding: 6px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.85rem; }
+        .filter-range { display: flex; gap: 8px; align-items: center; }
+        .filter-range input { flex: 1; }
+        
+        /* Playback */
+        .playback { background: var(--surface2); padding: 12px; border-radius: 8px; }
+        .playback-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .btn-play { padding: 8px 16px; border-radius: 6px; border: none; background: var(--accent); color: white; cursor: pointer; font-size: 0.9rem; }
+        .btn-play:hover { opacity: 0.9; }
+        .timeline { width: 100%; }
+        .time-display { font-size: 0.8rem; color: var(--muted); text-align: center; margin-top: 4px; }
+        
+        /* 3D Map */
+        .map-container { flex: 1; position: relative; }
+        #cesiumContainer { width: 100%; height: 100%; }
+        
+        /* Stats */
+        .stats { background: var(--surface2); padding: 12px; border-radius: 8px; margin-top: auto; }
+        .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
+        
+        /* Loading */
+        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--text); font-size: 1.2rem; }
+        
+        /* Features */
+        .features { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+        .feature-tag { padding: 4px 10px; border-radius: 12px; background: var(--surface2); font-size: 0.8rem; color: var(--muted); }
+        .feature-tag.active { background: var(--accent); color: white; }
+        
+        /* Altitude Profile */
+        .altitude-chart { height: 150px; margin-top: 12px; }
+        
+        /* Popup */
+        .balloon-popup { padding: 12px; background: var(--surface); border-radius: 8px; border: 1px solid var(--border); max-width: 300px; }
+        .balloon-popup h4 { margin-bottom: 8px; color: var(--accent); }
+        .balloon-popup p { margin-bottom: 4px; font-size: 0.9rem; }
+        .balloon-popup img { max-width: 100%; border-radius: 4px; margin-top: 8px; }
+        
+        /* Fullscreen */
+        .fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; padding: 8px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; }
+        
+        /* Color Legend */
+        .legend { background: var(--surface2); padding: 8px; border-radius: 6px; margin-top: 8px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; margin-bottom: 4px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div>
+            <h2>🎈 Ballon Tracker 3D</h2>
+            <p style="color: var(--muted); font-size: 0.9rem;">Flugpfade in Echtzeit und Historie</p>
+        </div>
+        
+        <div class="day-selector">
+            <h3>📅 Tage auswählen</h3>
+            <div class="day-actions">
+                <button class="btn-day" onclick="selectAllDays()">Alle auswählen</button>
+                <button class="btn-day" onclick="selectNoDays()">Keine auswählen</button>
+            </div>
+            <div class="day-list" id="dayList"></div>
+        </div>
+        
+        <div class="filters">
+            <h3>🔍 Erweiterte Filter</h3>
+            <div class="filter-group">
+                <label>Min Höhe (ft):</label>
+                <div class="filter-range">
+                    <input type="number" id="minAlt" value="0" onchange="updateVisualization()">
+                    <span>bis</span>
+                    <input type="number" id="maxAlt" value="10000" onchange="updateVisualization()">
+                </div>
+            </div>
+            <div class="filter-group">
+                <label>Min Geschwindigkeit (kts):</label>
+                <input type="number" id="minSpeed" value="0" onchange="updateVisualization()">
+            </div>
+            <div class="filter-group">
+                <label>Ballon-Typ:</label>
+                <select id="balloonType" onchange="updateVisualization()">
+                    <option value="all">Alle</option>
+                    <option value="BALL">BALL (Ballon)</option>
+                    <option value="HBAL">HBAL (Heissluft)</option>
+                    <option value="other">Sonstige</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="playback">
+            <h3>⏯ Zeitraffer (Playback)</h3>
+            <div class="playback-controls">
+                <button class="btn-play" id="playBtn" onclick="togglePlayback()">▶ Play</button>
+                <input type="range" class="timeline" id="timeline" min="0" max="100" value="0" oninput="updatePlaybackPosition()">
+            </div>
+            <div class="time-display" id="timeDisplay">Schiebe den Regler</div>
+        </div>
+        
+        <div class="features">
+            <span class="feature-tag active">✈️ 3D Flugpfade</span>
+            <span class="feature-tag active" id="liveTag">🔴 Live-Tracking</span>
+            <span class="feature-tag active">📸 Wikipedia Fotos</span>
+            <span class="feature-tag active">🎨 Farbcodierung</span>
+            <span class="feature-tag">📥 GPX Export</span>
+            <span class="feature-tag active">🔍 Erweiterte Filter</span>
+            <span class="feature-tag active">📱 PWA-App</span>
+        </div>
+        
+        <div class="legend" id="legend">
+            <h3 style="font-size: 0.9rem; margin-bottom: 8px;">🎨 Farblegende</h3>
+            <!-- Wird dynamisch gefüllt -->
+        </div>
+        
+        <div class="stats">
+            <h3>📊 Statistik</h3>
+            <div class="stat-row"><span>Gefundene Ballons:</span><span id="totalBalloons">0</span></div>
+            <div class="stat-row"><span>Ausgewählte Tage:</span><span id="selectedDays">0</span></div>
+            <div class="stat-row"><span>Durchschn. Höhe:</span><span id="avgAltitude">0 ft</span></div>
+            <div class="stat-row"><span>Live-Ballons:</span><span id="liveCount">0</span></div>
+        </div>
+        
+        <div class="altitude-chart">
+            <canvas id="altitudeChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- 3D Map -->
+    <div class="map-container">
+        <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Vollbild</button>
+        <div id="cesiumContainer"></div>
+        <div class="loading" id="loading">Lade Flugdaten...</div>
+    </div>
+
+    <script>
+        // Cesium Initialisierung mit deinem Token
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYWFiNWQ5ZS01MzJmLTQ3ZTItYTJkNy0wYzE4OWI1MzA5NzEiLCJpZCI6MzkzMzg4LCJpYXQiOjE3NzE4NjI1OTJ9.oMUm3gHMxrYab-OrCi17VBRLt7lR_CDGwbcnMwWr47c';
+        
+        const viewer = new Cesium.Viewer('cesiumContainer', {
+            terrainProvider: Cesium.createWorldTerrain(),
+            baseLayerPicker: false,
+            timeline: true,
+            animation: true,
+            homeButton: false,
+            sceneModePicker: false,
+            navigationHelpButton: false,
+            fullscreenButton: false,
+            shouldAnimate: false
+        });
+        
+        // Dark Mode für Cesium
+        viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0d1117');
+        viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#161b22');
+        
+        // Daten
+        let flightData = [];
+        let selectedDays = new Set();
+        let altitudeChart = null;
+        let playbackInterval = null;
+        let isPlaying = false;
+        let currentPlaybackIndex = 0;
+        let colorMap = {};
+        const colors = ['#58a6ff', '#22c55e', '#ef4444', '#fbbf24', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'];
+        
+        // Flugdaten laden
+        async function loadFlightData() {
+            try {
+                const response = await fetch('balloon_flights.json');
+                flightData = await response.json();
+                populateDaySelector();
+                updateVisualization();
+                updateLegend();
+                document.getElementById('loading').style.display = 'none';
+                
+                // Prüfe auf Live-Ballons (letzte 10 Minuten)
+                checkLiveBalloons();
+            } catch (error) {
+                console.error('Fehler beim Laden der Flugdaten:', error);
+                document.getElementById('loading').textContent = 'Fehler beim Laden der Daten. Bot läuft noch?';
+            }
+        }
+        
+        // Tag-Auswahl füllen
+        function populateDaySelector() {
+            const dayList = document.getElementById('dayList');
+            dayList.innerHTML = '';
+            
+            const dayCounts = {};
+            flightData.forEach(flight => {
+                const date = flight.date;
+                dayCounts[date] = (dayCounts[date] || 0) + 1;
+            });
+            
+            const sortedDays = Object.keys(dayCounts).sort().reverse();
+            
+            sortedDays.forEach(day => {
+                const count = dayCounts[day];
+                const div = document.createElement('div');
+                div.className = 'day-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="day-${day}" onchange="toggleDay('${day}')">
+                    <label for="day-${day}">${day}</label>
+                    <span class="count">${count} Sichtungen</span>
+                `;
+                dayList.appendChild(div);
+            });
+        }
+        
+        // Tag toggeln
+        function toggleDay(day) {
+            if (selectedDays.has(day)) {
+                selectedDays.delete(day);
+            } else {
+                selectedDays.add(day);
+            }
+            updateVisualization();
+        }
+        
+        // Alle Tage auswählen
+        function selectAllDays() {
+            const days = [...new Set(flightData.map(f => f.date))];
+            selectedDays = new Set(days);
+            days.forEach(day => {
+                const cb = document.getElementById(`day-${day}`);
+                if (cb) cb.checked = true;
+            });
+            updateVisualization();
+        }
+        
+        // Keine Tage auswählen
+        function selectNoDays() {
+            selectedDays.clear();
+            document.querySelectorAll('.day-item input').forEach(cb => cb.checked = false);
+            updateVisualization();
+        }
+        
+        // Farblegende aktualisieren
+        function updateLegend() {
+            const legend = document.getElementById('legend');
+            // Nur die ersten 8 Ballons/Tag-Kombinationen anzeigen
+            const entries = Object.entries(colorMap).slice(0, 8);
+            let html = '<h3 style="font-size: 0.9rem; margin-bottom: 8px;">🎨 Farblegende</h3>';
+            entries.forEach(([key, color]) => {
+                html += `<div class="legend-item"><div class="legend-color" style="background: ${color}"></div><span>${key}</span></div>`;
+            });
+            legend.innerHTML = html;
+        }
+        
+        // Filter anwenden
+        function applyFilters(flights) {
+            const minAlt = parseInt(document.getElementById('minAlt').value) || 0;
+            const maxAlt = parseInt(document.getElementById('maxAlt').value) || 10000;
+            const minSpeed = parseInt(document.getElementById('minSpeed').value) || 0;
+            const typeFilter = document.getElementById('balloonType').value;
+            
+            return flights.filter(f => {
+                if (f.altitude < minAlt || f.altitude > maxAlt) return false;
+                if (f.ground_speed < minSpeed) return false;
+                if (typeFilter !== 'all') {
+                    const isBalloon = f.callsign && (f.callsign.includes('BALL') || f.callsign.includes('HBAL'));
+                    if (typeFilter === 'BALL' && !f.callsign?.includes('BALL')) return false;
+                    if (typeFilter === 'HBAL' && !f.callsign?.includes('HBAL')) return false;
+                    if (typeFilter === 'other' && isBalloon) return false;
+                }
+                return true;
+            });
+        }
+        
+        // Visualisierung aktualisieren
+        function updateVisualization() {
+            viewer.entities.removeAll();
+            colorMap = {};
+            
+            const filteredFlights = flightData.filter(f => selectedDays.has(f.date) || selectedDays.size === 0);
+            const filteredAndFiltered = applyFilters(filteredFlights);
+            
+            // Nach Ballon-ID gruppieren
+            const flightsByBalloon = {};
+            filteredAndFiltered.forEach(flight => {
+                if (!flightsByBalloon[flight.id]) {
+                    flightsByBalloon[flight.id] = [];
+                }
+                flightsByBalloon[flight.id].push(flight);
+            });
+            
+            // Farben zuweisen (nach Ballon-ID oder Tag)
+            let colorIndex = 0;
+            Object.keys(flightsByBalloon).forEach(key => {
+                colorMap[key] = colors[colorIndex % colors.length];
+                colorIndex++;
+            });
+            
+            // Pfade zeichnen
+            Object.entries(flightsByBalloon).forEach(([id, flights]) => {
+                if (flights.length < 2) return;
+                
+                flights.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                
+                const positions = flights.map(f => Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048));
+                const color = Cesium.Color.fromCssColorString(colorMap[id] || '#58a6ff').withAlpha(0.8);
+                
+                viewer.entities.add({
+                    polyline: {
+                        positions: positions,
+                        width: 3,
+                        material: color
+                    }
+                });
+                
+                // Marker für jeden Punkt
+                flights.forEach(f => {
+                    const entity = viewer.entities.add({
+                        position: Cesium.Cartesian3.fromDegrees(f.lon, f.lat, f.altitude * 0.3048),
+                        point: {
+                            pixelSize: 8,
+                            color: Cesium.Color.fromCssColorString('#22c55e')
+                        },
+                        label: {
+                            text: f.callsign || f.registration || 'Ballon',
+                            font: '12px sans-serif',
+                            fillColor: Cesium.Color.WHITE,
+                            outlineColor: Cesium.Color.BLACK,
+                            outlineWidth: 2,
+                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM
+                        }
+                    });
+                    
+                    // Wikipedia Foto beim Klick
+                    entity.description = `
+                        <div class="balloon-popup">
+                            <h4>🎈 ${f.callsign || f.registration || 'Unbekannt'}</h4>
+                            <p><b>Datum:</b> ${f.date}</p>
+                            <p><b>Zeit:</b> ${new Date(f.timestamp).toLocaleTimeString()}</p>
+                            <p><b>Höhe:</b> ${f.altitude} ft</p>
+                            <p><b>Speed:</b> ${f.ground_speed} kts</p>
+                            <p><b>ID:</b> ${f.id}</p>
+                            <div id="photo-${f.id}">Lade Foto...</div>
+                        </div>
+                    `;
+                    
+                    // Wikipedia Foto laden
+                    fetchWikipediaPhoto(f.callsign, f.registration, f.id);
+                });
+            });
+            
+            updateAltitudeChart(filteredAndFiltered);
+            updateLegend();
+        }
+        
+        // Wikipedia Foto laden
+        async function fetchWikipediaPhoto(callsign, registration, id) {
+            const query = callsign || registration;
+            if (!query) return;
+            
+            try {
+                const response = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(query)}&prop=pageimages&format=json&pithumbsize=400&origin=*`);
+                const data = await response.json();
+                const pages = data.query?.pages || {};
+                
+                for (const page of Object.values(pages)) {
+                    if (page.thumbnail) {
+                        const photoUrl = page.thumbnail.source;
+                        const photoDiv = document.getElementById(`photo-${id}`);
+                        if (photoDiv) {
+                            photoDiv.innerHTML = `<img src="${photoUrl}" alt="Ballon Foto">`;
+                        }
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error('Fehler beim Laden des Wikipedia-Fotos:', error);
+            }
+        }
+        
+        // Live-Ballons prüfen
+        function checkLiveBalloons() {
+            const now = new Date();
+            const tenMinutesAgo = new Date(now.getTime() - 10 * 60000);
+            
+            const liveFlights = flightData.filter(f => {
+                const flightTime = new Date(f.timestamp);
+                return flightTime >= tenMinutesAgo;
+            });
+            
+            document.getElementById('liveCount').textContent = new Set(liveFlights.map(f => f.id)).size;
+            
+            const liveTag = document.getElementById('liveTag');
+            if (liveFlights.length > 0) {
+                liveTag.classList.add('active');
+                liveTag.textContent = `🔴 ${liveFlights.length} Live-Ballons`;
+            } else {
+                liveTag.classList.remove('active');
+                liveTag.textContent = '🔴 Live-Tracking';
+            }
+        }
+        
+        // Playback (Zeitraffer)
+        function togglePlayback() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                btn.textContent = '⏸ Pause';
+                startPlayback();
+            } else {
+                btn.textContent = '▶ Play';
+                stopPlayback();
+            }
+        }
+        
+        function startPlayback() {
+            const filteredFlights = flightData.filter(f => selectedDays.has(f.date) || selectedDays.size === 0);
+            if (filteredFlights.length === 0) return;
+            
+            filteredFlights.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            currentPlaybackIndex = 0;
+            
+            playbackInterval = setInterval(() => {
+                if (currentPlaybackIndex >= filteredFlights.length) {
+                    stopPlayback();
+                    return;
+                }
+                
+                const flight = filteredFlights[currentPlaybackIndex];
+                viewer.entities.add({
+                    position: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, flight.altitude * 0.3048),
+                    point: {
+                        pixelSize: 12,
+                        color: Cesium.Color.fromCssColorString('#ef4444')
+                    }
+                });
+                
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(flight.lon, flight.lat, flight.altitude * 0.3048 + 1000)
+                });
+                
+                document.getElementById('timeline').value = (currentPlaybackIndex / filteredFlights.length) * 100;
+                document.getElementById('timeDisplay').textContent = new Date(flight.timestamp).toLocaleString();
+                
+                currentPlaybackIndex++;
+            }, 500); // Alle 500ms ein Punkt
+        }
+        
+        function stopPlayback() {
+            isPlaying = false;
+            document.getElementById('playBtn').textContent = '▶ Play';
+            if (playbackInterval) {
+                clearInterval(playbackInterval);
+                playbackInterval = null;
+            }
+        }
+        
+        function updatePlaybackPosition() {
+            // Placeholder für manuelle Slider-Steuerung
+        }
+        
+        // Höhenprofil aktualisieren
+        function updateAltitudeChart(flights) {
+            if (altitudeChart) altitudeChart.destroy();
+            
+            const sortedFlights = flights.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            const labels = sortedFlights.map(f => new Date(f.timestamp).toLocaleTimeString());
+            const altitudes = sortedFlights.map(f => f.altitude);
+            
+            const ctx = document.getElementById('altitudeChart').getContext('2d');
+            altitudeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Höhe (ft)',
+                        data: altitudes,
+                        borderColor: '#58a6ff',
+                        backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: false },
+                        y: { display: true, title: { display: true, text: 'Höhe (ft)' } }
+                    }
+                }
+            });
+            
+            const avgAlt = altitudes.length > 0 ? Math.round(altitudes.reduce((a, b) => a + b, 0) / altitudes.length) : 0;
+            document.getElementById('avgAltitude').textContent = `${avgAlt} ft`;
+        }
+        
+        // Vollbild toggeln
+        function toggleFullscreen() {
+            const container = document.getElementById('cesiumContainer');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Statistik aktualisieren
+        function updateStats(filteredFlights) {
+            document.getElementById('totalBalloons').textContent = filteredFlights.length;
+            document.getElementById('selectedDays').textContent = selectedDays.size || 'Alle';
+        }
+        
+        // PWA-Installation
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const pwaTag = document.querySelector('.feature-tag[onclick]') || document.querySelectorAll('.feature-tag')[6];
+            if (pwaTag) {
+                pwaTag.style.cursor = 'pointer';
+                pwaTag.onclick = () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(() => {
+                            deferredPrompt = null;
+                        });
+                    }
+                };
+            }
+        });
+        
+        // Initial laden
+        loadFlightData();
+        setInterval(loadFlightData, 300000); // Alle 5 Minuten aktualisieren
+    </script>
+    
+    <!-- PWA Manifest -->
+    <script>
+        // Manifest dynamisch erstellen
+        const manifest = {
+            name: 'Ballon Tracker 3D',
+            short_name: 'Ballon Tracker',
+            description: '3D Ballon-Tracking mit CesiumJS',
+            start_url: '/ballons/',
+            display: 'standalone',
+            background_color: '#0d1117',
+            theme_color: '#0d1117',
+            icons: [{
+                src: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🎈</text></svg>',
+                sizes: 'any',
+                type: 'image/svg+xml'
+            }]
+        };
+        
+        const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(manifestBlob);
+        document.querySelector('link[rel="manifest"]').href = manifestURL;
+    </script>
+</body>
+</html>
