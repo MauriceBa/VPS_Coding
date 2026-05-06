@@ -96,10 +96,7 @@
         .stats { background: var(--surface2); padding: 12px; border-radius: 8px; margin-top: auto; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 0.9rem; }
         
-        /* Loading */
-        .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                    color: var(--text); font-size: 1.2rem; z-index: 1000; background: rgba(0,0,0,0.7); 
-                    padding: 20px; border-radius: 12px; }
+        /* Loading - wie slopes: Kein Overlay, Karte sofort sichtbar */
         
         /* Features */
         .features { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
@@ -216,7 +213,7 @@
         <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶ Vollbild</button>
         <div id="cesiumContainer" class="map-div active"></div>
         <div id="leafletContainer" class="map-div"></div>
-        <div class="loading" id="loading">Karte wird geladen...</div>
+        <!-- Kein Loading-Div wie auf slopes-Seite -->
     </div>
 
     <script>
@@ -252,12 +249,7 @@
         viewer.scene.backgroundColor = Cesium.Color.fromCssColorString('#0d1117');
         viewer.scene.globe.baseColor = Cesium.Color.fromCssColorString('#161b22');
         
-        // Remove loading text once Cesium is ready (wie slopes)
-        viewer.scene.globe.tileLoadProgressEvent.addEventListener(function(remaining) {
-            if (remaining === 0) {
-                document.getElementById('loading').style.display = 'none';
-            }
-        });
+        // Kein Loading-Event mehr nötig - Karte startet sofort
         
         // Leaflet Map (sofort initialisieren wie slopes)
         const leafletMap = L.map('leafletContainer').setView([50.77, 7.08], 8);
@@ -277,7 +269,7 @@
                 checkLiveBalloons();
             } catch (error) {
                 console.error('Fehler beim Laden der Flugdaten:', error);
-                document.getElementById('loading').style.display = 'none';
+                // Karte läuft trotzdem weiter
             }
         }
         
