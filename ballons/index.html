@@ -218,7 +218,8 @@
 
     <script>
         // Cesium Token
-        // Cesium Token entfernt (ungültig, verursacht 401 Fehler)
+        // Cesium Token (neu gesetzt)
+        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwYjVkMzQ1MC02YTMyLTRmZTctOTVhOS00YmJiOWM3YmMxYzQiLCJpZCI6MzkzMzg4LCJzdWIiOiJraW1zbGltamltIiwiaXNzIjoiaHR0cHM6Ly9pb24uY2VzaXVtLmNvbSIsImF1ZCI6Imhlcm1lcyIsImlhdCI6MTc3ODA4NjAwN30.TpGT3dLOuK6Xc8IVfP7N2kVvRzcv3LYbg0cX8JEPgX4';
         
         // Global Variables
         let flightData = [];
@@ -240,17 +241,14 @@
             if (viewer) return;
             try {
                 viewer = new Cesium.Viewer('cesiumContainer', {
-                    baseLayerPicker: false, // Ion-Zugriff vermeiden
+                    baseLayerPicker: true,
                     timeline: true,
                     animation: true,
                     homeButton: false,
                     sceneModePicker: false,
                     navigationHelpButton: false,
                     fullscreenButton: false,
-                    shouldAnimate: false,
-                    imageryProvider: new Cesium.OpenStreetMapImageryProvider({
-                        url: 'https://a.tile.openstreetmap.org/'
-                    })
+                    shouldAnimate: false
                 });
                 // Kamera auf Heimatort setzen nach kurzer Verzögerung
                 setTimeout(() => {
@@ -264,7 +262,7 @@
                             }
                         });
                     }
-                }, 500);
+                }, 1000);
             } catch(e) {
                 console.error('Cesium Init Fehler:', e);
             }
