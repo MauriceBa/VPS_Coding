@@ -78,6 +78,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_FILE = os.path.join(BASE_DIR, "bot_config.json")
 STATE_FILE = os.path.join(BASE_DIR, "known_balloons.json")
 STATS_FILE = os.path.join(BASE_DIR, "daily_stats.json")
+FLIGHT_LOG_FILE = "/home/ubuntu/VPS_Coding_full/ballons/balloon_flights.json"
 
 config = {
     "home_lat": 50.770592730763454,
@@ -257,6 +258,29 @@ async def now(update: Update, context: ContextTypes.DEFAULT_TYPE):
                f"<b>Speed:</b> {b.ground_speed} kts\n"
                f"<b>Callsign/Reg:</b> {b.callsign} / {b.registration}\n\n"
                f"📍 https://www.flightradar24.com/{b.id}")
+        
+        # Flugdaten protokollieren
+        try:
+            flight_entry = {
+                "id": b.id,
+                "callsign": b.callsign,
+                "registration": b.registration,
+                "lat": b.latitude,
+                "lon": b.longitude,
+                "altitude": b.altitude,
+                "ground_speed": b.ground_speed,
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "date": datetime.date.today().isoformat()
+            }
+            flights = []
+            if os.path.exists(FLIGHT_LOG_FILE):
+                with open(FLIGHT_LOG_FILE, "r") as f:
+                    flights = json.load(f)
+            flights.append(flight_entry)
+            with open(FLIGHT_LOG_FILE, "w") as f:
+                json.dump(flights, f)
+        except Exception as e:
+            logger.error(f"Fehler beim Protokollieren der Flugdaten: {e}")
         
         # Karte generieren und senden
         map_path = generate_balloon_map(active_lat, active_lon, b.latitude, b.longitude)
@@ -505,6 +529,30 @@ async def check_balloons_job(context: ContextTypes.DEFAULT_TYPE):
         
         if dist_km <= config["radius"]:
             current_balloon_ids.append(b.id)
+            
+            # Flugdaten protokollieren (für 3D-Karte)
+            try:
+                flight_entry = {
+                    "id": b.id,
+                    "callsign": b.callsign,
+                    "registration": b.registration,
+                    "lat": b.latitude,
+                    "lon": b.longitude,
+                    "altitude": b.altitude,
+                    "ground_speed": b.ground_speed,
+                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "date": datetime.date.today().isoformat()
+                }
+                flights = []
+                if os.path.exists(FLIGHT_LOG_FILE):
+                    with open(FLIGHT_LOG_FILE, "r") as f:
+                        flights = json.load(f)
+                flights.append(flight_entry)
+                with open(FLIGHT_LOG_FILE, "w") as f:
+                    json.dump(flights, f)
+            except Exception as e:
+                logger.error(f"Fehler beim Protokollieren der Flugdaten in check_balloons_job: {e}")
+            
             if b.id not in known_balloons:
                 aircraft_type = b.aircraft_code if b.aircraft_code else "Lighter-than-air (Ballon)"
                 
