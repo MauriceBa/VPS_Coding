@@ -1,0 +1,7 @@
+{
+  "name": "Ballon Tracker",
+  "short_name": "Ballons",
+  "start_url": "./",
+  "display": "standalone",
+  "icons": []
+}

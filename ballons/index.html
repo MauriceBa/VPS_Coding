@@ -218,7 +218,7 @@
 
     <script>
         // Cesium Token
-        Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYWFiNWQ5ZS01MzJmLTQ3ZTItYTJkNy0wYzE4OWI1MzA5NzEiLCJpZCI6MzkzMzg4LCJpYXQiOjE3NzE4NjI1OTJ9.oMUm3gHMxrYab-OrCi17VBRLt7lR_CDGwbcnMwWr47c';
+        // Cesium Token entfernt (ungültig, verursacht 401 Fehler)
         
         // Global Variables
         let flightData = [];
@@ -234,13 +234,12 @@
         // FT to M conversion
         const FT_TO_M = 0.3048;
         
-        // Cesium Viewer (exakt wie slopes: nur initialisieren wenn Tab aktiv)
+        // Cesium Viewer (wie slopes: nur bei Klick initialisieren)
         let viewer = null;
         function initCesium() {
             if (viewer) return;
             try {
                 viewer = new Cesium.Viewer('cesiumContainer', {
-                    terrainProvider: Cesium.createWorldTerrain(),
                     baseLayerPicker: true,
                     timeline: true,
                     animation: true,
@@ -250,25 +249,20 @@
                     fullscreenButton: false,
                     shouldAnimate: false
                 });
-                // Keine Kamera-Einstellung: Cesium zeigt standardmäßig die Erde (wie slopes)
+                // Kamera auf Heimatort setzen, sobald Viewer bereit ist (wie slopes)
+                viewer.readyPromise.then(() => {
+                    viewer.camera.setView({
+                        destination: Cesium.Cartesian3.fromDegrees(7.08, 50.77, 5000), // 5km Höhe
+                        orientation: {
+                            heading: Cesium.Math.toRadians(0),
+                            pitch: Cesium.Math.toRadians(-45), // Schrägansicht wie slopes
+                            roll: 0.0
+                        }
+                    });
+                }).catch(e => console.error('Cesium Ready Fehler:', e));
             } catch(e) {
                 console.error('Cesium Init Fehler:', e);
-                // Fallback ohne terrain
-                viewer = new Cesium.Viewer('cesiumContainer', {
-                    baseLayerPicker: true,
-                    timeline: true,
-                    animation: true,
-                    homeButton: false,
-                    sceneModePicker: false,
-                    navigationHelpButton: false,
-                    fullscreenButton: false,
-                    shouldAnimate: false
-                });
             }
-        }
-        // 3D Viewer initialisieren wenn Container sichtbar ist
-        if (document.getElementById('cesiumContainer').classList.contains('active')) {
-            initCesium();
         }
         
         // Kein Loading-Event mehr nötig - Karte startet sofort
@@ -311,8 +305,8 @@
             document.getElementById('leafletContainer').classList.remove('active');
             document.getElementById('btn3D').classList.add('active');
             document.getElementById('btn2D').classList.remove('active');
-            initCesium(); // Cesium jetzt initialisieren (wie slopes)
-            setTimeout(() => { if (viewer) viewer.scene.requestRender(); }, 100);
+            initCesium(); // Cesium jetzt initialisieren
+            setTimeout(() => { if (viewer) viewer.scene.requestRender(); }, 500);
         }
         
         function switchTo2D() {
@@ -321,7 +315,7 @@
             document.getElementById('leafletContainer').classList.add('active');
             document.getElementById('btn3D').classList.remove('active');
             document.getElementById('btn2D').classList.add('active');
-            leafletMap.invalidateSize();
+            setTimeout(() => { leafletMap.invalidateSize(); }, 100);
         }
         
         // Tag-Auswahl
