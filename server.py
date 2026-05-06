@@ -3,14 +3,18 @@
 Kombinierter Server für mauricefun.lol:
 - Bedient statische Dateien (inkl. Unterordner wie /ballons/, /plan-des-pistes/ etc.)
 - API-Endpunkte: /api/stats und /api/history/<period>
+- Reverse Proxy für thesis.mauricefun.lol -> Streamlit (Port 8501)
 """
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
 import psutil
 import time
 import collections
 from urllib.parse import urlparse
 import re
+import urllib.request
+import urllib.error
+import socket
 
 # === Stats-Historie ===
 MAX_HISTORY = 17280  # 24h bei 5s Intervall
@@ -22,10 +26,16 @@ timestamps = collections.deque(maxlen=MAX_HISTORY)
 last_net = psutil.net_io_counters()
 last_net_time = time.time()
 
-class CombinedHandler(SimpleHTTPRequestHandler):
+class CombinedHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urlparse(self.path)
         path = parsed_path.path
+        
+        # Reverse Proxy für thesis.mauricefun.lol -> Streamlit Port 8501
+        host = self.headers.get('Host', '')
+        if 'thesis.mauricefun.lol' in host:
+            self._proxy_to_streamlit()
+            return
         
         # API-Routen abfangen
         if path == '/api/stats':
@@ -81,7 +91,7 @@ class CombinedHandler(SimpleHTTPRequestHandler):
             
             self.wfile.write(json.dumps(data).encode())
             return
-            
+        
         # History API
         history_match = re.match(r'^/api/history/(.+)$', path)
         if history_match:
@@ -121,9 +131,81 @@ class CombinedHandler(SimpleHTTPRequestHandler):
             }).encode())
             return
         
-        # Ansonsten normale Datei ausliefern (inkl. Unterordner)
-        # SimpleHTTPRequestHandler kann das korrekt handhaben
-        super().do_GET()
+        # Ansonsten normale Datei ausliefern (statische Dateien)
+        self._serve_static_file(path)
+    
+    def _proxy_to_streamlit(self):
+        """Einfacher Reverse Proxy zu Streamlit auf Port 8501"""
+        try:
+            # Anfrage an Streamlit weiterleiten
+            streamlit_url = f"http://127.0.0.1:8501{self.path}"
+            
+            req = urllib.request.Request(streamlit_url, headers=dict(self.headers))
+            req.headers['Host'] = '127.0.0.1:8501'  # Host für Streamlit korrigieren
+            
+            response = urllib.request.urlopen(req, timeout=10)
+            
+            # Antwort-Header senden
+            self.send_response(response.status)
+            for header, value in response.headers.items():
+                if header.lower() not in ['transfer-encoding', 'connection']:
+                    self.send_header(header, value)
+            self.end_headers()
+            
+            # Antwort-Body senden
+            self.wfile.write(response.read())
+            
+        except urllib.error.HTTPError as e:
+            self.send_error(e.code, e.reason)
+        except Exception as e:
+            self.send_error(502, f"Proxy Error: {str(e)}")
+    
+    def _serve_static_file(self, path):
+        """Statische Dateien ausliefern"""
+        try:
+            # Sicherheitscheck: Pfad bereinigen
+            from os.path import realpath, join, isfile
+            from os import getcwd
+            
+            # Erlaubte Verzeichnisse
+            allowed_dirs = [realpath(getcwd()), realpath('/home/ubuntu/VPS_Coding_full')]
+            
+            full_path = realpath(join(getcwd(), path.lstrip('/')))
+            
+            # Prüfen, ob Pfad in erlaubten Verzeichnissen liegt
+            if not any(full_path.startswith(d) for d in allowed_dirs):
+                self.send_error(403, "Forbidden")
+                return
+            
+            if not isfile(full_path):
+                self.send_error(404, "File not found")
+                return
+            
+            # Datei lesen und senden
+            with open(full_path, 'rb') as f:
+                content = f.read()
+            
+            # Content-Type bestimmen
+            content_type = 'text/html'
+            if full_path.endswith('.css'):
+                content_type = 'text/css'
+            elif full_path.endswith('.js'):
+                content_type = 'application/javascript'
+            elif full_path.endswith('.json'):
+                content_type = 'application/json'
+            elif full_path.endswith('.png'):
+                content_type = 'image/png'
+            elif full_path.endswith('.jpg') or full_path.endswith('.jpeg'):
+                content_type = 'image/jpeg'
+            
+            self.send_response(200)
+            self.send_header('Content-Type', content_type)
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
+            
+        except Exception as e:
+            self.send_error(500, f"Internal Server Error: {str(e)}")
     
     def log_message(self, format, *args):
         # Weniger Logging für bessere Performance
@@ -133,4 +215,5 @@ if __name__ == '__main__':
     server = HTTPServer(('0.0.0.0', 8080), CombinedHandler)
     print('Kombinierter Server läuft auf Port 8080...')
     print('Statische Dateien + API (/api/stats, /api/history/*)')
+    print('Reverse Proxy für thesis.mauricefun.lol -> Streamlit Port 8501')
     server.serve_forever()
