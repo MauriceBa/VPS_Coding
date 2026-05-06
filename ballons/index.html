@@ -115,7 +115,7 @@
         .balloon-popup img { max-width: 100%; border-radius: 4px; margin-top: 8px; }
         
         /* Fullscreen */
-        .fullscreen-btn { position: absolute; top: 10px; right: 10px; z-index: 1000; 
+        .fullscreen-btn { position: absolute; bottom: 10px; right: 10px; z-index: 1000; 
                           padding: 8px 16px; background: var(--surface); border: 1px solid var(--border); 
                           border-radius: 6px; color: var(--text); cursor: pointer; }
         
@@ -234,39 +234,42 @@
         // FT to M conversion
         const FT_TO_M = 0.3048;
         
-        // Cesium Viewer (wie slopes initialisieren)
-        const viewer = new Cesium.Viewer('cesiumContainer', {
-            baseLayerPicker: true,  // Layer-Auswahl aktivieren wie slopes
-            timeline: true,
-            animation: true,
-            homeButton: false,
-            sceneModePicker: false,
-            navigationHelpButton: false,
-            fullscreenButton: false,
-            shouldAnimate: false
-        });
-        // Kamera auf Heimatort ausrichten (50.77°N, 7.08°E, 5km Höhe)
-        viewer.camera.setView({
-            destination: Cesium.Cartesian3.fromDegrees(7.08, 50.77, 5000),
-            orientation: {
-                heading: Cesium.Math.toRadians(0),
-                pitch: Cesium.Math.toRadians(-90),  // Senkrecht nach unten schauen
-                roll: 0.0
-            }
-        });
+        // Cesium Viewer (exakt wie slopes initialisieren)
+        let viewer = null;
+        function initCesium() {
+            if (viewer) return;
+            viewer = new Cesium.Viewer('cesiumContainer', {
+                baseLayerPicker: true,
+                timeline: true,
+                animation: true,
+                homeButton: false,
+                sceneModePicker: false,
+                navigationHelpButton: false,
+                fullscreenButton: false,
+                shouldAnimate: false
+            });
+            // Kamera auf Heimatort ausrichten (nachdem Viewer bereit ist)
+            viewer.camera.setView({
+                destination: Cesium.Cartesian3.fromDegrees(7.08, 50.77, 5000),
+                orientation: {
+                    heading: Cesium.Math.toRadians(0),
+                    pitch: Cesium.Math.toRadians(-90),
+                    roll: 0.0
+                }
+            });
+        }
+        // 3D Viewer sofort initialisieren (da Standard-Tab)
+        initCesium();
         
         // Kein Loading-Event mehr nötig - Karte startet sofort
         
         // Leaflet Map (wie slopes mit Layer-Switcher)
         const mapLayerStyles = {
-            'Dark Map': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> & CartoDB',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }),
-            'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                attribution: '&copy; Esri',
-                maxZoom: 19
+            'OSM': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
+            'Topo': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 }),
+            'Satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
+            'Dark Map': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { 
+                subdomains: 'abcd', maxZoom: 19 
             })
         };
         const leafletMap = L.map('leafletContainer', {
