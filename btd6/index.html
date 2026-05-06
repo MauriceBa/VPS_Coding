@@ -66,17 +66,9 @@
             background: rgba(59, 130, 246, 0.15);
             border-color: var(--primary); color: var(--primary);
         }
-        /* DROPDOWN */
-        .dropdown { position: relative; display: inline-block; }
-        .dropdown-content { display: none; position: absolute; top: 100%; right: 0; background: rgba(15, 23, 42, 0.95); min-width: 180px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid var(--card-border); z-index: 1000; overflow: hidden; backdrop-filter: blur(12px); }
-        .dropdown-content a { color: var(--text); padding: 0.8rem 1.2rem; text-decoration: none; display: block; transition: all 0.2s; font-size: 0.95rem; font-weight: 500; border-left: 3px solid transparent; }
-        .dropdown-content a:hover { background: rgba(59, 130, 246, 0.15); color: var(--primary); border-left-color: var(--primary); }
-        .dropdown:hover .dropdown-content { display: block; }
-        .dropdown:hover .dropbtn { background: rgba(59, 130, 246, 0.15); color: var(--primary); border-color: var(--primary); }
-        .dropbtn { cursor: pointer; font-family: inherit; font-size: inherit; background: transparent; }
 
         main {
-            max-width: 1200px; margin: calc(var(--header-height) + 4rem) auto 2rem;
+            max-width: 1400px; margin: calc(var(--header-height) + 4rem) auto 2rem;
             padding: 0 2rem; position: relative; z-index: 1;
         }
 
@@ -100,6 +92,11 @@
         }
         .stat-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 0.4rem; }
 
+        .section-title {
+            font-size: 1.8rem; font-weight: 700; margin: 3rem 0 1.5rem;
+            color: var(--text); display: flex; align-items: center; gap: 0.5rem;
+        }
+
         .grid-3 {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem; margin-bottom: 3rem; animation: slideUp 0.8s ease-out 0.2s backwards;
@@ -118,17 +115,29 @@
         .card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; }
         .card-icon { font-size: 1.4rem; }
         .card-title { font-weight: 700; color: var(--text); font-size: 1.1rem; }
-        
+
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.95rem; }
         .stat-row .lbl { color: var(--text-muted); }
         .stat-row .val { font-weight: 600; color: var(--text); text-align: right; }
+
+        .hero-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+        .hero-item {
+            background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .hero-name { font-size: 0.9rem; color: var(--text); }
+        .hero-count { font-weight: 700; color: var(--accent); }
 
         #error-msg { color: var(--secondary); font-weight: bold; text-align: center; margin: 2rem 0; display: none; }
 
         footer { margin-top: 6rem; padding: 2rem; text-align: center; color: var(--text-muted); border-top: 1px solid var(--card-border); }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .dropdown-content { right: auto; left: 0; } }
+        @media (max-width: 768px) { .stats-bar { gap: 1.5rem; } .stat-number { font-size: 2rem; } }
     </style>
 </head>
 <body>
@@ -141,15 +150,7 @@
             <a href="/" class="nav-link">🏠 Home</a>
             <a href="/plan-des-pistes/" class="nav-link">🎿 Pistenpläne</a>
             <a href="/untappd/" class="nav-link">🍺 Bier</a>
-            <a href="/btd6/" class="nav-link active">🎈 BTD6 Profil</a>
-            <div class="dropdown">
-                <button class="nav-link dropbtn">🎮 Games ▾</button>
-                <div class="dropdown-content">
-                    <a href="/lollipop-looper/">🍭 Lollipop Looper</a>
-                    <a href="/ski-resort-idle/">🏔️ Ski Resort</a>
-                    <a href="/game_bridle/">🧱 Bridle</a>
-                </div>
-            </div>
+            <a href="/btd6/" class="nav-link active">🎈 BTD6</a>
         </div>
     </header>
 
@@ -159,13 +160,15 @@
             <p class="subtitle">Live-Daten direkt über die Ninja Kiwi Open Data API ausgelesen</p>
         </div>
 
-        <div id="error-msg">API konnte nicht geladen werden. Bitte später erneut versuchen.</div>
+        <div id="error-msg">⚠️ API konnte nicht geladen werden. Bitte später erneut versuchen.</div>
 
-        <div class="stats-bar" id="highlights">
-            <div class="stat-item"><div class="stat-number">...</div><div class="stat-label">Lade Daten</div></div>
-        </div>
+        <div class="stats-bar" id="highlights"></div>
 
-        <div class="grid-3" id="details-grid"></div>
+        <div id="gameplay-section"></div>
+        <div id="bloons-section"></div>
+        <div id="towers-section"></div>
+        <div id="heroes-section"></div>
+        <div id="achievements-section"></div>
     </main>
 
     <footer>
@@ -175,27 +178,246 @@
     <script>
         const OAK_KEY = "oak_22b8220d7e5253073845";
         const API_URL = `https://data.ninjakiwi.com/btd6/users/${OAK_KEY}`;
+        
         const fmtNum = (v) => (typeof v === "number" && Number.isFinite(v)) ? new Intl.NumberFormat('de-DE').format(v) : v;
-        function statRow(label, value, rawValueForCheck) { const check = rawValueForCheck !== undefined ? rawValueForCheck : value; if(check === undefined || check === null || check === 0 || check === "0" || check === "") return ""; return `<div class="stat-row"><span class="lbl">${label}</span><span class="val">${fmtNum(value)}</span></div>`; }
+
+        function statRow(label, value) {
+            if (value === undefined || value === null || value === 0 || value === "0" || value === "") return "";
+            return `<div class="stat-row"><span class="lbl">${label}</span><span class="val">${fmtNum(value)}</span></div>`;
+        }
+
+        function createCard(title, icon, content) {
+            return `<div class="card">
+                <div class="card-header">
+                    <span class="card-icon">${icon}</span>
+                    <span class="card-title">${title}</span>
+                </div>
+                ${content}
+            </div>`;
+        }
+
+        function createHeroGrid(heroes) {
+            const sorted = Object.entries(heroes)
+                .filter(([_, v]) => typeof v === "number" && v > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            if (sorted.length === 0) return "";
+            
+            const items = sorted.map(([name, count]) => 
+                `<div class="hero-item">
+                    <span class="hero-name">${name}</span>
+                    <span class="hero-count">${fmtNum(count)}x</span>
+                </div>`
+            ).join('');
+            
+            return `<div class="hero-grid">${items}</div>`;
+        }
+
+        function createTowerGrid(towers) {
+            const sorted = Object.entries(towers)
+                .filter(([_, v]) => typeof v === "number" && v > 0)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 15);
+            
+            if (sorted.length === 0) return "";
+            
+            const items = sorted.map(([name, count]) => 
+                `<div class="hero-item">
+                    <span class="hero-name">${name.replace('Monkey', '').replace('Beast', '')}</span>
+                    <span class="hero-count">${fmtNum(count)}x</span>
+                </div>`
+            ).join('');
+            
+            return `<div class="hero-grid">${items}</div>`;
+        }
+
         async function fetchBTD6Data() {
             try {
-                const res = await fetch(API_URL); if(!res.ok) throw new Error("Network response was not ok"); const data = await res.json(); const body = data.body || data;
-                const rank = body.rank || body.level || "--"; const vetRank = body.veteranRank || 0; const mm = body.monkeyMoney || 0; const username = body.displayName || body.name || "Maurice";
-                let highlightsHTML = `<div class="stat-item"><div class="stat-number">${username}</div><div class="stat-label">Spieler</div></div><div class="stat-item"><div class="stat-number">${rank} ${vetRank > 0 ? `<span style="font-size:1.2rem; color:var(--accent)">+${vetRank}</span>` : ''}</div><div class="stat-label">Rang</div></div>`;
-                if(mm > 0) highlightsHTML += `<div class="stat-item"><div class="stat-number" style="color: var(--accent);">${fmtNum(mm)}</div><div class="stat-label">Monkey Money 💰</div></div>`;
+                const res = await fetch(API_URL); 
+                if (!res.ok) throw new Error("Network response was not ok"); 
+                
+                const data = await res.json(); 
+                const body = data.body || data;
+                
+                const rank = body.rank || body.level || "--";
+                const vetRank = body.veteranRank || 0;
+                const mm = body.monkeyMoney || 0;
+                const username = body.displayName || body.name || "RiiFT";
+                const avatarURL = body.avatarURL || "";
+                
+                // Highlights
+                let highlightsHTML = `
+                    <div class="stat-item">
+                        <div class="stat-number">${username}</div>
+                        <div class="stat-label">Spieler</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">${rank} ${vetRank > 0 ? `<span style="font-size:1.2rem; color:var(--accent)">+${vetRank}</span>` : ''}</div>
+                        <div class="stat-label">Rang</div>
+                    </div>`;
+                
+                if (mm > 0) highlightsHTML += `
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: var(--accent);">${fmtNum(mm)}</div>
+                        <div class="stat-label">Monkey Money 💰</div>
+                    </div>`;
+                
+                if (body.bloonsPopped && body.bloonsPopped.bloonsPopped) {
+                    highlightsHTML += `
+                    <div class="stat-item">
+                        <div class="stat-number" style="color: var(--secondary);">${fmtNum(body.bloonsPopped.bloonsPopped)}</div>
+                        <div class="stat-label">Bloons Popped 🎈</div>
+                    </div>`;
+                }
+                
+                if (body.gameplay && body.gameplay.gameCount) {
+                    highlightsHTML += `
+                    <div class="stat-item">
+                        <div class="stat-number">${fmtNum(body.gameplay.gameCount)}</div>
+                        <div class="stat-label">Spiele</div>
+                    </div>`;
+                }
+                
                 document.getElementById('highlights').innerHTML = highlightsHTML;
-                const grid = document.getElementById('details-grid'); grid.innerHTML = '';
-                if(body.stats) { const s = body.stats; let gameplayRows = statRow("Bloons Popped:", s.bloonsPopped) + statRow("MOABs Popped:", s.moabsPopped) + statRow("Lead Bloons:", s.leadBloonsPopped) + statRow("Camo Bloons:", s.camoBloonsPopped) + statRow("Games Played:", s.gamesPlayed) + statRow("Games Won:", s.gamesWon); if(gameplayRows) grid.innerHTML += `<div class="card"><div class="card-header"><span class="card-icon">⚔️</span><span class="card-title">Gameplay Stats</span></div>${gameplayRows}</div>`; let medalRows = statRow("Achievements:", s.achievements) + statRow("Daily Rewards:", s.dailyRewards) + statRow("Highest Round:", s.highestRound) + statRow("Black Borders:", s.blackBorders) + statRow("Gold Borders:", s.goldBorders) + statRow("Insta Monkeys:", s.instaMonkeys); if(medalRows) grid.innerHTML += `<div class="card"><div class="card-header"><span class="card-icon">🏆</span><span class="card-title">Erfolge &amp; Medaillen</span></div>${medalRows}</div>`; }
-                if(body.heroesPlaced) { const heroEntries = Object.entries(body.heroesPlaced).filter(([_,v])=>typeof v==="number"&&v>0).sort((a,b)=>b[1]-a[1]).slice(0,6); if(heroEntries.length>0){ let heroRows=heroEntries.map(([name,count])=>statRow(name+":", fmtNum(count)+" x platziert", count)).join(""); grid.innerHTML+=`<div class="card"><div class="card-header"><span class="card-icon">🦸‍♂️</span><span class="card-title">Top Heroes Placed</span></div>${heroRows}</div>`; } }
-                if(grid.innerHTML===''){let genericRows=''; for(const [key,value] of Object.entries(body)){if(typeof value!=='object'&&key!=='id'){genericRows+=statRow(key+":",value);}} if(genericRows)grid.innerHTML=`<div class="card" style="grid-column:1/-1;"><div class="card-header"><span class="card-icon">📋</span><span class="card-title">Allgemeine Infos</span></div><div style="column-count:2;column-gap:2rem;">${genericRows}</div></div>`;}
-            } catch(err) { console.error(err); document.getElementById('error-msg').style.display='block'; document.getElementById('highlights').style.display='none'; }
+
+                // Gameplay Stats
+                if (body.gameplay) {
+                    const g = body.gameplay;
+                    let gameplayRows = 
+                        statRow("Gespielte Spiele", g.gameCount) +
+                        statRow("Gewonnene Spiele", g.gamesWon) +
+                        statRow("Höchste Runde", g.highestRound) +
+                        statRow("Höchste Runde CHIMPS", g.highestRoundCHIMPS) +
+                        statRow("Cash verdient", g.cashEarned) +
+                        statRow("Monkeys platziert", g.monkeysPlaced) +
+                        statRow("Fähigkeiten genutzt", g.abilitiesUsed) +
+                        statRow("Powers genutzt", g.powersUsed) +
+                        statRow("Coop Cash gegeben", g.coopCashGiven) +
+                        statRow("Trophäen verdient", g.totalTrophiesEarned) +
+                        statRow("Odysseen abgeschlossen", g.totalOdysseysCompleted) +
+                        statRow("Odyssee-Sterne", g.totalOdysseyStars) +
+                        statRow("Monkey Teams Siege", g.monkeyTeamsWins);
+                    
+                    document.getElementById('gameplay-section').innerHTML = createCard("Gameplay Stats", "⚔️", gameplayRows);
+                }
+
+                // Bloons Popped Stats
+                if (body.bloonsPopped) {
+                    const b = body.bloonsPopped;
+                    let bloonsRows = 
+                        statRow("Gesamt Bloons", b.bloonsPopped) +
+                        statRow("Bloons gelassen", b.bloonsLeaked) +
+                        statRow("Ceramics", b.ceramicsPopped) +
+                        statRow("MOABs", b.moabsPopped) +
+                        statRow("BFBs", b.bfbsPopped) +
+                        statRow("DDTs", b.ddtsPopped) +
+                        statRow("BADs", b.badsPopped) +
+                        statRow("ZOMGs", b.zomgsPopped) +
+                        statRow("Camo Bloons", b.camosPopped) +
+                        statRow("Lead Bloons", b.leadsPopped) +
+                        statRow("Regrows", b.regrowsPopped) +
+                        statRow("Golden Bloons", b.goldenBloonsPopped) +
+                        statRow("Bosses", b.bossesPopped) +
+                        statRow("Necro Bloons", b.necroBloonsReanimated) +
+                        statRow("Coop Bloons", b.coopBloonsPopped);
+                    
+                    document.getElementById('bloons-section').innerHTML = createCard("Bloons Popped", "🎈", bloonsRows);
+                }
+
+                // Towers Placed
+                if (body.towersPlaced) {
+                    const towerGrid = createTowerGrid(body.towersPlaced);
+                    if (towerGrid) {
+                        document.getElementById('towers-section').innerHTML = createCard("Towers Placed (Top 15)", "🏹", towerGrid);
+                    }
+                }
+
+                // Heroes Placed
+                if (body.heroesPlaced) {
+                    const heroGrid = createHeroGrid(body.heroesPlaced);
+                    if (heroGrid) {
+                        document.getElementById('heroes-section').innerHTML = createCard("Heroes Placed (Top 10)", "🦸‍♂️", heroGrid);
+                    }
+                }
+
+                // Achievements & Medals
+                let medalRows = 
+                    statRow("Achievements", body.achievements) +
+                    statRow("Daily Rewards", body.dailyRewards) +
+                    statRow("Black Borders", body.blackBorders) +
+                    statRow("Gold Borders", body.goldBorders) +
+                    statRow("Insta Monkeys (Collection)", body.instaMonkeyCollection) +
+                    statRow("Insta Monkeys (Used)", body.instaMonkeysUsed) +
+                    statRow("Höchste Runde", body.highestRound) +
+                    statRow("Boss Damage", body.damageDoneToBosses ? fmtNum(body.damageDoneToBosses) : undefined) +
+                    statRow("Most Experienced", body.mostExperiencedMonkey ? body.mostExperiencedMonkey.replace('Monkey', '') : undefined);
+                
+                document.getElementById('achievements-section').innerHTML = createCard("Erfolge & Medaillen", "🏆", medalRows);
+
+            } catch(err) { 
+                console.error(err); 
+                document.getElementById('error-msg').style.display = 'block'; 
+                document.getElementById('highlights').style.display = 'none'; 
+            }
         }
+
         fetchBTD6Data();
-        const canvas=document.getElementById('bg-canvas'); const ctx=canvas.getContext('2d'); let width,height,particles=[];
-        function resize(){width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight;initParticles();} window.addEventListener('resize',resize); resize();
-        class Particle{constructor(){this.x=Math.random()*width;this.y=Math.random()*height;this.size=Math.random()*3+1;this.speedX=Math.random()*1-0.5;this.speedY=Math.random()*-1-0.5;this.opacity=Math.random()*0.5+0.1;const colors=['#ef4444','#3b82f6','#22c55e','#eab308'];this.color=colors[Math.floor(Math.random()*colors.length)];}update(){this.x+=this.speedX;this.y+=this.speedY;if(this.y<-10)this.y=height+10;if(this.x<-10)this.x=width+10;if(this.x>width+10)this.x=-10;}draw(){ctx.globalAlpha=this.opacity;ctx.fillStyle=this.color;ctx.beginPath();ctx.ellipse(this.x,this.y,this.size,this.size*1.2,0,0,Math.PI*2);ctx.fill();}}
-        function initParticles(){particles=[];const count=Math.floor((width*height)/10000);for(let i=0;i<count;i++)particles.push(new Particle());}
-        function animate(){ctx.clearRect(0,0,width,height);for(let i=0;i<particles.length;i++){particles[i].update();particles[i].draw();}requestAnimationFrame(animate);}
+
+        // Background Particles
+        const canvas = document.getElementById('bg-canvas'); 
+        const ctx = canvas.getContext('2d'); 
+        let width, height, particles = [];
+        
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initParticles();
+        }
+        window.addEventListener('resize', resize);
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 3 + 1;
+                this.speedX = Math.random() * 1 - 0.5;
+                this.speedY = Math.random() * -1 - 0.5;
+                this.opacity = Math.random() * 0.5 + 0.1;
+                const colors = ['#ef4444', '#3b82f6', '#22c55e', '#eab308'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.y < -10) this.y = height + 10;
+                if (this.x < -10) this.x = width + 10;
+                if (this.x > width + 10) this.x = -10;
+            }
+            draw() {
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y, this.size, this.size * 1.2, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        function initParticles() {
+            particles = [];
+            const count = Math.floor((width * height) / 10000);
+            for (let i = 0; i < count; i++) particles.push(new Particle());
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+            requestAnimationFrame(animate);
+        }
+        resize();
         animate();
     </script>
 </body>
