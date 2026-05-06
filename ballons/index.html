@@ -240,26 +240,31 @@
             if (viewer) return;
             try {
                 viewer = new Cesium.Viewer('cesiumContainer', {
-                    baseLayerPicker: true,
+                    baseLayerPicker: false, // Ion-Zugriff vermeiden
                     timeline: true,
                     animation: true,
                     homeButton: false,
                     sceneModePicker: false,
                     navigationHelpButton: false,
                     fullscreenButton: false,
-                    shouldAnimate: false
+                    shouldAnimate: false,
+                    imageryProvider: new Cesium.OpenStreetMapImageryProvider({
+                        url: 'https://a.tile.openstreetmap.org/'
+                    })
                 });
-                // Kamera auf Heimatort setzen, sobald Viewer bereit ist (wie slopes)
-                viewer.readyPromise.then(() => {
-                    viewer.camera.setView({
-                        destination: Cesium.Cartesian3.fromDegrees(7.08, 50.77, 5000), // 5km Höhe
-                        orientation: {
-                            heading: Cesium.Math.toRadians(0),
-                            pitch: Cesium.Math.toRadians(-45), // Schrägansicht wie slopes
-                            roll: 0.0
-                        }
-                    });
-                }).catch(e => console.error('Cesium Ready Fehler:', e));
+                // Kamera auf Heimatort setzen nach kurzer Verzögerung
+                setTimeout(() => {
+                    if (viewer && viewer.camera) {
+                        viewer.camera.setView({
+                            destination: Cesium.Cartesian3.fromDegrees(7.08, 50.77, 5000),
+                            orientation: {
+                                heading: Cesium.Math.toRadians(0),
+                                pitch: Cesium.Math.toRadians(-45),
+                                roll: 0.0
+                            }
+                        });
+                    }
+                }, 500);
             } catch(e) {
                 console.error('Cesium Init Fehler:', e);
             }
