@@ -207,7 +207,8 @@
         function updateAllStats() {
             document.getElementById('total-points').textContent = allData.length;
             
-            const shapes = ['sphere', 'cylinder', 'Raschig Ring'];
+            // Alle Formen dynamisch aus den Daten ermitteln
+            const shapes = [...new Set(allData.map(d => d.shape))];
             shapes.forEach(shape => {
                 const shapeData = allData.filter(d => d.shape === shape);
                 const avgPorosity = shapeData.reduce((sum, d) => sum + d.porosity, 0) / shapeData.length;
@@ -289,8 +290,8 @@
 
         // Diagramme für 3mm Daten
         function create3mmCharts() {
-            // Porosität nach Form
-            const shapes = ['sphere', 'cylinder', 'Raschig Ring'];
+            // Alle Formen aus den 3mm Daten dynamisch ermitteln
+            const shapes = [...new Set(data3mm.map(d => d.shape))];
             const porosityData = shapes.map(shape => {
                 const data = data3mm.filter(d => d.shape === shape);
                 return {
