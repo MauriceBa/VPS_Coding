@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pellet-Optimierung Ergebnisse - Masterarbeit</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        .download-btn:hover {
+            background: #5568d3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧪 Pellet-Optimierung Ergebnisse</h1>
+        <p>Masterarbeit - DOE Simulationen & Surrogat-Modell</p>
+        <p><strong>Datenpunkte:</strong> <span id="total-points">Lädt...</span> | 
+           <strong>Beste Form:</strong> <span id="best-shape">Lädt...</span></p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="stat-sphere">-</div>
+            <div class="stat-label">Kugel (Ø Porosität)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-cylinder">-</div>
+            <div class="stat-label">Zylinder (Ø Porosität)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-raschig">-</div>
+            <div class="stat-label">Raschig Ring (Ø Porosität)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="stat-best-surface">-</div>
+            <div class="stat-label">Beste Gesamtoberfläche (mm²)</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h2>📊 Porosität nach Pellet-Form</h2>
+        <div id="porosity-chart" style="height: 400px;"></div>
+    </div>
+
+    <div class="chart-container">
+        <h2>📏 Sauter-Durchmesser Verteilung</h2>
+        <div id="sauter-chart" style="height: 400px;"></div>
+    </div>
+
+    <div class="chart-container">
+        <h2>🏆 Gesamtoberfläche im Reaktor (V=10000mm³)</h2>
+        <div id="surface-chart" style="height: 400px;"></div>
+    </div>
+
+    <div class="chart-container">
+        <h2>📥 Daten herunterladen</h2>
+        <p>Alle 110 DOE-Ergebnisse in einer CSV-Datei:</p>
+        <a href="/data/Hermes/doe_results.csv" class="download-btn" download>CSV herunterladen</a>
+        <p style="margin-top: 20px;">Oder die zusammengefassten Ergebnisse:</p>
+        <button class="download-btn" onclick="downloadSummary()">Zusammenfassung als JSON</button>
+    </div>
+
+    <div class="chart-container">
+        <h2>📋 Daten-Tabelle (Top 20 nach Gesamtoberfläche)</h2>
+        <div style="overflow-x: auto;">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Form</th>
+                        <th>Sauter-Durchmesser (mm)</th>
+                        <th>Porosität</th>
+                        <th>Spez. Oberfläche</th>
+                        <th>Radius (mm)</th>
+                        <th>Länge (mm)</th>
+                        <th>Innenradius (mm)</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td colspan="7">Lade Daten...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let csvData = [];
+
+        // CSV laden
+        fetch('/data/Hermes/doe_results.csv')
+            .then(response => response.text())
+            .then(csvText => {
+                parseCSV(csvText);
+                updateStats();
+                createCharts();
+                populateTable();
+            })
+            .catch(err => {
+                console.error('Fehler beim Laden der CSV:', err);
+                document.getElementById('total-points').textContent = 'Fehler beim Laden';
+            });
+
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            csvData = lines.slice(1)
+                .filter(line => line.trim())
+                .map(line => {
+                    const values = line.split(',');
+                    const obj = {};
+                    headers.forEach((header, i) => {
+                        obj[header] = isNaN(values[i]) ? values[i] : parseFloat(values[i]);
+                    });
+                    return obj;
+                });
+            
+            document.getElementById('total-points').textContent = csvData.length;
+        }
+
+        function updateStats() {
+            const shapes = ['sphere', 'cylinder', 'Raschig Ring'];
+            const stats = {};
+            
+            shapes.forEach(shape => {
+                const data = csvData.filter(d => d.shape === shape);
+                if (data.length > 0) {
+                    const avgPorosity = data.reduce((sum, d) => sum + d.porosity, 0) / data.length;
+                    stats[shape] = {
+                        count: data.length,
+                        avgPorosity: avgPorosity,
+                        bestSurface: Math.max(...data.map(d => 6 * 10000 * (1 - d.porosity) / d.sauter_diameter))
+                    };
+                }
+            });
+
+            if (stats['sphere']) {
+                document.getElementById('stat-sphere').textContent = stats['sphere'].avgPorosity.toFixed(4);
+            }
+            if (stats['cylinder']) {
+                document.getElementById('stat-cylinder').textContent = stats['cylinder'].avgPorosity.toFixed(4);
+            }
+            if (stats['Raschig Ring']) {
+                document.getElementById('stat-raschig').textContent = stats['Raschig Ring'].avgPorosity.toFixed(4);
+            }
+
+            // Beste Gesamtoberfläche finden
+            let bestSurface = 0;
+            let bestShape = '';
+            Object.keys(stats).forEach(shape => {
+                if (stats[shape].bestSurface > bestSurface) {
+                    bestSurface = stats[shape].bestSurface;
+                    bestShape = shape;
+                }
+            });
+            document.getElementById('stat-best-surface').textContent = bestSurface.toFixed(2);
+            document.getElementById('best-shape').textContent = bestShape;
+        }
+
+        function createCharts() {
+            // Porositäts-Vergleich
+            const shapes = ['sphere', 'cylinder', 'Raschig Ring'];
+            const porosities = shapes.map(shape => {
+                const data = csvData.filter(d => d.shape === shape);
+                return data.map(d => d.porosity);
+            });
+
+            const porosityTrace = {
+                x: shapes,
+                y: porosities.map(p => p.reduce((a, b) => a + b, 0) / p.length),
+                type: 'bar',
+                marker: {
+                    color: ['#667eea', '#764ba2', '#f093fb']
+                }
+            };
+
+            Plotly.newPlot('porosity-chart', [porosityTrace], {
+                title: 'Durchschnittliche Porosität nach Form',
+                yaxis: { title: 'Porosität (ε)' }
+            });
+
+            // Sauter-Durchmesser Verteilung
+            const sauterData = csvData.filter(d => d.sauter_diameter >= 2.5 && d.sauter_diameter <= 3.5);
+            const sauterTrace = {
+                x: sauterData.map(d => d.sauter_diameter),
+                type: 'histogram',
+                nbinsx: 20,
+                name: 'Sauter-Durchmesser',
+                marker: { color: '#667eea' }
+            };
+
+            Plotly.newPlot('sauter-chart', [sauterTrace], {
+                title: 'Verteilung des Sauter-Durchmessers (2.5-3.5mm)',
+                xaxis: { title: 'Sauter-Durchmesser (mm)' },
+                yaxis: { title: 'Anzahl' }
+            });
+
+            // Gesamtoberfläche
+            const surfaceData = csvData.filter(d => d.sauter_diameter >= 2.9 && d.sauter_diameter <= 3.1);
+            const surfaceTraces = shapes.map(shape => {
+                const data = surfaceData.filter(d => d.shape === shape);
+                return {
+                    x: data.map(d => d.shape),
+                    y: data.map(d => 6 * 10000 * (1 - d.porosity) / d.sauter_diameter),
+                    type: 'bar',
+                    name: shape,
+                    marker: { color: shape === 'Raschig Ring' ? '#f093fb' : shape === 'cylinder' ? '#764ba2' : '#667eea' }
+                };
+            });
+
+            Plotly.newPlot('surface-chart', surfaceTraces, {
+                title: 'Gesamtoberfläche im Reaktor (d32=3.0±0.1mm, V=10000mm³)',
+                yaxis: { title: 'Gesamtoberfläche (mm²)' },
+                barmode: 'group'
+            });
+        }
+
+        function populateTable() {
+            const tbody = document.getElementById('table-body');
+            
+            // Top 20 nach Gesamtoberfläche (bei d32~3.0)
+            const filtered = csvData
+                .filter(d => d.sauter_diameter >= 2.9 && d.sauter_diameter <= 3.1)
+                .map(d => ({
+                    ...d,
+                    surface: 6 * 10000 * (1 - d.porosity) / d.sauter_diameter
+                }))
+                .sort((a, b) => b.surface - a.surface)
+                .slice(0, 20);
+
+            tbody.innerHTML = filtered.map(d => `
+                <tr>
+                    <td>${d.shape}</td>
+                    <td>${d.sauter_diameter.toFixed(3)}</td>
+                    <td>${d.porosity.toFixed(4)}</td>
+                    <td>${d.spec_surface_area.toFixed(4)}</td>
+                    <td>${d.p_radius.toFixed(2)}</td>
+                    <td>${d.p_length ? d.p_length.toFixed(2) : '-'}</td>
+                    <td>${d.p_inner_radius ? d.p_inner_radius.toFixed(2) : '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function downloadSummary() {
+            const summary = {
+                total_points: csvData.length,
+                shapes: ['sphere', 'cylinder', 'Raschig Ring'].map(shape => {
+                    const data = csvData.filter(d => d.shape === shape);
+                    return {
+                        shape: shape,
+                        count: data.length,
+                        avg_porosity: data.reduce((sum, d) => sum + d.porosity, 0) / data.length,
+                        avg_sauter: data.reduce((sum, d) => sum + d.sauter_diameter, 0) / data.length
+                    };
+                }),
+                best_result: csvData
+                    .filter(d => d.sauter_diameter >= 2.9 && d.sauter_diameter <= 3.1)
+                    .map(d => ({
+                        ...d,
+                        surface: 6 * 10000 * (1 - d.porosity) / d.sauter_diameter
+                    }))
+                    .sort((a, b) => b.surface - a.surface)[0]
+            };
+
+            const blob = new Blob([JSON.stringify(summary, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'pellet_results_summary.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
