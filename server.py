@@ -251,6 +251,16 @@ class CombinedHandler(BaseHTTPRequestHandler):
                 self.send_error(403, "Forbidden")
                 return
             
+            # Wenn es ein Verzeichnis ist, versuche index.html zu finden
+            from os import path as ospath
+            if ospath.isdir(full_path):
+                index_path = ospath.join(full_path, 'index.html')
+                if ospath.isfile(index_path):
+                    full_path = index_path
+                else:
+                    self.send_error(404, "File not found")
+                    return
+            
             if not isfile(full_path):
                 self.send_error(404, "File not found")
                 return
