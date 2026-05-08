@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <meta name="theme-color" content="#1a1a2e">
     <title>🍺 Vatertagswanderung | 14. Mai | mauricefun.lol</title>
     
@@ -26,6 +26,7 @@
         html, body {
             overflow-x: hidden;
             max-width: 100vw;
+            scroll-behavior: smooth;
         }
         
         body {
@@ -36,10 +37,10 @@
             display: flex;
             flex-direction: column;
             font-size: 1rem;
-            padding-bottom: 50px;
+            padding-bottom: 70px;
         }
-        
-        /* Animated Background */
+
+        /* ===== ANIMATED BACKGROUND ===== */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -48,33 +49,156 @@
             height: 100%;
             z-index: 0;
             overflow: hidden;
+            pointer-events: none;
             background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
         }
         
-        .beer {
+        .beer-float {
             position: absolute;
-            font-size: 40px;
-            animation: floatUp 15s linear infinite;
-            opacity: 0.3;
+            bottom: -80px;
+            font-size: 36px;
+            animation: floatUp linear infinite;
+            opacity: 0;
+            user-select: none;
         }
-        
-        .beer:nth-child(2) { animation-duration: 20s; animation-delay: 2s; font-size: 35px; }
-        .beer:nth-child(3) { animation-duration: 18s; animation-delay: 4s; font-size: 45px; }
-        .beer:nth-child(4) { animation-duration: 25s; animation-delay: 1s; font-size: 30px; }
-        .beer:nth-child(5) { animation-duration: 22s; animation-delay: 3s; font-size: 38px; }
         
         @keyframes floatUp {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.3; }
-            90% { opacity: 0.3; }
-            100% { transform: translateY(-100px) rotate(20deg); opacity: 0; }
+            0%   { transform: translateY(0) rotate(0deg);   opacity: 0; }
+            5%   { opacity: 0.35; }
+            90%  { opacity: 0.35; }
+            100% { transform: translateY(calc(-100vh - 100px)) rotate(25deg); opacity: 0; }
         }
-        
-        /* Header */
+
+        /* ===== MEME BUTTON (top-right, always visible) ===== */
+        #memeBtn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 10000;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(233,69,96,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: memePulse 3s ease-in-out infinite;
+        }
+        #memeBtn:hover { transform: scale(1.1); box-shadow: 0 6px 28px rgba(233,69,96,0.7); }
+        @keyframes memePulse {
+            0%,100% { box-shadow: 0 4px 20px rgba(233,69,96,0.5); }
+            50%      { box-shadow: 0 4px 30px rgba(233,69,96,0.9); }
+        }
+
+        /* ===== MEME MODAL ===== */
+        #memeModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #memeModal.open { display: flex; }
+        .meme-container {
+            position: relative;
+            max-width: 420px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            border: 2px solid rgba(233,69,96,0.4);
+            animation: memeIn 0.3s ease;
+        }
+        @keyframes memeIn {
+            from { transform: scale(0.8) translateY(30px); opacity: 0; }
+            to   { transform: scale(1) translateY(0);      opacity: 1; }
+        }
+        .meme-top-text {
+            position: absolute;
+            top: 12px;
+            left: 0; right: 0;
+            text-align: center;
+            font-size: clamp(18px, 5vw, 28px);
+            font-weight: 900;
+            color: white;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000;
+            padding: 0 12px;
+            line-height: 1.2;
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+        .meme-bottom-text {
+            position: absolute;
+            bottom: 12px;
+            left: 0; right: 0;
+            text-align: center;
+            font-size: clamp(18px, 5vw, 28px);
+            font-weight: 900;
+            color: white;
+            text-transform: uppercase;
+            text-shadow: 3px 3px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 0 3px 0 #000, 0 -3px 0 #000;
+            padding: 0 12px;
+            line-height: 1.2;
+            letter-spacing: 1px;
+            z-index: 2;
+        }
+        .meme-img-wrap {
+            position: relative;
+            width: 100%;
+            background: #111;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .meme-img-wrap img {
+            width: 100%;
+            max-height: 65vh;
+            object-fit: contain;
+            display: block;
+        }
+        .meme-footer {
+            display: flex;
+            gap: 10px;
+            padding: 14px;
+            background: var(--surface2);
+        }
+        .meme-footer button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.15s;
+        }
+        .meme-footer button:active { transform: scale(0.95); }
+        .btn-next { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+        .btn-close { background: var(--surface); color: var(--muted); border: 1px solid rgba(255,255,255,0.1) !important; }
+        .meme-no-images {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+
+        /* ===== HEADER ===== */
         header {
             text-align: center;
-            padding: 60px 20px 40px;
-            background: linear-gradient(180deg, rgba(233, 69, 96, 0.2) 0%, transparent 100%);
+            padding: 70px 20px 40px;
+            background: linear-gradient(180deg, rgba(233,69,96,0.15) 0%, transparent 100%);
             position: relative;
             z-index: 1;
         }
@@ -92,11 +216,11 @@
         
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            50%       { transform: scale(1.05); }
         }
         
         h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2rem, 8vw, 3.5rem);
             font-weight: 700;
             margin-bottom: 10px;
             background: linear-gradient(135deg, var(--accent), var(--gold));
@@ -104,73 +228,79 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             word-wrap: break-word;
+            line-height: 1.2;
         }
         
         .subtitle {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 3vw, 1.2rem);
             color: var(--muted);
             margin-bottom: 30px;
         }
-        
-        /* Countdown */
+
+        /* ===== COUNTDOWN ===== */
         .countdown {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin: 40px 0;
+            gap: 12px;
+            margin: 30px 0;
             flex-wrap: wrap;
         }
         
         .countdown-item {
             background: var(--surface2);
-            padding: 20px;
+            padding: 16px 20px;
             border-radius: 12px;
-            min-width: 100px;
+            min-width: 80px;
             text-align: center;
-            border: 1px solid rgba(233, 69, 96, 0.3);
+            border: 1px solid rgba(233,69,96,0.3);
+            flex: 1;
+            max-width: 110px;
         }
         
         .countdown-number {
-            font-size: 2.5rem;
+            font-size: clamp(1.8rem, 5vw, 2.5rem);
             font-weight: 700;
             color: var(--accent);
+            display: block;
         }
         
         .countdown-label {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: var(--muted);
-            margin-top: 5px;
+            margin-top: 4px;
         }
-        
-        /* Buttons */
+
+        /* ===== BUTTONS ===== */
         .button-container {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
             flex-wrap: wrap;
             margin-top: 20px;
         }
         
         .cta-button {
-            display: inline-block;
-            padding: 15px 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 14px 24px;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
             color: white;
             text-decoration: none;
             border-radius: 30px;
             font-weight: 600;
-            transition: transform 0.3s;
+            font-size: 0.95rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+            cursor: pointer;
         }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-        }
-        
-        /* Main Content */
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(233,69,96,0.4); }
+
+        /* ===== MAIN / CARDS ===== */
         main {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px 16px 20px;
             width: 100%;
             position: relative;
             z-index: 1;
@@ -179,206 +309,309 @@
         .card {
             background: var(--surface);
             border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255,255,255,0.06);
         }
         
         .card h2 {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            margin-bottom: 18px;
             color: var(--accent);
         }
         
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 10px;
         }
         
         .info-item {
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 20px;
+            gap: 14px;
+            padding: 16px;
             background: var(--surface2);
             border-radius: 12px;
         }
         
         .info-icon {
-            font-size: 2rem;
-            width: 50px;
-            height: 50px;
+            font-size: 1.8rem;
+            width: 46px;
+            height: 46px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--bg);
             border-radius: 10px;
+            flex-shrink: 0;
         }
         
-        .info-text h3 {
-            font-size: 0.9rem;
-            color: var(--muted);
-            margin-bottom: 5px;
-        }
+        .info-text h3 { font-size: 0.8rem; color: var(--muted); margin-bottom: 4px; }
+        .info-text p  { font-size: 1rem; font-weight: 600; }
+
+        /* ===== EVENT INFO ===== */
+        .event-info p { margin-bottom: 14px; line-height: 1.65; }
         
-        .info-text p {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        /* Event Info */
-        .event-info p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        /* Komoot Screenshot */
         .komoot-img {
             width: 100%;
-            max-width: 600px;
+            max-width: 580px;
             border-radius: 12px;
-            margin: 20px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: block;
         }
         
-        /* Buttons for Spotify/Komoot */
-        .spotify-button {
+        .link-buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+        
+        .spotify-button, .komoot-button {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 12px 25px;
-            background: #1DB954;
+            gap: 8px;
+            padding: 11px 22px;
             color: white;
             text-decoration: none;
             border-radius: 30px;
             font-weight: 600;
-            margin: 10px 10px 10px 0;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
         }
-        
-        .komoot-button {
-            display: inline-flex;
-            align-items: center;
+        .spotify-button { background: #1DB954; }
+        .komoot-button  { background: #314153; }
+        .spotify-button:hover, .komoot-button:hover { transform: translateY(-2px); }
+
+        /* ===== FLUNKYBALL ===== */
+        .flunky-row {
+            display: flex;
             gap: 10px;
-            padding: 12px 25px;
-            background: #314153;
-            color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-            margin: 10px 10px 10px 0;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
         }
         
-        /* Flunkyball */
         .flunky-input {
-            flex-grow: 1;
+            flex: 1;
+            min-width: 160px;
             padding: 12px 15px;
             background: var(--surface2);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             color: var(--text);
             font-size: 1rem;
         }
+        .flunky-input:focus { outline: none; border-color: var(--accent); }
         
         .flunky-button {
-            padding: 12px 25px;
+            padding: 12px 22px;
             background: linear-gradient(135deg, var(--accent), var(--accent2));
             color: white;
             border: none;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
+            font-size: 0.95rem;
+            transition: transform 0.15s;
+            white-space: nowrap;
         }
+        .flunky-button:active { transform: scale(0.97); }
         
-        .player-list {
-            margin-top: 15px;
-        }
+        .player-list { margin-top: 14px; }
         
         .player-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 15px;
+            padding: 12px 15px;
             background: var(--surface2);
             border-radius: 8px;
             margin-bottom: 8px;
         }
-        
-        /* Footer */
+        .player-item span:first-child { font-weight: 600; }
+        .wins-badge {
+            background: rgba(233,69,96,0.2);
+            color: var(--accent);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* ===== TEAMS SECTION ===== */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 10px;
+        }
+        @media (max-width: 480px) { .teams-grid { grid-template-columns: 1fr; } }
+
+        .team-card {
+            background: var(--surface2);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .team-card h3 { font-size: 1rem; margin-bottom: 10px; color: var(--gold); }
+        .team-player { padding: 6px 10px; background: var(--bg); border-radius: 6px; margin-bottom: 6px; font-size: 0.9rem; }
+
+        /* ===== FOOTER ===== */
         footer {
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
             color: var(--muted);
             position: relative;
             z-index: 1;
+            font-size: 0.9rem;
         }
-        
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
+        footer a { color: var(--accent); text-decoration: none; }
+
+        /* ===== AUDIO PLAYER ===== */
+        #bottomPlayer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(15,15,30,0.97);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.15);
+            padding: 8px 14px;
+            z-index: 9000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            h1 { font-size: 2.5rem; }
-            .countdown { gap: 10px; }
-            .countdown-item { min-width: 80px; padding: 15px; }
-            .countdown-number { font-size: 2rem; }
-            .button-container { flex-direction: column; align-items: center; }
-            .cta-button { width: 100%; max-width: 300px; text-align: center; }
+
+        #playPauseBtn {
+            background: linear-gradient(135deg, #e94560, #533483);
+            border: none;
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s;
         }
-        
-        @media (max-width: 480px) {
-            h1 { font-size: 2rem; }
-            header { padding: 40px 15px 30px; }
-            main { padding: 20px 15px; }
-            .card { padding: 20px; }
+        #playPauseBtn:active { transform: scale(0.9); }
+
+        #progressContainer {
+            flex-grow: 1;
+            min-width: 0;
         }
+        .player-title {
+            font-size: 11px;
+            color: #fff;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .progress-row { display: flex; align-items: center; gap: 6px; }
+        .progress-track {
+            flex-grow: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #533483);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        #currentTime { font-size: 9px; color: rgba(255,255,255,0.5); flex-shrink: 0; }
+
+        .volume-group { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+        .volume-group span { font-size: 12px; color: rgba(255,255,255,0.7); }
+        #volumeSlider {
+            width: 50px;
+            height: 3px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+        #volumeSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+
+        /* ===== REGISTRATION MESSAGE ===== */
+        #registrationMessage { min-height: 24px; margin-bottom: 6px; font-size: 0.9rem; }
+
+        /* ===== SCROLL ANCHOR offset ===== */
+        [id] { scroll-margin-top: 20px; }
     </style>
 </head>
 <body>
-    <!-- Animated Background (Bierflaschen) -->
-    <div class="bg-animation">
-        <div class="beer" style="left: 10%;">🍺</div>
-        <div class="beer" style="left: 30%;">🍺</div>
-        <div class="beer" style="left: 50%;">🍺</div>
-        <div class="beer" style="left: 70%;">🍺</div>
-        <div class="beer" style="left: 90%;">🍺</div>
+
+    <!-- ===== ANIMATED BEER BACKGROUND ===== -->
+    <div class="bg-animation" id="bgAnimation"></div>
+
+    <!-- ===== MEME BUTTON ===== -->
+    <button id="memeBtn" title="Meme des Tages!" onclick="openMeme()">😎</button>
+
+    <!-- ===== MEME MODAL ===== -->
+    <div id="memeModal" onclick="closeMemeOnBg(event)">
+        <div class="meme-container" id="memeContainer">
+            <div class="meme-img-wrap" id="memeImgWrap">
+                <div class="meme-top-text"    id="memeTopText"></div>
+                <img id="memeImg" src="" alt="Meme" onerror="this.style.display='none'">
+                <div class="meme-bottom-text" id="memeBottomText"></div>
+            </div>
+            <div class="meme-footer">
+                <button class="btn-close" onclick="closeMeme()">✕ Schließen</button>
+                <button class="btn-next"  onclick="loadRandomMeme()">🔀 Nächstes Meme</button>
+            </div>
+        </div>
     </div>
-    
+
+    <!-- ===== HEADER ===== -->
     <header>
-        <div class="event-badge">🎉 14. Mai 2026</div>
+        <div class="event-badge">🎉 14. Mai 2026 – Vatertag</div>
         <h1>Vatertagswanderung</h1>
-        <p class="subtitle">Flunkyball bis zum Tod</p>
+        <p class="subtitle">Flunkyball bis zum Tod 🍺</p>
         
         <div class="countdown" id="countdown">
             <div class="countdown-item">
-                <div class="countdown-number" id="days">--</div>
+                <span class="countdown-number" id="days">--</span>
                 <div class="countdown-label">Tage</div>
             </div>
             <div class="countdown-item">
-                <div class="countdown-number" id="hours">--</div>
+                <span class="countdown-number" id="hours">--</span>
                 <div class="countdown-label">Stunden</div>
             </div>
             <div class="countdown-item">
-                <div class="countdown-number" id="minutes">--</div>
+                <span class="countdown-number" id="minutes">--</span>
                 <div class="countdown-label">Minuten</div>
             </div>
             <div class="countdown-item">
-                <div class="countdown-number" id="seconds">--</div>
+                <span class="countdown-number" id="seconds">--</span>
                 <div class="countdown-label">Sekunden</div>
             </div>
         </div>
         
         <div class="button-container">
-            <a href="#flunkyball" class="cta-button">🎮 Flunkyball-Game</a>
+            <a href="#flunkyball" class="cta-button">🎮 Flunkyball</a>
             <a href="#registrierung" class="cta-button">📝 Eintragen</a>
         </div>
     </header>
     
     <main>
-        <!-- Event Details -->
+        <!-- EVENT DETAILS -->
         <div class="card" id="details">
             <h2>📍 Event-Details</h2>
             <div class="info-grid">
@@ -405,250 +638,357 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Event Infos -->
+
+        <!-- EVENT INFOS -->
         <div class="card" id="infos">
             <h2>📋 Event-Infos</h2>
             <div class="event-info">
-                <p>🍺 <strong>Vatertagswanderung am 14. Mai!</strong></p>
-                <p>Wir treffen uns um 12:00 Uhr im Westpark Aachen für eine entspannte Wanderung mit Flunkyball.</p>
-                <p>Nach der Wanderung gibt es das legendäre Flunkyball-Turnier bis zum Tod!</p>
-                <p>🎵 Musik: <strong>Käppler Ex</strong> und viele andere Hits auf der Playlist.</p>
-                <p>🗺️ Die Wanderroute führt durch den schönen Westpark – siehe unten.</p>
+                <p>🍺 <strong>Vatertagswanderung am 14. Mai!</strong> Wir treffen uns um 12:00 Uhr im Westpark Aachen für eine entspannte Wanderung mit anschließendem Flunkyball-Turnier.</p>
+                <p>🎵 Musik: <strong>Käppler Ex</strong> und viele andere Hits – Spotify-Playlist unten.</p>
+                <p>🗺️ Die Wanderroute führt durch den schönen Westpark – Route auf Komoot.</p>
                 <p>📱 <strong>Wichtig:</strong> Trage dich für Flunkyball ein und bilde Teams!</p>
-                
-                <a href="https://open.spotify.com/playlist/6RqGnpRXJfZT8WcXbbY3uG?si=8bd4cafff3504a68" target="_blank" class="spotify-button">
-                    🎵 Spotify Playlist
-                </a>
-                <a href="https://www.komoot.de/tour/123456" target="_blank" class="komoot-button">
-                    🗺️ Komoot Route
-                </a>
+                <div class="link-buttons">
+                    <a href="https://open.spotify.com/playlist/6RqGnpRXJfZT8WcXbbY3uG?si=8bd4cafff3504a68" target="_blank" class="spotify-button">🎵 Spotify Playlist</a>
+                    <a href="https://www.komoot.de/tour/123456" target="_blank" class="komoot-button">🗺️ Komoot Route</a>
+                </div>
             </div>
         </div>
-        
-        <!-- Wanderroute -->
+
+        <!-- WANDERROUTE -->
         <div class="card" id="route">
             <h2>🗺️ Wanderroute</h2>
-            <p>Die Route führt durch den Westpark Aachen. Hier ist ein Screenshot der Komoot-Tour:</p>
+            <p style="color:var(--muted); margin-bottom:12px;">Komoot-Screenshot der Tour durch den Westpark Aachen:</p>
             <img src="komoot_screenshot.jpg" alt="Komoot Wanderroute" class="komoot-img">
         </div>
-        
-        <!-- Flunkyball Registration -->
+
+        <!-- FLUNKYBALL EINTRAGEN -->
         <div class="card" id="registrierung">
             <h2>📝 Flunkyball-Eintragen</h2>
-            <p style="color: var(--muted); margin-bottom: 15px;">Trage dich hier für das Flunkyball-Spiel ein!</p>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <input type="text" id="playerName" class="flunky-input" placeholder="Dein Name...">
-                <button onclick="registerPlayer()" class="flunky-button">Eintragen</button>
+            <p style="color:var(--muted); margin-bottom:14px;">Trage dich hier für das Flunkyball-Spiel ein!</p>
+            <div class="flunky-row">
+                <input type="text" id="playerName" class="flunky-input" placeholder="Dein Name..." maxlength="30"
+                    onkeydown="if(event.key==='Enter') registerPlayer()">
+                <button onclick="registerPlayer()" class="flunky-button">➕ Eintragen</button>
             </div>
             <div id="registrationMessage"></div>
             <div class="player-list" id="playerList"></div>
         </div>
-        
-        <!-- Flunkyball Game -->
-        <div class="card" id="flunkyball" style="display: none;">
-            <h2>🎮 Flunkyball</h2>
-            <p style="color: var(--muted); margin-bottom: 20px;">Teams und Siege werden hier verwaltet.</p>
+
+        <!-- FLUNKYBALL GAME -->
+        <div class="card" id="flunkyball">
+            <h2>🎮 Flunkyball-Game</h2>
+            <p style="color:var(--muted); margin-bottom:16px;">Teams generieren und Siege tracken.</p>
+            <div class="flunky-row">
+                <button onclick="generateTeams()" class="flunky-button" style="flex:1;">🎲 Teams zufällig mischen</button>
+                <button onclick="clearAll()" class="flunky-button" style="background:rgba(233,69,96,0.3); flex:1;">🗑️ Alles löschen</button>
+            </div>
             <div id="gameArea"></div>
         </div>
     </main>
-    
+
     <footer>
         <p>© 2026 Vatertagswanderung | <a href="https://mauricefun.lol">mauricefun.lol</a></p>
-        <p style="margin-top: 10px; font-size: 0.8rem;">🍺 Prost! 🎉</p>
+        <p style="margin-top:8px; font-size:0.8rem;">🍺 Prost! 🎉</p>
     </footer>
-    
-    <!-- KLEINER AUDIO-PLAYER UNTEN FIXIERT -->
-    <div id="bottomPlayer" style="
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        background: rgba(15, 15, 30, 0.95);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 6px 12px;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-    ">
-        <button id="playPauseBtn" onclick="togglePlay()" style="
-            background: linear-gradient(135deg, #e94560, #533483);
-            border: none;
-            color: #fff;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            font-size: 10px;
-            cursor: pointer;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        ">▶</button>
-        
-        <div style="flex-grow: 1; min-width: 0;">
-            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
-                <span style="font-size: 10px; color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">🎵 Käppler Ex</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 6px;">
-                <div style="flex-grow: 1; height: 2px; background: rgba(255,255,255,0.2); border-radius: 1px; overflow: hidden;">
-                    <div id="progressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #e94560, #533483); border-radius: 1px; transition: width 0.3s;"></div>
+
+    <!-- ===== AUDIO PLAYER ===== -->
+    <div id="bottomPlayer">
+        <button id="playPauseBtn" onclick="togglePlay()">▶</button>
+        <div id="progressContainer">
+            <div class="player-title">🎵 Käppler Ex – Wanderung Banger 2026</div>
+            <div class="progress-row">
+                <div class="progress-track" onclick="seekAudio(event)">
+                    <div id="progressBar"></div>
                 </div>
-                <span id="currentTime" style="font-size: 8px; color: rgba(255,255,255,0.5); flex-shrink: 0;">0:00</span>
+                <span id="currentTime">0:00</span>
             </div>
         </div>
-        
-        <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-            <span style="font-size: 10px; color: rgba(255,255,255,0.7);">🔊</span>
-            <input type="range" id="volumeSlider" min="0" max="100" value="30" onchange="setVolume(this.value)" style="
-                width: 40px;
-                height: 2px;
-                -webkit-appearance: none;
-                background: rgba(255,255,255,0.3);
-                border-radius: 1px;
-                outline: none;
-            ">
+        <div class="volume-group">
+            <span>🔊</span>
+            <input type="range" id="volumeSlider" min="0" max="100" value="30" oninput="setVolume(this.value)">
         </div>
     </div>
-    
-    <audio id="audioElement" preload="auto">
+
+    <audio id="audioElement" preload="auto" loop>
         <source src="background_music.mp3" type="audio/mpeg">
     </audio>
-    
+
     <script>
-        // Countdown Timer
-        const eventDate = new Date('2026-05-14T12:00:00+02:00').getTime();
-        
-        function updateCountdown() {
-            const now = new Date().getTime();
-            const distance = eventDate - now;
-            
-            if (distance < 0) {
-                document.getElementById('countdown').innerHTML = '<h2 style="color: var(--accent);">🎉 Event läuft oder ist vorbei!</h2>';
-                return;
-            }
-            
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            document.getElementById('days').textContent = days;
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+    /* ==================== BEER FLOAT ANIMATION ==================== */
+    (function() {
+        const emojis = ['🍺','🍻','🍾','🍺','🍻','🍺'];
+        const container = document.getElementById('bgAnimation');
+        const count = 14;
+        for (let i = 0; i < count; i++) {
+            const el = document.createElement('div');
+            el.className = 'beer-float';
+            el.textContent = emojis[i % emojis.length];
+            const size = 28 + Math.random() * 26;
+            el.style.cssText = [
+                'left:' + (Math.random() * 96) + '%',
+                'font-size:' + size + 'px',
+                'animation-duration:' + (12 + Math.random() * 14) + 's',
+                'animation-delay:-' + (Math.random() * 20) + 's'
+            ].join(';');
+            container.appendChild(el);
         }
-        
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-        
-        // Audio Player
-        const audio = document.getElementById('audioElement');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const progressBar = document.getElementById('progressBar');
-        const currentTimeEl = document.getElementById('currentTime');
-        let isPlaying = false;
+    })();
 
-        function togglePlay() {
-            if (isPlaying) {
-                audio.pause();
-                playPauseBtn.textContent = '▶';
-                isPlaying = false;
+    /* ==================== COUNTDOWN ==================== */
+    const eventDate = new Date('2026-05-14T12:00:00+02:00').getTime();
+    function updateCountdown() {
+        const dist = eventDate - Date.now();
+        if (dist < 0) {
+            document.getElementById('countdown').innerHTML =
+                '<h2 style="color:var(--accent);font-size:1.4rem;">🎉 Die Wanderung läuft (oder ist legendär vorbei)!</h2>';
+            return;
+        }
+        document.getElementById('days').textContent    = Math.floor(dist / 86400000);
+        document.getElementById('hours').textContent   = String(Math.floor((dist % 86400000) / 3600000)).padStart(2,'0');
+        document.getElementById('minutes').textContent = String(Math.floor((dist % 3600000) / 60000)).padStart(2,'0');
+        document.getElementById('seconds').textContent = String(Math.floor((dist % 60000) / 1000)).padStart(2,'0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    /* ==================== AUDIO PLAYER ==================== */
+    const audio = document.getElementById('audioElement');
+    const playBtn = document.getElementById('playPauseBtn');
+    const progressBar = document.getElementById('progressBar');
+    const timeEl = document.getElementById('currentTime');
+    let playing = false;
+
+    function togglePlay() {
+        if (playing) {
+            audio.pause(); playBtn.textContent = '▶'; playing = false;
+        } else {
+            audio.play().then(() => { playBtn.textContent = '⏸'; playing = true; })
+                .catch(() => { playBtn.textContent = '▶'; playing = false; });
+        }
+    }
+    audio.addEventListener('timeupdate', () => {
+        if (!audio.duration) return;
+        progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        const m = Math.floor(audio.currentTime / 60);
+        const s = Math.floor(audio.currentTime % 60);
+        timeEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+    });
+    audio.addEventListener('ended', () => { playBtn.textContent = '▶'; playing = false; progressBar.style.width = '0%'; timeEl.textContent = '0:00'; });
+    function setVolume(v) { audio.volume = v / 100; }
+    setVolume(30);
+    function seekAudio(e) {
+        if (!audio.duration) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+    }
+
+    /* ==================== FLUNKYBALL DATA ==================== */
+    function getData() {
+        try { return JSON.parse(localStorage.getItem('flunkyball_v2')) || { players: [], nextId: 1 }; }
+        catch(e) { return { players: [], nextId: 1 }; }
+    }
+    function saveData(d) { localStorage.setItem('flunkyball_v2', JSON.stringify(d)); }
+
+    function registerPlayer() {
+        const inp = document.getElementById('playerName');
+        const name = inp.value.trim();
+        if (!name) {
+            showMsg('<span style="color:var(--accent);">⚠️ Bitte einen Namen eingeben!</span>'); return;
+        }
+        const d = getData();
+        if (d.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+            showMsg('<span style="color:var(--gold);">⚠️ ' + name + ' ist schon dabei!</span>'); return;
+        }
+        d.players.push({ id: d.nextId++, name, wins: 0 });
+        saveData(d);
+        inp.value = '';
+        showMsg('<span style="color:#1DB954;">✅ ' + name + ' eingetragen!</span>');
+        renderPlayerList();
+    }
+
+    function showMsg(html) {
+        const el = document.getElementById('registrationMessage');
+        el.innerHTML = html;
+        setTimeout(() => { el.innerHTML = ''; }, 3000);
+    }
+
+    function renderPlayerList() {
+        const d = getData();
+        const el = document.getElementById('playerList');
+        if (!d.players.length) {
+            el.innerHTML = '<p style="color:var(--muted);">Noch keine Spieler eingetragen.</p>'; return;
+        }
+        el.innerHTML = d.players.map(p =>
+            '<div class="player-item">' +
+            '<span>' + escHtml(p.name) + '</span>' +
+            '<div style="display:flex;align-items:center;gap:8px;">' +
+            '<span class="wins-badge">🏆 ' + p.wins + '</span>' +
+            '<button onclick="addWin(' + p.id + ')" style="background:rgba(29,185,84,0.2);color:#1DB954;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">+Sieg</button>' +
+            '<button onclick="removePlayer(' + p.id + ')" style="background:rgba(233,69,96,0.2);color:var(--accent);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">✕</button>' +
+            '</div></div>'
+        ).join('');
+    }
+
+    function addWin(id) {
+        const d = getData();
+        const p = d.players.find(x => x.id === id);
+        if (p) { p.wins++; saveData(d); renderPlayerList(); renderGame(); }
+    }
+
+    function removePlayer(id) {
+        const d = getData();
+        d.players = d.players.filter(x => x.id !== id);
+        saveData(d);
+        renderPlayerList();
+        renderGame();
+    }
+
+    function clearAll() {
+        if (!confirm('Wirklich alle Spieler und Teams löschen?')) return;
+        saveData({ players: [], nextId: 1 });
+        renderPlayerList();
+        document.getElementById('gameArea').innerHTML = '';
+    }
+
+    function generateTeams() {
+        const d = getData();
+        if (d.players.length < 2) {
+            document.getElementById('gameArea').innerHTML = '<p style="color:var(--muted);">Mindestens 2 Spieler eingetragen sein müssen!</p>'; return;
+        }
+        const shuffled = [...d.players].sort(() => Math.random() - 0.5);
+        const half = Math.ceil(shuffled.length / 2);
+        const t1 = shuffled.slice(0, half);
+        const t2 = shuffled.slice(half);
+        document.getElementById('gameArea').innerHTML =
+            '<div class="teams-grid">' +
+            '<div class="team-card"><h3>🔴 Team 1</h3>' + t1.map(p => '<div class="team-player">' + escHtml(p.name) + '</div>').join('') + '</div>' +
+            '<div class="team-card"><h3>🔵 Team 2</h3>' + t2.map(p => '<div class="team-player">' + escHtml(p.name) + '</div>').join('') + '</div>' +
+            '</div>';
+    }
+
+    function renderGame() { /* auto-refresh if teams exist */ }
+    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    renderPlayerList();
+
+    /* ==================== MEME SYSTEM ==================== */
+    // Meme-Texte: zufällige Kombinationen aus Top/Bottom-Text
+    const memeTopTexts = [
+        'WENN DIE WANDERUNG',
+        'POV: ES IST 12 UHR',
+        'VATERTAG 2026',
+        'ERSTE RUNDE FLUNKYBALL',
+        'WENN DU AM FRÜHSTEN DA BIST',
+        'MAN SAGT, DIE WANDERUNG',
+        'HEUTE AUF DEM WESTPARK',
+        'NIEMAND:',
+        'DIE CREW AM MORGEN',
+        'WEN DER WETTERBERICHT MEINT'
+    ];
+    const memeBottomTexts = [
+        'UND DAS BIER IST WARM 🍺',
+        'ABER DER RUCKSACK KLINGT SCHON 🎶',
+        'FLUNKYBALL BIS ZUM TOD',
+        '...UND MAN VERLIERT DIREKT',
+        'KÄPPLER EX LÄUFT SCHON SEIT 10',
+        'WAR EIGENTLICH NUR EIN SPAZIERGANG',
+        'DAS IST NUR EIN KLEINER UMWEG',
+        'ICH: BEREITS AM TRINKEN',
+        'SCHLÄFT BEIM DRITTEN BIER EIN',
+        'ES SOLL SONNIG WERDEN... LÜGE'
+    ];
+
+    // Bilder aus dem memes/-Ordner – einfach nummeriert laden, bis 404
+    // Dynamisch geladene Liste (wenn kein serverseitiges Directory-Listing möglich,
+    // versuchen wir memes/1.jpg bis memes/20.jpg + gängige Namen)
+    const memeFiles = [];
+    const extensions = ['jpg','jpeg','png','gif','webp'];
+    for (let i = 1; i <= 30; i++) {
+        extensions.forEach(ext => memeFiles.push('memes/' + i + '.' + ext));
+    }
+    // Auch Namen wie meme1, vatertag1 etc. probieren
+    ['meme','vatertag','wanderung','flunky','beer','bier','vater'].forEach(base => {
+        for (let i = 1; i <= 5; i++) {
+            extensions.forEach(ext => memeFiles.push('memes/' + base + i + '.' + ext));
+        }
+    });
+
+    let validMemes = null; // wird lazy gecacht
+    let memeLoadQueue = [...memeFiles];
+    let checkedMemes = [];
+    let checkDone = false;
+
+    // Probiere alle Pfade per fetch HEAD-Request (nur wenn Modal geöffnet wird)
+    async function discoverMemes() {
+        if (checkDone) return;
+        const results = await Promise.allSettled(
+            memeFiles.map(path => fetch(path, { method: 'HEAD' }).then(r => r.ok ? path : null))
+        );
+        validMemes = results.map(r => r.value).filter(Boolean);
+        checkDone = true;
+    }
+
+    function openMeme() {
+        document.getElementById('memeModal').classList.add('open');
+        loadRandomMeme();
+    }
+    function closeMeme() {
+        document.getElementById('memeModal').classList.remove('open');
+    }
+    function closeMemeOnBg(e) {
+        if (e.target === document.getElementById('memeModal')) closeMeme();
+    }
+
+    async function loadRandomMeme() {
+        // Zeig Ladeindikator
+        document.getElementById('memeTopText').textContent    = '';
+        document.getElementById('memeBottomText').textContent = '';
+        const imgEl = document.getElementById('memeImg');
+        imgEl.style.display = 'block';
+        imgEl.src = '';
+
+        // Wähle zufälligen Top- und Bottom-Text
+        const top    = memeTopTexts[Math.floor(Math.random() * memeTopTexts.length)];
+        const bottom = memeBottomTexts[Math.floor(Math.random() * memeBottomTexts.length)];
+        document.getElementById('memeTopText').textContent    = top;
+        document.getElementById('memeBottomText').textContent = bottom;
+
+        // Entdecke valide Bilder (lazy, einmalig)
+        if (!checkDone) {
+            document.getElementById('memeImgWrap').style.minHeight = '200px';
+            await discoverMemes();
+        }
+
+        if (!validMemes || validMemes.length === 0) {
+            // Fallback: Zeige Platzhalter-Meme mit Text auf grauem Hintergrund
+            imgEl.style.display = 'none';
+            const existing = document.getElementById('memeFallback');
+            if (!existing) {
+                const fb = document.createElement('div');
+                fb.id = 'memeFallback';
+                fb.style.cssText = 'width:100%;min-height:220px;background:linear-gradient(135deg,#1a1a2e,#25253e);display:flex;align-items:center;justify-content:center;font-size:80px;';
+                fb.textContent = ['🍺','🎉','🏃','🍻','😂','🎮'][Math.floor(Math.random()*6)];
+                document.getElementById('memeImgWrap').appendChild(fb);
             } else {
-                audio.play().then(() => {
-                    playPauseBtn.textContent = '⏸';
-                    isPlaying = true;
-                }).catch(e => {
-                    console.log('Playback failed:', e);
-                    playPauseBtn.textContent = '▶';
-                    isPlaying = false;
-                });
+                existing.textContent = ['🍺','🎉','🏃','🍻','😂','🎮'][Math.floor(Math.random()*6)];
             }
+            return;
         }
 
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = progress + '%';
-                const mins = Math.floor(audio.currentTime / 60);
-                const secs = Math.floor(audio.currentTime % 60);
-                currentTimeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-            }
-        });
+        // Lösche Fallback wenn vorhanden
+        const fb = document.getElementById('memeFallback');
+        if (fb) fb.remove();
+        imgEl.style.display = 'block';
 
-        audio.addEventListener('ended', () => {
-            playPauseBtn.textContent = '▶';
-            isPlaying = false;
-            progressBar.style.width = '0%';
-            currentTimeEl.textContent = '0:00';
-        });
+        const src = validMemes[Math.floor(Math.random() * validMemes.length)];
+        imgEl.src = src;
+        imgEl.onerror = () => {
+            imgEl.style.display = 'none';
+        };
+    }
 
-        function setVolume(val) {
-            audio.volume = val / 100;
-        }
-        setVolume(30);
-        
-        // Flunkyball System (localStorage)
-        function getFlunkyData() {
-            const data = localStorage.getItem('flunkyball_data');
-            if (data) return JSON.parse(data);
-            return { players: [], games: [], nextPlayerId: 1, nextGameId: 1 };
-        }
-        
-        function saveFlunkyData(data) {
-            localStorage.setItem('flunkyball_data', JSON.stringify(data));
-        }
-        
-        function registerPlayer() {
-            const nameInput = document.getElementById('playerName');
-            const name = nameInput.value.trim();
-            
-            if (!name) {
-                document.getElementById('registrationMessage').innerHTML = '<p style="color: var(--accent);">Bitte gib einen Namen ein!</p>';
-                return;
-            }
-            
-            const data = getFlunkyData();
-            data.players.push({ id: data.nextPlayerId++, name: name, wins: 0 });
-            saveFlunkyData(data);
-            
-            nameInput.value = '';
-            document.getElementById('registrationMessage').innerHTML = '<p style="color: #1DB954;">✅ ' + name + ' wurde eingetragen!</p>';
-            updatePlayerList();
-        }
-        
-        function updatePlayerList() {
-            const data = getFlunkyData();
-            const list = document.getElementById('playerList');
-            
-            if (data.players.length === 0) {
-                list.innerHTML = '<p style="color: var(--muted);">Noch keine Spieler eingetragen.</p>';
-                return;
-            }
-            
-            list.innerHTML = data.players.map(p => 
-                '<div class="player-item">' +
-                '<span>' + p.name + '</span>' +
-                '<span style="color: var(--muted); font-size: 0.9rem;">' + p.wins + ' Siege</span>' +
-                '</div>'
-            ).join('');
-        }
-        
-        updatePlayerList();
-        
-        // Show/Hide sections
-        document.querySelectorAll('a[href^="#"]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = this.getAttribute('href').substring(1);
-                document.querySelectorAll('.card').forEach(c => c.style.display = 'none');
-                if (target) document.getElementById(target).style.display = 'block';
-            });
-        });
+    // ESC schließt Modal
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMeme(); });
     </script>
 </body>
 </html>
