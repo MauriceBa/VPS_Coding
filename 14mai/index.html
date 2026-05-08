@@ -782,96 +782,182 @@
         audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
     }
 
-    /* ==================== FLUNKYBALL DATA ==================== */
-    function getData() {
-        try { return JSON.parse(localStorage.getItem('flunkyball_v2')) || { players: [], nextId: 1 }; }
-        catch(e) { return { players: [], nextId: 1 }; }
+    /* ==================== FLUNKYBALL API ==================== */
+    const API_BASE = '/14mai/api';
+    
+    // Player laden
+    async function loadPlayers() {
+        try {
+            const res = await fetch(API_BASE + '/players');
+            return await res.json();
+        } catch(e) {
+            console.error('Fehler beim Laden der Spieler:', e);
+            return [];
+        }
     }
-    function saveData(d) { localStorage.setItem('flunkyball_v2', JSON.stringify(d)); }
-
-    function registerPlayer() {
+    
+    // Spieler registrieren
+    async function registerPlayer() {
         const inp = document.getElementById('playerName');
         const name = inp.value.trim();
         if (!name) {
-            showMsg('<span style="color:var(--accent);">⚠️ Bitte einen Namen eingeben!</span>'); return;
+            showMsg('<span style="color:var(--accent);">⚠️ Bitte einen Namen eingeben!</span>'); 
+            return;
         }
-        const d = getData();
-        if (d.players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
-            showMsg('<span style="color:var(--gold);">⚠️ ' + name + ' ist schon dabei!</span>'); return;
+        
+        try {
+            const res = await fetch(API_BASE + '/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: name})
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                showMsg('<span style="color:var(--gold);">⚠️ ' + data.error + '</span>');
+                return;
+            }
+            
+            inp.value = '';
+            showMsg('<span style="color:#1DB954;">✅ ' + name + ' eingetragen!</span>');
+            renderPlayerList();
+        } catch(e) {
+            showMsg('<span style="color:var(--accent);">⚠️ Fehler beim Registrieren!</span>');
         }
-        d.players.push({ id: d.nextId++, name, wins: 0 });
-        saveData(d);
-        inp.value = '';
-        showMsg('<span style="color:#1DB954;">✅ ' + name + ' eingetragen!</span>');
-        renderPlayerList();
     }
-
-    function showMsg(html) {
-        const el = document.getElementById('registrationMessage');
-        el.innerHTML = html;
-        setTimeout(() => { el.innerHTML = ''; }, 3000);
-    }
-
-    function renderPlayerList() {
-        const d = getData();
+    
+    // Spielerliste anzeigen
+    async function renderPlayerList() {
+        const players = await loadPlayers();
         const el = document.getElementById('playerList');
-        if (!d.players.length) {
-            el.innerHTML = '<p style="color:var(--muted);">Noch keine Spieler eingetragen.</p>'; return;
+        
+        if (!players.length) {
+            el.innerHTML = '<p style="color:var(--muted);">Noch keine Spieler eingetragen.</p>'; 
+            return;
         }
-        el.innerHTML = d.players.map(p =>
+        
+        el.innerHTML = players.map(p =>
             '<div class="player-item">' +
             '<span>' + escHtml(p.name) + '</span>' +
             '<div style="display:flex;align-items:center;gap:8px;">' +
-            '<span class="wins-badge">🏆 ' + p.wins + '</span>' +
+            '<span class="wins-badge">🏆 ' + (p.wins || 0) + '</span>' +
             '<button onclick="addWin(' + p.id + ')" style="background:rgba(29,185,84,0.2);color:#1DB954;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">+Sieg</button>' +
             '<button onclick="removePlayer(' + p.id + ')" style="background:rgba(233,69,96,0.2);color:var(--accent);border:none;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:0.8rem;">✕</button>' +
             '</div></div>'
-        ).join('');
+        ).append('');
     }
-
-    function addWin(id) {
-        const d = getData();
-        const p = d.players.find(x => x.id === id);
-        if (p) { p.wins++; saveData(d); renderPlayerList(); renderGame(); }
-    }
-
-    function removePlayer(id) {
-        const d = getData();
-        d.players = d.players.filter(x => x.id !== id);
-        saveData(d);
-        renderPlayerList();
-        renderGame();
-    }
-
-    function clearAll() {
-        if (!confirm('Wirklich alle Spieler und Teams löschen?')) return;
-        saveData({ players: [], nextId: 1 });
-        renderPlayerList();
-        document.getElementById('gameArea').innerHTML = '';
-    }
-
-    function generateTeams() {
-        const d = getData();
-        if (d.players.length < 2) {
-            document.getElementById('gameArea').innerHTML = '<p style="color:var(--muted);">Mindestens 2 Spieler eingetragen sein müssen!</p>'; return;
+    
+    // Sieg hinzufügen
+    async function addWin(id) {
+        try {
+            await fetch(API_BASE + '/game/winner', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({player_id: id})
+            });
+            renderPlayerList();
+        } catch(e) {
+            console.error('Fehler beim Hinzufügen des Sieges:', e);
         }
-        const shuffled = [...d.players].sort(() => Math.random() - 0.5);
-        const half = Math.ceil(shuffled.length / 2);
-        const t1 = shuffled.slice(0, half);
-        const t2 = shuffled.slice(half);
-        document.getElementById('gameArea').innerHTML =
-            '<div class="teams-grid">' +
-            '<div class="team-card"><h3>🔴 Team 1</h3>' + t1.map(p => '<div class="team-player">' + escHtml(p.name) + '</div>').join('') + '</div>' +
-            '<div class="team-card"><h3>🔵 Team 2</h3>' + t2.map(p => '<div class="team-player">' + escHtml(p.name) + '</div>').join('') + '</div>' +
-            '</div>';
     }
+    
+    // Spieler entfernen
+    async function removePlayer(id) {
+        if (!confirm('Spieler wirklich entfernen?')) return;
+        
+        try {
+            await fetch(API_BASE + '/remove', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({player_id: id})
+            });
+            renderPlayerList();
+        } catch(e) {
+            console.error('Fehler beim Entfernen:', e);
+        }
+    }
+    
+    // Alle löschen (Admin)
+    async function clearAll() {
+        const password = prompt('Admin-Passwort eingeben:');
+        if (!password) return;
+        
+        try {
+            const res = await fetch(API_BASE + '/clear', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({password: password})
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                renderPlayerList();
+                document.getElementById('gameArea').innerHTML = '';
+                showMsg('<span style="color:#1DB954;">✅ Alle Daten gelöscht!</span>');
+            } else {
+                showMsg('<span style="color:var(--accent);">⚠️ Falsches Passwort!</span>');
+            }
+        } catch(e) {
+            showMsg('<span style="color:var(--accent);">⚠️ Fehler beim Löschen!</span>');
+        }
+    }
+    
+    // Teams generieren
+    async function generateTeams() {
+        const players = await loadPlayers();
+        if (players.length < 2) {
+            document.getElementById('gameArea').innerHTML = '<p style="color:var(--muted);">Mindestens 2 Spieler eingetragen sein müssen!</p>'; 
+            return;
+        }
+        
+        try {
+            const res = await fetch(API_BASE + '/game/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({player_ids: players.map(p => p.id)})
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                renderGame(data.game);
+            }
+        } catch(e) {
+            console.error('Fehler beim Erstellen des Spiels:', e);
+        }
+    }
+    
+    // Spiel anzeigen
+    function renderGame(game) {
+        if (!game || !game.teams) return;
+        
+        const teamNames = ['🔴 Team 1', '🔵 Team 2'];
+        let html = '<div class="teams-grid">';
+        
+        game.teams.forEach((team, idx) => {
+            html += '<div class="team-card"><h3>' + teamNames[idx] + '</h3>';
+            // Spielernamen auflösen
+            loadPlayers().then(players => {
+                const teamHtml = team.map(id => {
+                    const p = players.find(p => p.id === id);
+                    return '<div class="team-player">' + (p ? escHtml(p.name) : 'Unbekannt') + '</div>';
+                }).join('');
+                // Update spezifisches Team (vereinfacht)
+            });
+            html += '</div>';
+        });
+        
+        html += '</div>';
+        document.getElementById('gameArea').innerHTML = html;
+    }
+    
+    // Beim Laden der Seite
+    window.addEventListener('DOMContentLoaded', () => {
+        renderPlayerList();
+    });
+    
 
-    function renderGame() { /* auto-refresh if teams exist */ }
-    function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-    renderPlayerList();
-
-    /* ==================== MEME SYSTEM ==================== */
+        /* ==================== MEME SYSTEM ==================== */
     // Meme-Texte: zufällige Kombinationen aus Top/Bottom-Text
     const memeTopTexts = [
         'WENN DIE WANDERUNG',

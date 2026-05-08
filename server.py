@@ -7,6 +7,7 @@ Kombinierter Server für mauricefun.lol:
 """
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+import os
 import psutil
 import time
 import collections
@@ -27,6 +28,24 @@ timestamps = collections.deque(maxlen=MAX_HISTORY)
 
 last_net = psutil.net_io_counters()
 last_net_time = time.time()
+
+
+# === FLUNKYBALL API ===
+FLUNKY_DATA_FILE = '/home/ubuntu/VPS_Coding_full/14mai/flunkyball_data.json'
+FLUNKY_ADMIN_PASSWORD = 'admin'
+
+def flunky_load_data():
+    if not os.path.exists(FLUNKY_DATA_FILE):
+        return {"players": [], "games": [], "next_player_id": 1, "next_game_id": 1}
+    try:
+        with open(FLUNKY_DATA_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return {"players": [], "games": [], "next_player_id": 1, "next_game_id": 1}
+
+def flunky_save_data(data):
+    with open(FLUNKY_DATA_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
 
 class CombinedHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -132,8 +151,130 @@ class CombinedHandler(BaseHTTPRequestHandler):
             }).encode())
             return
         
+        # Flunkyball API
+        if path.startswith('/14mai/api/players'):
+            self._flunky_get_players()
+            return
+        if path.startswith('/14mai/api/games'):
+            self._flunky_get_games()
+            return
+        
         # Ansonsten normale Datei ausliefern (statische Dateien)
         self._serve_static_file(path)
+    
+
+    def do_POST(self):
+        from urllib.parse import urlparse
+        import random
+        parsed = urlparse(self.path)
+        path = parsed.path
+        
+        length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(length).decode() if length > 0 else '{}'
+        
+        try:
+            req = json.loads(body)
+        except:
+            req = {}
+        
+        if path.startswith('/14mai/api/register'):
+            self._flunky_register(req)
+        elif path.startswith('/14mai/api/game/create'):
+            self._flunky_create_game(req)
+        elif path.startswith('/14mai/api/game/winner'):
+            self._flunky_add_winner(req)
+        elif path.startswith('/14mai/api/admin/login'):
+            self._flunky_admin_login(req)
+        elif path.startswith('/14mai/api/remove'):
+            self._flunky_remove_player(req)
+        elif path.startswith('/14mai/api/clear'):
+            self._flunky_clear_all(req)
+        else:
+            self.send_error(404, "API not found")
+    
+    def _json_response(self, data, status=200):
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode())
+    
+    def _flunky_get_players(self):
+        data = flunky_load_data()
+        self._json_response(data['players'])
+    
+    def _flunky_get_games(self):
+        data = flunky_load_data()
+        self._json_response(data['games'])
+    
+    def _flunky_register(self, req):
+        name = req.get('name', '').strip()
+        if not name:
+            self._json_response({'error': 'Name required'}, 400)
+            return
+        data = flunky_load_data()
+        if any(p['name'].lower() == name.lower() for p in data['players']):
+            self._json_response({'error': 'Name already exists'}, 400)
+            return
+        player = {'id': data['next_player_id'], 'name': name, 'wins': 0}
+        data['players'].append(player)
+        data['next_player_id'] += 1
+        flunky_save_data(data)
+        self._json_response({'success': True, 'player': player})
+    
+    def _flunky_create_game(self, req):
+        player_ids = req.get('player_ids', [])
+        if len(player_ids) < 2:
+            self._json_response({'error': 'Need at least 2 players'}, 400)
+            return
+        data = flunky_load_data()
+        shuffled = player_ids.copy()
+        random.shuffle(shuffled)
+        half = len(shuffled) // 2
+        game = {
+            'id': data['next_game_id'],
+            'teams': [shuffled[:half], shuffled[half:]],
+            'winners': []
+        }
+        data['games'].append(game)
+        data['next_game_id'] += 1
+        flunky_save_data(data)
+        self._json_response({'success': True, 'game': game})
+    
+    def _flunky_add_winner(self, req):
+        player_id = req.get('player_id')
+        if not player_id:
+            self._json_response({'error': 'player_id required'}, 400)
+            return
+        data = flunky_load_data()
+        player = next((p for p in data['players'] if p['id'] == player_id), None)
+        if player:
+            player['wins'] += 1
+            flunky_save_data(data)
+        self._json_response({'success': True})
+    
+    def _flunky_admin_login(self, req):
+        if req.get('password') == FLUNKY_ADMIN_PASSWORD:
+            self._json_response({'success': True})
+        else:
+            self._json_response({'error': 'Wrong password'}, 401)
+    
+    def _flunky_remove_player(self, req):
+        player_id = req.get('player_id')
+        if not player_id:
+            self._json_response({'error': 'player_id required'}, 400)
+            return
+        data = flunky_load_data()
+        data['players'] = [p for p in data['players'] if p['id'] != player_id]
+        flunky_save_data(data)
+        self._json_response({'success': True})
+    
+    def _flunky_clear_all(self, req):
+        if req.get('password') != FLUNKY_ADMIN_PASSWORD:
+            self._json_response({'error': 'Unauthorized'}, 401)
+            return
+        flunky_save_data({"players": [], "games": [], "next_player_id": 1, "next_game_id": 1})
+        self._json_response({'success': True})
     
     def _proxy_to_streamlit(self):
         """Proxy zu Streamlit mit Websocket-Support"""
