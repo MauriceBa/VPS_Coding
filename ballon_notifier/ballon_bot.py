@@ -10,7 +10,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
-from FlightRadar24 import FlightRadar24API
+from flightradar24 import Api as FlightRadar24API
 
 # Logging konfigurieren
 logging.basicConfig(
@@ -155,7 +155,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "<b>/status</b> - Zeigt aktuelle Koordinaten, Radien und temporäre Städte an\n"
         "<b>/radius &lt;Zahl&gt;</b> - Setzt den km-Radius für die automatischen 5-Minuten-Warnungen\n"
         "<b>/stadt &lt;Name&gt;</b> - Überschreibt deinen Standort temporär für 12 Stunden\n"
-        "<b>/now</b> - Führt sofort einen Scan nach Ballons im aktuellen Radius aus\n"
+        "<b>/global</b> - Zeigt globale Ballon-Anzahl & nächsten Ballon (mit Land)\n"
         "<b>/flugzeuge</b> - Sucht sofort nach den 5 Flugzeugen, die dir am nächsten sind\n"
         "<b>/alltime</b> - Zeigt eine Gesamtstatistik aller bisher gefundenen Ballons\n"
         "<b>/weekly</b> - Zeigt die Ballon-Statistik der letzten 7 Tage\n"
@@ -210,104 +210,67 @@ async def set_city(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ Stadt nicht gefunden. Bitte versuche es noch einmal.")
 
-# NEU: /now Befehl (Sofort-Scan)
-async def now(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(f"📡 Scanne den Radius von {config['radius']} km... bitte warten.")
+# /global Befehl (Globaler Ballon-Scan)
+async def global_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Globaler Ballon-Scan: Zeigt weltweite Anzahl und nächsten Ballon"""
+    await update.message.reply_text("🌍 Scanne global nach Ballons... bitte warten.")
     
-    if config["temp_until"] > time.time():
-        active_lat, active_lon, active_city = config["temp_lat"], config["temp_lon"], config["temp_city"]
-    else:
-        active_lat, active_lon, active_city = config["home_lat"], config["home_lon"], config["home_city"]
-
     fr_api = FlightRadar24API()
-    bounds = fr_api.get_bounds_by_point(active_lat, active_lon, config["radius"] * 1000)
     
     try:
-        flights = fr_api.get_flights(bounds=bounds)
+        # Globaler Scan - keine Bounds, um alle Ballons weltweit zu finden
+        flights = fr_api.get_flights()
         balloons = [f for f in flights if is_balloon(f)]
     except Exception as e:
-        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in /now: {e}")
+        logger.error(f"Fehler beim Abrufen der Flightradar-Daten in /global: {e}")
         await update.message.reply_text("❌ Fehler beim Abrufen der Flightradar-Daten. Details wurden geloggt.")
         return
-
-    found_in_radius = []
     
-    # Filtere nochmal exakt nach Distanz (Da die Bounds quadratisch sind, der Radius aber ein Kreis ist)
-    for b in balloons:
-        dist_km, direction = get_distance_and_direction(active_lat, active_lon, b.latitude, b.longitude)
-        if dist_km <= config["radius"]:
-            found_in_radius.append((b, dist_km, direction))
-
-    if not found_in_radius:
-        await update.message.reply_text(f"Keine Ballons im Umkreis von {config['radius']} km um {active_city} gefunden.")
+    if not balloons:
+        await update.message.reply_text("🌍 Keine Ballons weltweit gefunden!")
         return
-
-    # Bekannte Ballons laden, damit wir nicht bei /now jedes Mal alle als "neu" in die .json packen
-    known_balloons = []
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, "r") as f:
-            known_balloons = json.load(f)
-
-    # Sende die gefundenen Ballons
-    for b, dist_km, direction in found_in_radius:
-        aircraft_type = b.aircraft_code if b.aircraft_code else "Lighter-than-air (Ballon)"
-        msg = (f"🎈 <b>HEISSLUFTBALLON BEI {active_city.upper()} GEFUNDEN!</b> 🎈\n\n"
-               f"<b>Typ:</b> {aircraft_type}\n"
-               f"<b>Position:</b> {dist_km} km in Richtung {direction}\n"
-               f"<b>Höhe:</b> {b.altitude} ft\n"
-               f"<b>Speed:</b> {b.ground_speed} kts\n"
-               f"<b>Callsign/Reg:</b> {b.callsign} / {b.registration}\n\n"
-               f"📍 https://www.flightradar24.com/{b.id}")
-        
-        # Flugdaten protokollieren
-        try:
-            flight_entry = {
-                "id": b.id,
-                "callsign": b.callsign,
-                "registration": b.registration,
-                "lat": b.latitude,
-                "lon": b.longitude,
-                "altitude": b.altitude,
-                "ground_speed": b.ground_speed,
-                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "date": datetime.date.today().isoformat()
-            }
-            flights = []
-            if os.path.exists(FLIGHT_LOG_FILE):
-                with open(FLIGHT_LOG_FILE, "r") as f:
-                    flights = json.load(f)
-            flights.append(flight_entry)
-            with open(FLIGHT_LOG_FILE, "w") as f:
-                json.dump(flights, f)
-        except Exception as e:
-            logger.error(f"Fehler beim Protokollieren der Flugdaten: {e}")
-        
-        # Karte generieren und senden
-        map_path = generate_balloon_map(active_lat, active_lon, b.latitude, b.longitude)
-        if map_path:
-            try:
-                with open(map_path, 'rb') as photo:
-                    await update.message.reply_photo(photo=photo)
-            except Exception as e:
-                logger.error(f"Fehler beim Senden der Karte: {e}")
-        
-        # Foto suchen und senden (Wikipedia)
-        photo_url = get_balloon_photo(b.callsign, b.registration)
-        if photo_url:
-            try:
-                await update.message.reply_photo(photo=photo_url)
-            except Exception as e:
-                logger.error(f"Fehler beim Senden des Fotos: {e}")
-        
-        await update.message.reply_text(msg, parse_mode="HTML")
-        
-        # In die Liste aufnehmen, damit der 5-Minuten-Job danach nicht sofort nochmal warnt
-        if b.id not in known_balloons:
-            known_balloons.append(b.id)
-
-    # Speichern
-    with open(STATE_FILE, "w") as f:
-        json.dump(known_balloons, f)
+    
+    total_global = len(balloons)
+    
+    # Finde nächsten Ballon zu Home-Location
+    home_lat = config["home_lat"]
+    home_lon = config["home_lon"]
+    
+    balloon_distances = []
+    for b in balloons:
+        dist_km, direction = get_distance_and_direction(home_lat, home_lon, b.latitude, b.longitude)
+        balloon_distances.append((b, dist_km, direction))
+    
+    # Sortiere nach Entfernung
+    balloon_distances.sort(key=lambda x: x[1])
+    
+    nearest_b, nearest_dist, nearest_dir = balloon_distances[0]
+    
+    # Reverse-Geocoding für Land
+    country = "Unbekannt"
+    try:
+        geocoder = Nominatim(user_agent="ballon_bot")
+        location = geocoder.reverse((nearest_b.latitude, nearest_b.longitude), language="de")
+        if location and location.raw and 'address' in location.raw:
+            address = location.raw['address']
+            country = address.get('country', 'Unbekannt')
+    except Exception as e:
+        logger.error(f"Fehler bei Reverse-Geocoding: {e}")
+    
+    # Nachricht zusammenbauen
+    aircraft_type = nearest_b.aircraft_code if nearest_b.aircraft_code else "Lighter-than-air (Ballon)"
+    
+    msg = (f"🌍 <b>GLOBALE BALLON-ÜBERSICHT</b> 🎈\n\n"
+           f"<b>Weltweit gesichtet:</b> {total_global} Ballons\n\n"
+           f"<b>NÄCHSTER BALLON:</b>\n"
+           f"📍 {country}\n"
+           f"📏 {nearest_dist} km in Richtung {nearest_dir}\n"
+           f"🎈 Typ: {aircraft_type}\n"
+           f"📊 Höhe: {nearest_b.altitude} ft | 💨 Speed: {nearest_b.ground_speed} kts\n"
+           f"📛 Callsign/Reg: {nearest_b.callsign} / {nearest_b.registration}\n\n"
+           f"📍 https://www.flightradar24.com/{nearest_b.id}")
+    
+    await update.message.reply_text(msg, parse_mode="HTML")
 
 
 async def flugzeuge(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -508,51 +471,53 @@ async def check_balloons_job(context: ContextTypes.DEFAULT_TYPE):
         active_lat, active_lon, active_city = config["home_lat"], config["home_lon"], config["home_city"]
 
     fr_api = FlightRadar24API()
-    bounds = fr_api.get_bounds_by_point(active_lat, active_lon, config["radius"] * 1000)
     
     try:
-        flights = fr_api.get_flights(bounds=bounds)
+        # Globaler Scan: Keine 'bounds' übergeben, um alle Ballons weltweit zu finden
+        flights = fr_api.get_flights()
         balloons = [f for f in flights if is_balloon(f)]
     except Exception as e:
         logger.error(f"Fehler beim Abrufen der Flightradar-Daten in check_balloons_job: {e}")
         return
-
+    
     known_balloons = []
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE, "r") as f:
             known_balloons = json.load(f)
-
+    
     current_balloon_ids = []
-
+    
     for b in balloons:
         dist_km, direction = get_distance_and_direction(active_lat, active_lon, b.latitude, b.longitude)
         
+        # Immer zur Liste hinzufügen und protokollieren für globale Karte
+        current_balloon_ids.append(b.id)
+        
+        # Flugdaten protokollieren (für 3D-Karte) - Global
+        try:
+            flight_entry = {
+                "id": b.id,
+                "callsign": b.callsign,
+                "registration": b.registration,
+                "lat": b.latitude,
+                "lon": b.longitude,
+                "altitude": b.altitude,
+                "ground_speed": b.ground_speed,
+                "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "date": datetime.date.today().isoformat()
+            }
+            flights = []
+            if os.path.exists(FLIGHT_LOG_FILE):
+                with open(FLIGHT_LOG_FILE, "r") as f:
+                    flights = json.load(f)
+            flights.append(flight_entry)
+            with open(FLIGHT_LOG_FILE, "w") as f:
+                json.dump(flights, f)
+        except Exception as e:
+            logger.error(f"Fehler beim Protokollieren der Flugdaten in check_balloons_job: {e}")
+        
+        # Telegram-Benachrichtigung nur im konfigurierten Radius
         if dist_km <= config["radius"]:
-            current_balloon_ids.append(b.id)
-            
-            # Flugdaten protokollieren (für 3D-Karte)
-            try:
-                flight_entry = {
-                    "id": b.id,
-                    "callsign": b.callsign,
-                    "registration": b.registration,
-                    "lat": b.latitude,
-                    "lon": b.longitude,
-                    "altitude": b.altitude,
-                    "ground_speed": b.ground_speed,
-                    "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                    "date": datetime.date.today().isoformat()
-                }
-                flights = []
-                if os.path.exists(FLIGHT_LOG_FILE):
-                    with open(FLIGHT_LOG_FILE, "r") as f:
-                        flights = json.load(f)
-                flights.append(flight_entry)
-                with open(FLIGHT_LOG_FILE, "w") as f:
-                    json.dump(flights, f)
-            except Exception as e:
-                logger.error(f"Fehler beim Protokollieren der Flugdaten in check_balloons_job: {e}")
-            
             if b.id not in known_balloons:
                 aircraft_type = b.aircraft_code if b.aircraft_code else "Lighter-than-air (Ballon)"
                 
@@ -643,7 +608,7 @@ def main():
     app.add_handler(CommandHandler("status", status))
     app.add_handler(CommandHandler("radius", set_radius))
     app.add_handler(CommandHandler("stadt", set_city))
-    app.add_handler(CommandHandler("now", now))  # NEU HINZUGEFÜGT
+    app.add_handler(CommandHandler("global", global_cmd))  # Globaler Ballon-Scan
     app.add_handler(CommandHandler("flugzeuge", flugzeuge))
     app.add_handler(CommandHandler("alltime", alltime))
     app.add_handler(CommandHandler("weekly", weekly))
