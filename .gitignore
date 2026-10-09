@@ -1,10 +1,49 @@
-# Node modules
-node_modules/
-
-# Python
+# --- Python ---
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
 
-# Solar Data Cache
-solar/data.jsonresults/*.csv
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Runtime data / caches ---
+solar/data.json
+results/*.csv
+untappd/data/location_cache.json
+*.log
+ballon_notifier/bot_config.json
+ballon_notifier/known_balloons.json
+ballon_notifier/daily_stats.json
+ballon_notifier/*.log
+
+# --- Local planning artifacts ---
+tasks/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

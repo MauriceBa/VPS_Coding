@@ -1,0 +1,133 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mauricefun"
+version = "1.0.0"
+description = "Backend services, scrapers and tooling for mauricefun.lol"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [{ name = "Maurice" }]
+keywords = ["mauricefun", "vps", "monitoring", "scraper", "telegram-bot"]
+classifiers = [
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+]
+dependencies = []
+
+[project.optional-dependencies]
+monitoring = ["psutil>=5.9", "flask>=3.0", "flask-cors>=4.0"]
+remontees = ["requests>=2.31", "beautifulsoup4>=4.12", "fastapi>=0.110", "uvicorn>=0.29"]
+untappd = ["requests>=2.31", "beautifulsoup4>=4.12"]
+balloons = [
+  "python-telegram-bot>=21.0",
+  "geopy>=2.4",
+  "flightradar24>=1.0",
+  "staticmap>=0.5",
+]
+dev = [
+  "ruff>=0.5",
+  "mypy>=1.10",
+  "pytest>=8.2",
+  "pytest-cov>=5.0",
+  "types-requests>=2.31",
+]
+all = [
+  "mauricefun[monitoring,remontees,untappd,balloons]",
+]
+
+[project.scripts]
+mauricefun-monitoring = "mauricefun.monitoring.web:main"
+mauricefun-stats = "mauricefun.monitoring.cron:main"
+mauricefun-solar = "mauricefun.solar.client:main"
+mauricefun-remontees-api = "mauricefun.remontees.api:main"
+mauricefun-remontees-scrape = "mauricefun.remontees.scraper:main"
+mauricefun-untappd-scrape = "mauricefun.untappd.scraper:main"
+mauricefun-untappd-parse = "mauricefun.untappd.parser:main"
+mauricefun-untappd-locations = "mauricefun.untappd.locations:main"
+mauricefun-untappd-ml = "mauricefun.untappd.recommender:main"
+mauricefun-untappd-api = "mauricefun.untappd.scraper_api:main"
+mauricefun-balloons = "mauricefun.balloons.bot:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ---------------------------------------------------------------------------
+# Linting & formatting (ruff replaces flake8/isort/black)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = ["node_modules", "*.min.js"]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "W",   # pycodestyle warnings
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "UP",  # pyupgrade
+  "B",   # flake8-bugbear
+  "C4",  # flake8-comprehensions
+  "SIM", # flake8-simplify
+  "RUF", # ruff-specific
+]
+ignore = [
+  "E501",   # line length is enforced by the formatter
+  "RUF001", # German typography legitimately uses en/em dashes and quotes
+  "RUF002",
+  "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------------------
+# Static typing
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.10"
+packages = ["mauricefun"]
+mypy_path = "src"
+strict = false
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_return_any = true
+no_implicit_optional = true
+ignore_missing_imports = true
+exclude = "(^build/|^dist/)"
+
+# ---------------------------------------------------------------------------
+# Tests
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = ["error::DeprecationWarning:mauricefun.*"]
+
+[tool.coverage.run]
+source = ["mauricefun"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+  "pragma: no cover",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

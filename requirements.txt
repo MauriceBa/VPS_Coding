@@ -1,0 +1,13 @@
+# Runtime dependencies for all mauricefun.lol backend services.
+# Install with:  pip install -r requirements.txt
+psutil>=5.9
+flask>=3.0
+flask-cors>=4.0
+requests>=2.31
+beautifulsoup4>=4.12
+fastapi>=0.110
+uvicorn>=0.29
+python-telegram-bot>=21.0
+geopy>=2.4
+flightradar24>=1.0
+staticmap>=0.5
