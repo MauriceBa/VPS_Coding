@@ -60,3 +60,16 @@ untappd/
 - `Untappd at Home` → Aachen (50.7753, 6.0839)
 - Venues without a recognized name have `lat/lon = NULL`
 - Valmeinier ski trip (Feb 7–14, 2026) and Châtel ski trip (Dec 2025) are mapped
+
+## Code
+
+The parsing/scraping logic lives in the typed `mauricefun.untappd` package
+(`src/mauricefun/untappd/`). The files under `scripts/` are thin backward-compatible shims:
+
+```bash
+python -m mauricefun.untappd.parser   data/untapped_maurice.txt   # regenerate stats.json
+python -m mauricefun.untappd.locations data/untapped_locations.txt # update the heatmap
+python -m mauricefun.untappd.scraper                               # scrape recent activity
+python -m mauricefun.untappd.recommender                           # rebuild ml_data.json
+```
+

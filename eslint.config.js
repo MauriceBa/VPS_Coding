@@ -5,6 +5,7 @@ export default [
   {
     ignores: [
       "node_modules/**",
+      ".venv/**",
       "**/data/**",
       "slopes/app_data/**",
       "**/*.min.js",
@@ -25,15 +26,16 @@ export default [
     rules: {
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-console": "off",
+      // The browser games are loaded as classic <script> tags that share globals
+      // across files, so `no-undef` would flag every cross-file reference.
+      // New, self-contained modules under src/js/ are checked strictly below.
+      "no-undef": "off",
     },
   },
   {
-    files: ["tests/**/*.js"],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.browser,
-      },
+    files: ["src/js/**/*.js", "tests/**/*.js"],
+    rules: {
+      "no-undef": "error",
     },
   },
 ];
