@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import re
 import sys
 from datetime import datetime
@@ -371,7 +370,8 @@ class RemonteesScraper:
             logger.warning("OPENROUTER_API_KEY is not set; aborting")
             return {}
 
-        os.makedirs(self.settings.data_dir, exist_ok=True)
+        output_file = self.settings.remontees_data_file
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         now = datetime.now()
         logger.info("Remontées scraper starting (posts=%s)", posts_to_fetch)
 
@@ -385,7 +385,6 @@ class RemonteesScraper:
             "stations": stations,
             "lifts": lifts,
         }
-        output_file = self.settings.data_dir / "remontees_data.json"
         with open(output_file, "w", encoding="utf-8") as handle:
             json.dump(data, handle, ensure_ascii=False, indent=2)
         logger.info("Saved %s (stations=%d, lifts=%d)", output_file, len(stations), len(lifts))
