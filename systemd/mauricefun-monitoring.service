@@ -1,0 +1,15 @@
+[Unit]
+Description=mauricefun.lol combined monitoring + static server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/VPS_Coding_full
+EnvironmentFile=-/home/ubuntu/VPS_Coding_full/.env
+ExecStart=/home/ubuntu/VPS_Coding_full/.venv/bin/python -m mauricefun.web.combined
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

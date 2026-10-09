@@ -1,0 +1,10 @@
+[Unit]
+Description=Refresh FoxESS solar data every 5 minutes
+
+[Timer]
+OnBootSec=60s
+OnUnitActiveSec=5min
+Unit=mauricefun-solar.service
+
+[Install]
+WantedBy=timers.target

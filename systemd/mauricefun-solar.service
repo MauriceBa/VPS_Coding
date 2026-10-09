@@ -1,0 +1,8 @@
+[Unit]
+Description=mauricefun.lol FoxESS solar data fetch
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/ubuntu/VPS_Coding_full
+EnvironmentFile=-/home/ubuntu/VPS_Coding_full/.env
+ExecStart=/home/ubuntu/VPS_Coding_full/.venv/bin/python -m mauricefun.solar.client

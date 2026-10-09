@@ -1,0 +1,15 @@
+[Unit]
+Description=mauricefun.lol Telegram balloon tracker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/ubuntu/VPS_Coding_full
+EnvironmentFile=-/home/ubuntu/VPS_Coding_full/.env
+ExecStart=/home/ubuntu/VPS_Coding_full/.venv/bin/python -m mauricefun.balloons.bot
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
