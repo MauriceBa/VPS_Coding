@@ -231,7 +231,7 @@ class PlanetSkiGame {
       catDiv.innerHTML = `<h4>${label}</h4>`;
 
       Object.entries(LIFT_TYPES)
-        .filter(([key, lift]) => lift.category === cat)
+        .filter(([_key, lift]) => lift.category === cat)
         .forEach(([key, lift]) => {
           const btn = document.createElement("button");
           btn.className = "lift-btn";
@@ -262,7 +262,7 @@ class PlanetSkiGame {
       catDiv.innerHTML = `<h4>${label}</h4>`;
 
       Object.entries(BUILDING_TYPES)
-        .filter(([key, b]) => b.category === cat)
+        .filter(([_key, b]) => b.category === cat)
         .forEach(([key, building]) => {
           const btn = document.createElement("button");
           btn.className = "building-btn";
@@ -375,7 +375,7 @@ class PlanetSkiGame {
    * @param {Object} point - Treffpunkt auf dem Terrain.
    * @returns {void}
    */
-  updatePreview(point) {
+  updatePreview(_point) {
     // Vorschau für Lift/Bauen anzeigen
     // TODO: Implementieren
   }

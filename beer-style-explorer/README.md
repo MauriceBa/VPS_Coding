@@ -43,14 +43,23 @@ chmod +x serve.sh openclaw-service.sh
 ## File Structure
 ```
 beer-style-explorer/
-├── index.html          # Main dashboard
+├── index.html          # Main dashboard (loads app.js as a module)
 ├── style.css           # Dark theme styles
-├── data.js             # Style data (BA 2026 + WBC 2026)
-├── app.js              # Interactive logic (Chart.js + XLSX)
+├── app.js              # Browser entry (DOM + Chart.js + XLSX wiring)
+├── js/
+│   ├── style-data.js   # Style dataset (BA 2026 + WBC 2026)
+│   ├── styles.js       # Access, filtering and search
+│   ├── compare.js      # Radar-chart metric normalization
+│   ├── recipe.js       # Recipe / grain bill / hop schedule generation
+│   ├── drift.js        # Style-drift scoring and suggestions
+│   └── color.js        # SRM → hex color mapping
 ├── serve.sh            # Simple static server script
 ├── openclaw-service.sh # OpenClaw bot service manager
 └── README.md
 ```
+
+The pure logic lives in the `js/` ES modules and is unit-tested with Vitest
+(`tests/js/beer_style_explorer.test.js`).
 
 ## Dependencies (CDN — no install needed)
 - [Chart.js 4.4](https://www.chartjs.org/) — radar + bar charts

@@ -414,8 +414,6 @@ function initJourneyScroll() {
 
   // Parallax effect for chapter visuals
   window.addEventListener("scroll", () => {
-    const scrolled = window.pageYOffset;
-
     chapters.forEach((chapter) => {
       const rect = chapter.getBoundingClientRect();
       const centerY = rect.top + rect.height / 2;

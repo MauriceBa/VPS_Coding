@@ -349,7 +349,7 @@ class SkierSystem {
    * @param {number} deltaTime - Vergangene Zeit in Sekunden.
    * @returns {void}
    */
-  updateWaiting(skier, deltaTime) {
+  updateWaiting(skier, _deltaTime) {
     // Wartet auf Lift
     skier.mesh.rotation.y = Math.sin(skier.animationTime) * 0.2;
 

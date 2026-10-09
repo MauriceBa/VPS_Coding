@@ -1801,7 +1801,7 @@ class SkiLift {
    * @param {number} deltaTime - Vergangene Zeit in Sekunden.
    * @returns {void}
    */
-  update(deltaTime) {
+  update(_deltaTime) {
     const speed = this.config.speed * CARRIER_SPEED_FACTOR;
     const isPendulum = ["tramway", "funicular"].includes(this.config.category);
     const isSurface = this.config.category === "surface";

@@ -191,7 +191,7 @@ class SlopeSystem {
    * @param {boolean} isStart - true = Startschild.
    * @returns {void}
    */
-  createSign(x, y, z, color, isStart) {
+  createSign(x, y, z, color, _isStart) {
     const group = new THREE.Group();
 
     // Stange
